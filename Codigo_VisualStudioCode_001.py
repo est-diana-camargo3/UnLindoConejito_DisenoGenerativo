@@ -1,6 +1,7 @@
-ESTE ES EL CODIGO HASTA EL MOMENTO 
+#prueba de cambio 
+#ESTE ES EL CODIGO HASTA EL MOMENTO 
 
- import maya.cmds as cmds
+import maya.cmds as cmds
 
 import random
 
