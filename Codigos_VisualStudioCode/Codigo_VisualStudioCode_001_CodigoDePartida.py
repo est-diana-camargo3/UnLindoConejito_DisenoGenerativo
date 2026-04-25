@@ -341,4 +341,3 @@ def crear_ui():
     cmds.showWindow()
 
 crear_ui()
-
