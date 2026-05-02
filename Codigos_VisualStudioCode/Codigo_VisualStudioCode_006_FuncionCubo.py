@@ -10,17 +10,26 @@
 import maya.cmds as cmds # Importamos el módulo de comandos de Maya para poder crear y manipular objetos en la escena.
 import random # Importamos el módulo random para generar números aleatorios.
 
-#                         ╔═══════════════════════════════════════════════════════════════╗
-#                         ║  PASO 1: Cambiar unidades a centimetros.                      ║                                                               ║
-#                         ╚═══════════════════════════════════════════════════════════════╝
+#                         ╔═════════════════════════════════════════════════════════════════╗
+#                         ║  PASO 1: Cambiar unidades a centimetros.                        ║                                                               ║
+#                         ╚═════════════════════════════════════════════════════════════════╝
 
 cmds.currentUnit(linear="centimeter") #Cambiar unidades a centimetros para facilitar la creación de los objetos 
 # Windows → Settings/Preferences → Preferences → Settings → Working Units  →"Linear"  → "centimeter"
 
 
 #                         ╔═══════════════════════════════════════════════════════════════╗
-#                         ║  PASO 2: Entender como Maya saca las formas                   ║                                                               ║
+#                         ║  PASO 2: Definir Modulo m. (ancho de Cabeza alearorio)        ║             
 #                         ╚═══════════════════════════════════════════════════════════════╝
+# ancho de cabeza es un numero aleatorio entre 20 y 43 cm
+# nuestro modulo sera " m "
+# m = ancho de cabeza / 10
+ancho_cabeza = random.uniform(20, 43) 
+m = ancho_cabeza / 10
+
+#                         ╔═════════════════════════════════════════════════════════════════╗
+#                         ║  PASO 3: Entender como Maya saca las formas, Funcion crear_cubo ║                                                               ║
+#                         ╚═════════════════════════════════════════════════════════════════╝
 
 def crear_cubo(nombre, escala, posicion): 
     ancho, alto, profundidad = escala # Definimos como se llamaran los valores de la escala, en lugar de w.h.d que son por defecto.
@@ -38,11 +47,17 @@ def crear_cubo(nombre, escala, posicion):
     
     #Calculamos el offset de la posicion, porque por defcto el cubo se crea con su centro en el origen (0,0,0), y nosotros queremos que siempre el 
     # punto de referencia sea la esquina superior izquierda de la cara frontal del cubo, y que se dibuje de ahi para abajo y hacia la derecha y la sobre el plano xy osea z=0
+    # Al finalizar el conejo debemos reubicar los pivotes para que los joints se creen en el centro de las formas.
     offset_x = ancho / 2
     offset_y = -(alto / 2)
     offset_z = -(profundidad / 2)
     cmds.move(posicion[0] + offset_x, posicion[1] + offset_y, posicion[2] + offset_z, cubo)
+    
     return cubo
+
+
+
+
 
 
 cabeza = crear_cubo("MiCubitoDePrueba", (1, 2, 3), (0, 0, 0)) #Dibujamos un cubo de prueba y Funciona perfectamente 
@@ -52,12 +67,6 @@ cabeza = crear_cubo("MiCubitoDePrueba", (1, 2, 3), (0, 0, 0)) #Dibujamos un cubo
 
 
 
-
-#                         ╔═══════════════════════════════════════════════════════════════╗
-#                         ║  PASO 1: Cambiar unidades a centimetros.                      ║                                                               ║
-#                         ╚═══════════════════════════════════════════════════════════════╝
-
-ancho_cabeza = random.uniform(2.0, 4.3) #Generamos un número aleatorio entre 2.0 y 4.3 para el ancho de la cabeza del conejo, esto nos permitirá crear conejos de diferentes tamaños cada vez que ejecutemos el script.
 
 
 
