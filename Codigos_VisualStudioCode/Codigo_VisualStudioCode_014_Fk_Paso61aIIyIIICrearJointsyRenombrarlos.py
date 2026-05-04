@@ -88,6 +88,7 @@ def crear_conejo(emocion="calma"):
     conejo = cmds.group(parte_superior, parte_inferior, name="Conejo_Grupo_001")
 
     
+    
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  PASO 6: Sistema FK                                             ║
 #                         ╚═════════════════════════════════════════════════════════════════╝
@@ -132,13 +133,13 @@ def mostrar_ejes_conejo():
 # Paso 6.1.A.I. Obtenemos posicion de pivote y caja envolvente con extremos de geometria de cada primitiva.
 # =========================
 
-def datos_primitiva(obj, z_plano):
+def datos_primitiva(obj, PlanoCoplanarEnZ):
     # Devuelve una lista [X, Y, Z] con la posicion del pivote  de la primitiva, para colocar joints EXACTAMENTE en el centro x,y en z si es (z= -m*10/4)
     centro = cmds.xform(obj, q=True, ws=True, rp=True) 
     #devuelve una lista de [xmin, ymin, zmin, xmax, ymax, zmax] para encontrar extremos de la geometría y colocar los 2 joints de las puntas o extremos (orejas, pies, etc.)
     bbox = cmds.exactWorldBoundingBox(obj)     
     return {
-        "centro": (centro[0], centro[1], z_plano),
+        "centro": (centro[0], centro[1], PlanoCoplanarEnZ),
         "xmin": bbox[0],
         "ymin": bbox[1],
         "zmin": bbox[2],
@@ -156,101 +157,83 @@ def crear_joints_coplanares():
 
     cmds.select(clear=True)
 
-    z_plano = -(m*10)/4
+    PlanoCoplanarEnZ = -(m*10)/4
 
     # =========================
     # COLUMNA Joints (22,23,24)
     # =========================
-    cabeza = datos_primitiva("Cabeza_Primitiva_001", z_plano) # extraemos posicion del pivote y box de la caja
-    tronco = datos_primitiva("Tronco_Primitiva_010", z_plano)
-    cola   = datos_primitiva("Cola_Primitiva_013", z_plano)
+    cabeza = datos_primitiva("Cabeza_Primitiva_001", PlanoCoplanarEnZ) # extraemos posicion del pivote y box de la caja
+    tronco = datos_primitiva("Tronco_Primitiva_010", PlanoCoplanarEnZ)
+    cola   = datos_primitiva("Cola_Primitiva_013", PlanoCoplanarEnZ)
 
-    j22 = cmds.joint(name="UpperColumna_Frente_joint22",  p=(cabeza["centro"][0], cabeza["ymax"], z_plano) ) # centro en x, ymax en y, z en el plano coplanar
-    j23 = cmds.joint(name="MiddleColumna_Cuello_joint23", p=(tronco["centro"][0], tronco["ymax"], z_plano) )
-    j24 = cmds.joint(name="LowerColumna_Cadera_joint24", p=(cola["centro"][0], cola["ymax"], z_plano) )
-
-
-"""
-    # =========================
-    # OREJA DERECHA (1,2,3)
-    # =========================
-    cmds.select(j22)
-
-    earR = datos_primitiva("Oreja_Derecha_007", z_plano)
-
-    cmds.joint(name="J1_earR_base", p=(earR["centro"][0], earR["ymin"], z_plano))
-    cmds.joint(name="J2_earR_mid",  p=earR["centro"])
-    cmds.joint(name="J3_earR_tip",  p=(earR["centro"][0], earR["ymax"], z_plano))
+    j22 = cmds.joint(name="Upper_ColumnaFrente_Joint_22",  p=(cabeza["centro"][0], cabeza["ymax"], PlanoCoplanarEnZ) ) # centro en x, ymax en y, z en el plano coplanar
+    j23 = cmds.joint(name="Middle_ColumnaCuello_Joint_23", p=(tronco["centro"][0], tronco["ymax"], PlanoCoplanarEnZ) )
+    j24 = cmds.joint(name="Lower_ColumnaCadera_Joint_24",  p=(cola["centro"][0], cola["ymax"], PlanoCoplanarEnZ) )
 
     # =========================
+    # OREJA DERECHA Joints (1,2,3)
+    # =========================
+    cmds.select(j22) #van pegados al j22 que es UpperColumna_Frente_Joint_22
+    OrejaR = datos_primitiva("Oreja_Derecha_007", PlanoCoplanarEnZ)
+    j3 = cmds.joint(name="Lower_OrejaDerecha_Joint_3",  p=(OrejaR["centro"][0], OrejaR["ymin"]+m, PlanoCoplanarEnZ)) # centro en x, ymin+m en y para que no quede en la interpenetracion de formas, z en el plano coplanar
+    j2 = cmds.joint(name="Middle_OrejaDerecha_Joint_2", p=(OrejaR["centro"][0], OrejaR["centro"][1], PlanoCoplanarEnZ)) 
+    j1 = cmds.joint(name="Upper_OrejaDerecha_Joint_1",  p=(OrejaR["centro"][0], OrejaR["ymax"], PlanoCoplanarEnZ)) # centro en x, ymax en y, z en el plano coplanar
+
+        # =========================
     # OREJA IZQUIERDA (4,5,6)
     # =========================
-    cmds.select(j22)
-
-    earL = datos_primitiva("Oreja_Izquierda_006", z_plano)
-
-    cmds.joint(name="J4_earL_base", p=(earL["centro"][0], earL["ymin"], z_plano))
-    cmds.joint(name="J5_earL_mid",  p=earL["centro"])
-    cmds.joint(name="J6_earL_tip",  p=(earL["centro"][0], earL["ymax"], z_plano))
-
+    cmds.select(j22) #van pegados al j22 que es UpperColumna_Frente_Joint_22
+    OrejaL = datos_primitiva("Oreja_Izquierda_006", PlanoCoplanarEnZ)
+    j6 = cmds.joint(name="Lower_OrejaIzquierda_Joint_6",  p=(OrejaL["centro"][0], OrejaL["ymin"]+m, PlanoCoplanarEnZ))
+    j5 = cmds.joint(name="Middle_OrejaIzquierda_Joint_5", p=(OrejaL["centro"][0], OrejaL["centro"][1], PlanoCoplanarEnZ))
+    j4 = cmds.joint(name="Upper_OrejaIzquierda_Joint_4",  p=(OrejaL["centro"][0], OrejaL["ymax"], PlanoCoplanarEnZ))
+    
     # =========================
     # MANO DERECHA (7,8,9)
     # =========================
     cmds.select(j23)
-
-    armR = datos_primitiva("ManoDerecha_Primitiva_012", z_plano)
-
-    cmds.joint(name="J7_armR_base", p=(armR["xmax"], armR["centro"][1], z_plano))
-    cmds.joint(name="J8_armR_mid",  p=armR["centro"])
-    cmds.joint(name="J9_armR_tip",  p=(armR["xmin"], armR["centro"][1], z_plano))
+    BrazoR = datos_primitiva("ManoDerecha_Primitiva_012", PlanoCoplanarEnZ)
+    j7 = cmds.joint(name="Upper_ManoDerecha_Joint_7",  p=(BrazoR["xmax"], BrazoR["centro"][1], PlanoCoplanarEnZ))
+    j8 = cmds.joint(name="Middle_ManoDerecha_Joint_8", p=(BrazoR["centro"][0], BrazoR["centro"][1], PlanoCoplanarEnZ))
+    j9 = cmds.joint(name="Lower_ManoDerecha_Joint_9",  p=(BrazoR["xmin"], BrazoR["centro"][1], PlanoCoplanarEnZ))
 
     # =========================
     # MANO IZQUIERDA (10,11,12)
     # =========================
     cmds.select(j23)
-
-    armL = datos_primitiva("ManoIzquierda_Primitiva_011", z_plano)
-
-    cmds.joint(name="J10_armL_base", p=(armL["xmin"], armL["centro"][1], z_plano))
-    cmds.joint(name="J11_armL_mid",  p=armL["centro"])
-    cmds.joint(name="J12_armL_tip",  p=(armL["xmax"], armL["centro"][1], z_plano))
+    BrazoL = datos_primitiva("ManoIzquierda_Primitiva_011", PlanoCoplanarEnZ)
+    j10 = cmds.joint(name="Upper_ManoIzquierda_Joint_10",  p=(BrazoL["xmin"], BrazoL["centro"][1], PlanoCoplanarEnZ))
+    j11 = cmds.joint(name="Middle_ManoIzquierda_Joint_11", p=(BrazoL["centro"][0], BrazoL["centro"][1], PlanoCoplanarEnZ))
+    j12 = cmds.joint(name="Lower_ManoIzquierda_Joint_12",  p=(BrazoL["xmax"], BrazoL["centro"][1], PlanoCoplanarEnZ))
 
     # =========================
     # PIE DERECHO (13,14,15)
     # =========================
     cmds.select(j24)
-
-    legR = datos_primitiva("PieDerecho_Primitiva_009", z_plano)
-
-    cmds.joint(name="J13_legR_base", p=(legR["centro"][0], legR["ymax"], z_plano))
-    cmds.joint(name="J14_legR_mid",  p=legR["centro"])
-    cmds.joint(name="J15_legR_tip",  p=(legR["centro"][0], legR["ymin"], z_plano))
+    legR = datos_primitiva("PieDerecho_Primitiva_009", PlanoCoplanarEnZ)
+    j13 = cmds.joint(name="Upper_PieDerecho_Joint_13",  p=(legR["centro"][0], legR["ymax"], PlanoCoplanarEnZ))
+    j14 = cmds.joint(name="Middle_PieDerecho_Joint_14", p=(legR["centro"][0], legR["centro"][1], PlanoCoplanarEnZ))
+    j15 = cmds.joint(name="Lower_PieDerecho_Joint_15",  p=(legR["centro"][0], legR["ymin"], PlanoCoplanarEnZ))
 
     # =========================
     # PIE IZQUIERDO (16,17,18)
     # =========================
     cmds.select(j24)
-
-    legL = datos_primitiva("PieIzquierdo_Primitiva_008", z_plano)
-
-    cmds.joint(name="J16_legL_base", p=(legL["centro"][0], legL["ymax"], z_plano))
-    cmds.joint(name="J17_legL_mid",  p=legL["centro"])
-    cmds.joint(name="J18_legL_tip",  p=(legL["centro"][0], legL["ymin"], z_plano))
+    legL = datos_primitiva("PieIzquierdo_Primitiva_008", PlanoCoplanarEnZ)
+    j16 = cmds.joint(name="Upper_PieIzquierdo_Joint_16",  p=(legL["centro"][0], legL["ymax"], PlanoCoplanarEnZ))
+    j17 = cmds.joint(name="Middle_PieIzquierdo_Joint_17", p=(legL["centro"][0], legL["centro"][1], PlanoCoplanarEnZ))
+    j18 = cmds.joint(name="Lower_PieIzquierdo_Joint_18",  p=(legL["centro"][0], legL["ymin"], PlanoCoplanarEnZ))
 
     # =========================
     # COLA (19,20,21)
     # =========================
     cmds.select(j24)
+    tail = datos_primitiva("Cola_Primitiva_013", PlanoCoplanarEnZ)
+    j19 = cmds.joint(name="Upper_Cola_Joint_19", p=(tail["centro"][0], tail["ymax"], PlanoCoplanarEnZ))
+    j20 = cmds.joint(name="Middle_Cola_Joint_20",p=(tail["centro"][0], tail["centro"][1], PlanoCoplanarEnZ))
+    j21 = cmds.joint(name="Lower_Cola_Joint_21", p=(tail["centro"][0], tail["ymin"], PlanoCoplanarEnZ))
 
-    tail = datos_primitiva("Cola_Primitiva_013", z_plano)
-
-    cmds.joint(name="J19_tail_base", p=(tail["centro"][0], tail["ymax"], z_plano))
-    cmds.joint(name="J20_tail_mid",  p=tail["centro"])
-    cmds.joint(name="J21_tail_tip",  p=(tail["centro"][0], tail["ymin"], z_plano))
-    
-
-    print("✅ JOINTS LIMPIOS, COPLANARES Y BIEN POSICIONADOS")
-    """
+    print("✅ 24 JOINTS CREADOS - COPLANARES, JERÁRQUICOS Y LIMPIOS")
 
 
 
@@ -473,6 +456,11 @@ crear_conejo("ternura") """
 
 # Cambiar una variable en donde este 
 # ctrl + shift +l
+
+"""Comentario"""
+# region Nombre seccion
+# código aquí
+# endregion
 
 # Linea a copiar en el script editor de maya en la seccion python para ejecutar aplicacion de conejos
 # Solo es cambiarle el numero el nombre
