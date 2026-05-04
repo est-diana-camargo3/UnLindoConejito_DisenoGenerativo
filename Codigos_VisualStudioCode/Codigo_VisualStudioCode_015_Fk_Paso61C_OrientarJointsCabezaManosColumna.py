@@ -28,6 +28,9 @@ cmds.currentUnit(linear="centimeter") #Cambiar unidades a centimetros para facil
 ancho_cabeza = random.randint(20, 43) 
 m = ancho_cabeza / 10
 
+
+
+# region PASO3: Entender Funcion crear_cubo
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  PASO 3: Entender como Maya saca las formas, Funcion crear_cubo ║                                                               ║
 #                         ╚═════════════════════════════════════════════════════════════════╝
@@ -55,8 +58,11 @@ def crear_cubo(nombre, escala, posicion):
     cmds.move(posicion[0] + offset_x, posicion[1] + offset_y, posicion[2] + offset_z, cubo)
     
     return cubo
+# endregion
 
 
+
+# region PASO 4: Crear Conejo Estandar 
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  PASO 4: Crear Conejo Estandar                                  ║
 #                         ╚═════════════════════════════════════════════════════════════════╝
@@ -86,9 +92,12 @@ def crear_conejo(emocion="calma"):
     parte_superior = cmds.group(cabeza, ojo_izq, ojo_der, nariz, boca, oreja_izq, oreja_der, name="ParteSuperior_Grupo")
     parte_inferior = cmds.group(tronco, mano_izq, mano_der, pie_izq, pie_der, cola, name="ParteInferior_Grupo")
     conejo = cmds.group(parte_superior, parte_inferior, name="Conejo_Grupo_001")
+# endregion
 
-    
-    
+
+
+# region PASO 6: Sistema FK   
+   
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  PASO 6: Sistema FK                                             ║
 #                         ╚═════════════════════════════════════════════════════════════════╝
@@ -97,12 +106,27 @@ def crear_conejo(emocion="calma"):
 # PASO 6.0. UBICAR PIVOTES EN EL CENTRO DE LAS PRIMITIVAS
 # =========================
 
-#Como yo movi los pivotes a la esquina superior izquierda de la cara frontal de cada cubo, para dibujar mas fácil , 
+# Como yo movi los pivotes a la esquina superior izquierda de la cara frontal de cada cubo, para dibujar mas fácil , 
 # debo devolverlos al centro para poder obtener las coordenadas del centro en x,y,z de cada forma y colocar los joints en el x,y que me de 
 # el z si debe ser en el centro de la profundidad...todos coplanares (en el paso 6.1  explico porque coplanares )
 
-def mostrar_ejes_conejo():
-    
+def mostrar_gizmos_pivotes():
+    # Mostramos los gizmos de los pivotes para poder ver donde esta el punto de ancla o pivote 
+    # Display → Transform Display → Pivots    
+    objetos = [
+        "Cabeza_Primitiva_001",
+        "Oreja_Izquierda_006", "Oreja_Derecha_007",
+        "Tronco_Primitiva_010",
+        "ManoIzquierda_Primitiva_011", "ManoDerecha_Primitiva_012",
+        "PieIzquierdo_Primitiva_008", "PieDerecho_Primitiva_009",
+        "Cola_Primitiva_013"
+    ]
+    for obj in objetos: 
+        if cmds.objExists(obj):
+            cmds.setAttr(obj + ".displayLocalAxis", 1)
+
+#Por si en un futuro queremos ocultar los gizmos de los pivotes 
+def ocultar_gizmos_pivotes():
     objetos = [
         "Cabeza_Primitiva_001",
         "Oreja_Izquierda_006", "Oreja_Derecha_007",
@@ -114,23 +138,19 @@ def mostrar_ejes_conejo():
     
     for obj in objetos:
         if cmds.objExists(obj):
-            cmds.setAttr(obj + ".displayLocalAxis", 1)
-    # Para ocultarlos despues 
-    #for obj in cmds.ls(type="transform"):
-        #cmds.setAttr(obj + ".displayLocalAxis", 0)
+            cmds.setAttr(obj + ".displayLocalAxis", 0)
 
 
 # =========================
 # PASO 6.1. CREAR JOINTS
 # =========================
-# 6.1.A. Crear joints coplanares en z= m/4
 # Yo inicie a dibujar la cabeza del conejo en 0,0,0 y tiene una profundidad en z de -m*10/2,
 # Por lo tanto la mitad de la profundidad de la cabeza es z= -(m*10/2)/2 es decir z= -m*10/4
 # Ese es el plano central del conejo en z, ahi voy a dibujar los joints de manera coplanar 
 # Porque es el plano que todas las primitivas comparten. 
 
 # =========================
-# Paso 6.1.A.I. Obtenemos posicion de pivote y caja envolvente con extremos de geometria de cada primitiva.
+# Paso 6.1.A.Previo. Obtenemos posicion de pivote y caja envolvente con extremos de geometria de cada primitiva.
 # =========================
 
 def datos_primitiva(obj, PlanoCoplanarEnZ):
@@ -149,12 +169,45 @@ def datos_primitiva(obj, PlanoCoplanarEnZ):
     }
 
 # =========================
-# Paso 6.1.A.II.   Crear joints coplanares en z= m/4 (24 JOINTS)
-# Paso 6.1.A.III.  Renombrar joints (upper, middle, end)
+# Paso 6.1.A. Crear joints coplanares en z= m/4 (24 JOINTS)
+# Paso 6.1.B.  Renombrar joints (upper, middle, end)
 # =========================
 
 def crear_joints_coplanares():
-
+    """ 
+    .......................................................................
+    ......................(1)...................(4)........................
+    .......................|.....................|.........................           
+    ......................(2)...................(5)........................       <-- Orejas
+    .......................|.....................|.........................
+    ......................(3)...................(6)........................
+    .......................__________(22)_________.........................       <--Frente
+    ......................|            |          |........................
+    ......................|       O         O     |........................
+    ......................|            |          |........................
+    ......................|            O          |........................
+    ......................|            |          |........................
+    ......................|         ___|___       |........................
+    ......................|            |          |........................
+    ......................._______________________.........................
+    ................_________________(23)________________..................       <--Cuello
+    ................|                 |                 |..................
+    ................|                 |                 |..................
+    ................|                 |                 |..................
+    ..( 7)-( 8)-( 9)|___________      |      ___________|(10)-(11)-(12)....	      <-- Manos
+    ................|           \     |     /           |..................
+    ................|               (24)                |(19)-(20)-(21)....       <-- Cola
+    ................|                 |                 |..................
+    ................|                 |                 |..................
+    ................|________________(23)_______________|.................. 
+    ......................(13)...................(16)......................
+    .......................|......................|........................           
+    ......................(14)...................(17)......................       <-- Orejas
+    .......................|......................|........................
+    ......................(15)...................(18)......................
+    .......................................................................
+           
+    """
     cmds.select(clear=True)
 
     PlanoCoplanarEnZ = -(m*10)/4
@@ -166,77 +219,199 @@ def crear_joints_coplanares():
     tronco = datos_primitiva("Tronco_Primitiva_010", PlanoCoplanarEnZ)
     cola   = datos_primitiva("Cola_Primitiva_013", PlanoCoplanarEnZ)
 
-    j22 = cmds.joint(name="Upper_ColumnaFrente_Joint_22",  p=(cabeza["centro"][0], cabeza["ymax"], PlanoCoplanarEnZ) ) # centro en x, ymax en y, z en el plano coplanar
-    j23 = cmds.joint(name="Middle_ColumnaCuello_Joint_23", p=(tronco["centro"][0], tronco["ymax"], PlanoCoplanarEnZ) )
-    j24 = cmds.joint(name="Lower_ColumnaCadera_Joint_24",  p=(cola["centro"][0], cola["ymax"], PlanoCoplanarEnZ) )
+    j22 = cmds.joint(name="FK_Joint_22_Upper_ColumnaFrente",  p=(cabeza["centro"][0], cabeza["ymax"], PlanoCoplanarEnZ) ) # centro en x, ymax en y, z en el plano coplanar
+    j23 = cmds.joint(name="FK_Joint_23_Middle_ColumnaCuello", p=(tronco["centro"][0], tronco["ymax"], PlanoCoplanarEnZ) )
+    j24 = cmds.joint(name="FK_Joint_24_Lower_ColumnaCadera",  p=(cola["centro"][0], cola["ymin"]+((cola["ymax"]-cola["ymin"])/2), PlanoCoplanarEnZ) )
 
     # =========================
     # OREJA DERECHA Joints (1,2,3)
     # =========================
     cmds.select(j22) #van pegados al j22 que es UpperColumna_Frente_Joint_22
     OrejaR = datos_primitiva("Oreja_Derecha_007", PlanoCoplanarEnZ)
-    j3 = cmds.joint(name="Lower_OrejaDerecha_Joint_3",  p=(OrejaR["centro"][0], OrejaR["ymin"]+m, PlanoCoplanarEnZ)) # centro en x, ymin+m en y para que no quede en la interpenetracion de formas, z en el plano coplanar
-    j2 = cmds.joint(name="Middle_OrejaDerecha_Joint_2", p=(OrejaR["centro"][0], OrejaR["centro"][1], PlanoCoplanarEnZ)) 
-    j1 = cmds.joint(name="Upper_OrejaDerecha_Joint_1",  p=(OrejaR["centro"][0], OrejaR["ymax"], PlanoCoplanarEnZ)) # centro en x, ymax en y, z en el plano coplanar
+    j1 = cmds.joint(name="FK_Joint_1_Lower_OrejaDerecha",  p=(OrejaR["centro"][0], OrejaR["ymin"]+m, PlanoCoplanarEnZ)) # centro en x, ymin+m en y para que no quede en la interpenetracion de formas, z en el plano coplanar
+    j2 = cmds.joint(name="FK_Joint_2_Middle_OrejaDerecha", p=(OrejaR["centro"][0], OrejaR["centro"][1], PlanoCoplanarEnZ)) 
+    j3 = cmds.joint(name="FK_Joint_3_Upper_OrejaDerecha",  p=(OrejaR["centro"][0], OrejaR["ymax"], PlanoCoplanarEnZ))
 
-        # =========================
+    # =========================
     # OREJA IZQUIERDA (4,5,6)
     # =========================
     cmds.select(j22) #van pegados al j22 que es UpperColumna_Frente_Joint_22
     OrejaL = datos_primitiva("Oreja_Izquierda_006", PlanoCoplanarEnZ)
-    j6 = cmds.joint(name="Lower_OrejaIzquierda_Joint_6",  p=(OrejaL["centro"][0], OrejaL["ymin"]+m, PlanoCoplanarEnZ))
-    j5 = cmds.joint(name="Middle_OrejaIzquierda_Joint_5", p=(OrejaL["centro"][0], OrejaL["centro"][1], PlanoCoplanarEnZ))
-    j4 = cmds.joint(name="Upper_OrejaIzquierda_Joint_4",  p=(OrejaL["centro"][0], OrejaL["ymax"], PlanoCoplanarEnZ))
+    j4 = cmds.joint(name="FK_Joint_6_Upper_OrejaIzquierda",  p=(OrejaL["centro"][0], OrejaL["ymin"]+m, PlanoCoplanarEnZ))
+    j5 = cmds.joint(name="FK_Joint_5_Middle_OrejaIzquierda", p=(OrejaL["centro"][0], OrejaL["centro"][1], PlanoCoplanarEnZ))
+    j6 = cmds.joint(name="FK_Joint_4_Lower_OrejaIzquierda",  p=(OrejaL["centro"][0], OrejaL["ymax"], PlanoCoplanarEnZ))
     
     # =========================
     # MANO DERECHA (7,8,9)
     # =========================
     cmds.select(j23)
     BrazoR = datos_primitiva("ManoDerecha_Primitiva_012", PlanoCoplanarEnZ)
-    j7 = cmds.joint(name="Upper_ManoDerecha_Joint_7",  p=(BrazoR["xmax"], BrazoR["centro"][1], PlanoCoplanarEnZ))
-    j8 = cmds.joint(name="Middle_ManoDerecha_Joint_8", p=(BrazoR["centro"][0], BrazoR["centro"][1], PlanoCoplanarEnZ))
-    j9 = cmds.joint(name="Lower_ManoDerecha_Joint_9",  p=(BrazoR["xmin"], BrazoR["centro"][1], PlanoCoplanarEnZ))
+    j7 = cmds.joint(name="FK_Joint_7_Upper_ManoDerecha",  p=(BrazoR["xmax"], BrazoR["centro"][1], PlanoCoplanarEnZ)) # pegada al cuerpo = raiz 
+    j8 = cmds.joint(name="FK_Joint_8_Middle_ManoDerecha", p=(BrazoR["centro"][0], BrazoR["centro"][1], PlanoCoplanarEnZ))
+    j9 = cmds.joint(name="FK_Joint_9_Lower_ManoDerecha",  p=(BrazoR["xmin"], BrazoR["centro"][1], PlanoCoplanarEnZ)) # Dedos de la mano Fin 
 
     # =========================
     # MANO IZQUIERDA (10,11,12)
     # =========================
     cmds.select(j23)
     BrazoL = datos_primitiva("ManoIzquierda_Primitiva_011", PlanoCoplanarEnZ)
-    j10 = cmds.joint(name="Upper_ManoIzquierda_Joint_10",  p=(BrazoL["xmin"], BrazoL["centro"][1], PlanoCoplanarEnZ))
-    j11 = cmds.joint(name="Middle_ManoIzquierda_Joint_11", p=(BrazoL["centro"][0], BrazoL["centro"][1], PlanoCoplanarEnZ))
-    j12 = cmds.joint(name="Lower_ManoIzquierda_Joint_12",  p=(BrazoL["xmax"], BrazoL["centro"][1], PlanoCoplanarEnZ))
-
+    j10 = cmds.joint(name="FK_Joint_10_Upper_ManoIzquierda",  p=(BrazoL["xmin"], BrazoL["centro"][1], PlanoCoplanarEnZ)) # pegada al cuerpo = raiz 
+    j11 = cmds.joint(name="FK_Joint_11_Middle_ManoIzquierda", p=(BrazoL["centro"][0], BrazoL["centro"][1], PlanoCoplanarEnZ))
+    j12 = cmds.joint(name="FK_Joint_12_Lower_ManoIzquierda",  p=(BrazoL["xmax"], BrazoL["centro"][1], PlanoCoplanarEnZ)) # Dedos de la mano Fin 
+ 
     # =========================
     # PIE DERECHO (13,14,15)
     # =========================
     cmds.select(j24)
-    legR = datos_primitiva("PieDerecho_Primitiva_009", PlanoCoplanarEnZ)
-    j13 = cmds.joint(name="Upper_PieDerecho_Joint_13",  p=(legR["centro"][0], legR["ymax"], PlanoCoplanarEnZ))
-    j14 = cmds.joint(name="Middle_PieDerecho_Joint_14", p=(legR["centro"][0], legR["centro"][1], PlanoCoplanarEnZ))
-    j15 = cmds.joint(name="Lower_PieDerecho_Joint_15",  p=(legR["centro"][0], legR["ymin"], PlanoCoplanarEnZ))
+    PieR = datos_primitiva("PieDerecho_Primitiva_009", PlanoCoplanarEnZ)
+    j13 = cmds.joint(name="FK_Joint_13_Upper_PieDerecho",  p=(PieR["centro"][0], PieR["ymax"], PlanoCoplanarEnZ))
+    j14 = cmds.joint(name="FK_Joint_14_Middle_PieDerecho", p=(PieR["centro"][0], PieR["centro"][1], PlanoCoplanarEnZ))
+    j15 = cmds.joint(name="FK_Joint_15_Lower_PieDerecho",  p=(PieR["centro"][0], PieR["ymin"], PlanoCoplanarEnZ))
 
     # =========================
     # PIE IZQUIERDO (16,17,18)
     # =========================
     cmds.select(j24)
-    legL = datos_primitiva("PieIzquierdo_Primitiva_008", PlanoCoplanarEnZ)
-    j16 = cmds.joint(name="Upper_PieIzquierdo_Joint_16",  p=(legL["centro"][0], legL["ymax"], PlanoCoplanarEnZ))
-    j17 = cmds.joint(name="Middle_PieIzquierdo_Joint_17", p=(legL["centro"][0], legL["centro"][1], PlanoCoplanarEnZ))
-    j18 = cmds.joint(name="Lower_PieIzquierdo_Joint_18",  p=(legL["centro"][0], legL["ymin"], PlanoCoplanarEnZ))
+    PieL = datos_primitiva("PieIzquierdo_Primitiva_008", PlanoCoplanarEnZ)
+    j16 = cmds.joint(name="FK_Joint_16_Upper_PieIzquierdo",  p=(PieL["centro"][0], PieL["ymax"], PlanoCoplanarEnZ))
+    j17 = cmds.joint(name="FK_Joint_17_Middle_PieIzquierdo", p=(PieL["centro"][0], PieL["centro"][1], PlanoCoplanarEnZ))
+    j18 = cmds.joint(name="FK_Joint_18_Lower_PieIzquierdo",  p=(PieL["centro"][0], PieL["ymin"], PlanoCoplanarEnZ))
 
     # =========================
-    # COLA (19,20,21)
+    # COLA (19,20,21) 
     # =========================
+    # la cola no crece verticalmente sino hacia -z  por eso no pueden quedar en el mismo plano coplanar que el resto del cuerpo 
+    cola = datos_primitiva("Cola_Primitiva_013", PlanoCoplanarEnZ)
+    centro_cola = cmds.xform("Cola_Primitiva_013", q=True, ws=True, rp=True) #medida de centro de la cola 
+    # Devueleve una lista de 3 valores "centroenx": centro[0], "centroeny": centro[1], "centroenz": centro[2]),
+    bboxcola = cmds.exactWorldBoundingBox("Cola_Primitiva_013") #limites de la cola para colocar joints en los extremos
+    # Devuelve una lista de 5 valores "xmin": bbox[0], "ymin": bbox[1], "zmin": bbox[2], "xmax": bbox[3], "ymax": bbox[4], "zmax": bbox[5], zmin = bbox[2]
+    zmin = bboxcola[2]  
+    zmax = bboxcola[5] 
+    zcentro = centro_cola[2]
+
     cmds.select(j24)
-    tail = datos_primitiva("Cola_Primitiva_013", PlanoCoplanarEnZ)
-    j19 = cmds.joint(name="Upper_Cola_Joint_19", p=(tail["centro"][0], tail["ymax"], PlanoCoplanarEnZ))
-    j20 = cmds.joint(name="Middle_Cola_Joint_20",p=(tail["centro"][0], tail["centro"][1], PlanoCoplanarEnZ))
-    j21 = cmds.joint(name="Lower_Cola_Joint_21", p=(tail["centro"][0], tail["ymin"], PlanoCoplanarEnZ))
 
+    j19 = cmds.joint(name="FK_Joint_19_Upper_Cola",  p=(centro_cola[0], centro_cola[1], zmax)) #  Raiz pegada al cuerpo 
+    j20 = cmds.joint(name="FK_Joint_20_Middle_Cola", p=(centro_cola[0], centro_cola[1], zcentro))
+    j21 = cmds.joint(name="FK_Joint_21_Lower_Cola",  p=(centro_cola[0], centro_cola[1], zmin)) # Fin de la cola
     print("✅ 24 JOINTS CREADOS - COPLANARES, JERÁRQUICOS Y LIMPIOS")
 
+    # guardo mi 8 sistemas Fk 
+    # 1 es la cadena principal (columna)
+    # Las otras 7 son ramas (subcadenas) conectadas a esa
+    # Aunque tenga varias listas: SIGUEN siendo una sola jerarquía en Maya Porque hicimos esto:
+    # cmds.select(j22)  # orejas cuelgan de la columna
+    orejaR_FK = [j1, j2, j3]
+    orejaL_FK = [j4, j5, j6]
+    brazoR_FK = [j7, j8, j9]
+    brazoL_FK = [j10, j11, j12]
+    piernaR_FK = [j13, j14, j15]
+    piernaL_FK = [j16, j17, j18]
+    cola_FK = [j19, j20, j21]
+    columna_FK = [j22, j23, j24] #guardo la lista de la columna 
+
+    lista_del_sistema_FK = {
+        "orejaR_FK": orejaR_FK,
+        "orejaL_FK": orejaL_FK,
+        "brazoR_FK": brazoR_FK,
+        "brazoL_FK": brazoL_FK,
+        "piernaR_FK": piernaR_FK,
+        "piernaL_FK": piernaL_FK,                
+        "cola_FK": cola_FK,
+        "columna_FK": columna_FK
+    }
+
+    return lista_del_sistema_FK
 
 
+# =========================
+# Paso 6.1.C. Orientar Joints
+# =========================
+
+#Definimos estas funciones para usarlas lineas mas adelante en la función de orientar joints()
+def mostrar_gizmos_joints():
+    joints = cmds.ls(type="joint")
+    for j in joints:
+        cmds.setAttr(j + ".displayLocalAxis", 1)
+
+#Por si queremos ocultar los gizmos de los joints en un futuro
+def ocultar_gizmos_joints():
+    joints = cmds.ls(type="joint")
+    for j in joints:
+        cmds.setAttr(j + ".displayLocalAxis", 0)
+
+#para orientar cadena por cadena, la llamo mas adelante 
+def orientar_subcadena_FK(FK_talcadena, eje_secundario):
+    cmds.select(clear=True)
+    cmds.select(FK_talcadena[0])
+
+    cmds.joint(
+        edit=True,
+        orientJoint="xyz",
+        secondaryAxisOrient=eje_secundario,
+        children=True,
+        zeroScaleOrient=True
+    )
+
+    # Nos aseguramos que el ultimo joint tenga sus valores de transformacion (rotacion y traslacion) excepto la escala en 0,0,0
+    ultimo = FK_talcadena[-1]
+    ultimo = FK_talcadena[-1]
+    cmds.setAttr(ultimo + ".jointOrientX", 0)
+    cmds.setAttr(ultimo + ".jointOrientY", 0)
+    cmds.setAttr(ultimo + ".jointOrientZ", 0)
+
+def orientar_subcadena_FK_cola(FK_talcadena):
+    for j in FK_talcadena:
+        cmds.setAttr(j + ".jointOrientX", 0)
+        cmds.setAttr(j + ".jointOrientY", 0)
+        cmds.setAttr(j + ".jointOrientZ", 0)
+        cmds.setAttr(j + ".rotateX", 0)
+        cmds.setAttr(j + ".rotateY", 0)
+        cmds.setAttr(j + ".rotateZ", 0)
+
+
+def orientar_joints(ListaDelSistemaFK):
+
+    cola = ListaDelSistemaFK["cola_FK"]
+    raiz_cola = cola[0]
+
+    # 🔥 1. Guardar padre original
+    padre = cmds.listRelatives(raiz_cola, parent=True)
+
+    # 🔥 2. Desparentar cola
+    cmds.parent(raiz_cola, world=True)
+
+    # 🔥 3. Orientar TODO menos la cola
+    orientar_subcadena_FK(ListaDelSistemaFK["columna_FK"], "yup")
+    orientar_subcadena_FK(ListaDelSistemaFK["orejaR_FK"], "yup")
+    orientar_subcadena_FK(ListaDelSistemaFK["orejaL_FK"], "yup")
+    orientar_subcadena_FK(ListaDelSistemaFK["brazoR_FK"], "yup")
+    orientar_subcadena_FK(ListaDelSistemaFK["brazoL_FK"], "ydown")
+    orientar_subcadena_FK(ListaDelSistemaFK["piernaR_FK"], "yup")
+    orientar_subcadena_FK(ListaDelSistemaFK["piernaL_FK"], "yup")
+
+    # 🔥 4. Limpiar cola SIN orientación automática
+    orientar_subcadena_FK_cola(cola)
+
+    # 🔥 5. Volver a parentar
+    if padre:
+        cmds.parent(raiz_cola, padre[0])
+
+    ocultar_gizmos_pivotes()
+    mostrar_gizmos_joints()
+
+    print("✅ JOINTS ORIENTADOS POR SISTEMAS")
+
+# endregion   
+ 
+
+
+
+
+
+
+# region PASO 5: Interfaz UI     
 
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  PASO 5: Interfaz UI                                            ║
@@ -260,9 +435,10 @@ def generar_conejo_ui(*args):
     seleccion = cmds.radioCollection("emociones", q=True, select=True)
     
     crear_conejo(seleccion)
-    mostrar_ejes_conejo()
-    crear_joints_coplanares()
-    
+    mostrar_gizmos_pivotes()
+    ListaDelSistemaFK = crear_joints_coplanares()
+    orientar_joints(ListaDelSistemaFK)
+
 
 
 # =========================
@@ -327,7 +503,7 @@ def crear_ui():
     cmds.radioCollection("emociones")
     cmds.radioButton("calma", label="Calma 😌", select=True)
     cmds.radioButton("tristeza", label="Tristeza 😞")
-    cmds.radioButton("alegria", label="Alegría 😊")
+    cmds.radioButton("aPieria", label="APiería 😊")
     cmds.radioButton("ternura", label="Ternura 😍")
     cmds.radioButton("enojo", label="Enojo 😠")
 
@@ -386,6 +562,7 @@ def crear_ui():
 # =========================
 crear_ui()
 
+# endregion
 
 
 
@@ -395,16 +572,45 @@ crear_ui()
 
 
 
+# region Notas
+
+#                         ╔═════════════════════════════════════════════════════════════════╗
+#                         ║  Notas                                                          ║
+#                         ╚═════════════════════════════════════════════════════════════════╝
+
+# Cambiar una variable en donde este 
+# ctrl + shift +l
+
+"""Comentario"""
+""" # region Notas
+# código aquí
+# endregion
+"""
+
+# Linea a copiar en el script editor de maya en la seccion python para ejecutar aplicacion de conejos
+# Solo es cambiarle el numero el nombre
+
+#import sys
+#import importlib
+#sys.path.append("C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode")
+#import Codigo_VisualStudioCode_009_Interfaz
+#importlib.reload(Codigo_VisualStudioCode_009_Interfaz)
+#Codigo_VisualStudioCode_009_Interfaz.crear_ui()
+# endregion
 
 
 
+
+
+# region Codigo sin usar
+#hola
 """
 
 def obtener_color(emocion):
     colores = {
         "calma": (0.88, 0.98, 0.92),
         "tristeza": (0.0, 0.41, 0.54),
-        "alegria": (1.0, 0.85, 0.6),
+        "aPieria": (1.0, 0.85, 0.6),
         "ternura": (0.96, 0.8, 1.0),
         "enojo": (1.0, 0.58, 0.58)
     }
@@ -447,29 +653,14 @@ def crear_conejo(emocion="calma"):
     conejo = cmds.group(parte_superior, parte_inferior, name="Conejo_Grupo_001")
 
 crear_conejo("ternura") """
-
-
-
-#                         ╔═════════════════════════════════════════════════════════════════╗
-#                         ║  Notas                                                          ║
-#                         ╚═════════════════════════════════════════════════════════════════╝
-
-# Cambiar una variable en donde este 
-# ctrl + shift +l
-
-"""Comentario"""
-# region Nombre seccion
-# código aquí
 # endregion
 
-# Linea a copiar en el script editor de maya en la seccion python para ejecutar aplicacion de conejos
-# Solo es cambiarle el numero el nombre
 
-#import sys
-#import importlib
-#sys.path.append("C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode")
-#import Codigo_VisualStudioCode_009_Interfaz
-#importlib.reload(Codigo_VisualStudioCode_009_Interfaz)
-#Codigo_VisualStudioCode_009_Interfaz.crear_ui()
+
+
+
+
+
+
 
 
