@@ -563,29 +563,24 @@ def crear_fk_auto_root_control(ListaDelSistemaFK):
             nombre_root = joint.replace("FK_Joint_", "FK_root_")
             root = cmds.group(em=True, n=nombre_root)
 
-            # SNAP
+            # SNAP root al auto
             cmds.delete(cmds.parentConstraint(auto, root))
 
-            # A WORLD
-            if cmds.listRelatives(root, parent=True):
-                cmds.parent(root, world=True)
+            # 🔥 CLAVE: guardar padre del auto
+            parent = cmds.listRelatives(auto, parent=True)
 
-            if i == 0:
-                cmds.parent(auto, root)
+            # 1. meter auto dentro del root
+            cmds.parent(auto, root)
 
+            # 2. restaurar jerarquía
+            if parent:
+                cmds.parent(root, parent[0])
             else:
-                parent_joint = fk_joints[i - 1]
-
-                child = cmds.listRelatives(parent_joint, c=True, type="transform")
-
-                if child:
-                    child = child[0]
-
-                    cmds.parent(root, parent_joint)
-                    cmds.parent(child, root)
+                cmds.parent(root, world=True)
 
             roots.append(root)
 
+        print("🔥 Roots creados SIN romper jerarquía")
         return roots
 
 
@@ -618,12 +613,12 @@ def crear_fk_auto_root_control(ListaDelSistemaFK):
     for nombre_cadena, fk_joints in ListaDelSistemaFK.items():
 
         autos = crear_autos(fk_joints)
-        #roots = crear_roots(fk_joints, autos)
+        roots = crear_roots(fk_joints, autos)
         #ctrls = crear_controles(fk_joints)
 
         resultado_fk[nombre_cadena] = {
             "autos": autos,
-            #"roots": roots,
+            "roots": roots,
             #"ctrls": ctrls
         }
 
