@@ -1,14 +1,8 @@
 import maya.cmds as cmds
 import random # Generar números aleatorios.
 
-#                         ╔═══════════════════════════════════════════════════════════════╗
-#                         ║   Definir Modulo m. (ancho de Cabeza alearorio)               ║             
-#                         ╚═══════════════════════════════════════════════════════════════╝
-
-# Ancho de cabeza: numero entero  aleatorio entre 20 y 43 cm
-# modulo m = ancho de cabeza / 10
-ancho_cabeza = random.randint(20, 43) 
-m = ancho_cabeza / 10
+# Variable global para modulo
+m = 1
 
 
 #  region Funcion crear_cubo
@@ -64,6 +58,21 @@ def crear_conejo(emocion="calma"):
     Crea un cubo en 0,0,0 con escala 1 de ancho,2 cm de alto ,3 cm de profundo y nombre "MiCubitoDePrueba"
     Si queremos ver las medidas del cubo: chanel box → polyCube1 → input NO en escala, la escala siempre dira 1 
     """
+    #                         ╔═══════════════════════════════════════════════════════════════╗
+    #                         ║   Definir Modulo m. (ancho de Cabeza alearorio)               ║             
+    #                         ╚═══════════════════════════════════════════════════════════════╝
+
+
+    global m
+
+    # =========================
+    # NUEVO MODULO ALEATORIO
+    # =========================
+    ancho_cabeza = random.randint(20, 43)
+    m = ancho_cabeza / 10
+
+    print(" 📐 ancho_Cabeza :", ancho_cabeza)
+    print(" 📐 Nuevo módulo m:", m)
 
     #                            nombre                            escala                            posicion 
     cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,         (m*10)/2 ),    (0,     0,                  0          )  ) 
