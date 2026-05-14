@@ -622,6 +622,12 @@ def generar_conejo_ui(*args):
     
     seleccion = cmds.radioCollection("emociones", q=True, select=True)
     crearConejo.crear_conejo(seleccion)
+    ancho = crearConejo.m * 10
+    cmds.text(
+        "textoModulo",
+        edit=True,
+        label=f"Ancho de cabeza: {ancho:.1f} cm"
+    )
     crear_jerarquia_general()
     lista_fk = funcionesFK.crear_joints_coplanares(crearConejo.m)
     funcionesFK.orientar_joints_de_toda_la_cadena_FK(lista_fk)
@@ -744,6 +750,15 @@ def crear_ui():
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
     cmds.separator(h=10, style="none")
 
+    #texto para mostrar el ancho de cabeza generado y como varia 
+    cmds.text(
+        "textoModulo",
+        label="Ancho de cabeza: --- cm",
+        bgc=fondorosado,
+        align="center"
+    )
+
+    cmds.separator(h=10, style="none")
 
     cmds.rowLayout(numberOfColumns=3,columnWidth3=(90, 120, 100)) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
