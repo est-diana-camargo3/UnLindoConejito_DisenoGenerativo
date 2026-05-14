@@ -724,7 +724,8 @@ def crear_ui():
 
     cmds.text(label="MI DULCE FORTUNA",
               height=30,
-              bgc=fondorosado,
+              #bgc=fondorosado,
+              bgc=gris,
               font="boldLabelFont",
               align="center")
     cmds.separator(h=10, style="none") #espacio vacio
@@ -833,18 +834,30 @@ crear_ui()
 # endregion
 """
 
-# Linea a copiar en el script editor de maya en la seccion python para ejecutar aplicacion de conejos
-# Solo es cambiarle el numero el nombre
 
+
+#SI SE CAMBIA DE CARPETA de ejecucion se debe cambiar la ruta en el userSetup
+#Ruta C:\Users\USUARIO\Documents\Maya\scripts
+#Debe quedar asi:
+#
+#import maya.cmds as cmds
+#import sys
+##Aqui se puede copiar directamente la ruta desde la barra de la carpeta, los slash deben ir asi \
+#sys.path.append(r"C:\Users\USUARIO\Documents\GitHub\UnLindoConejito_DisenoGenerativo\Codigos_VisualStudioCode\ProyectoFinal_001_Al_021_AntesDeDividirArchivos")
+#sys.path.append(r"C:\Users\USUARIO\Documents\GitHub\vscode-environment-for-maya\.venv\Lib\site-packages")
+#if not cmds.commandPort(":4434", query=True):
+#    cmds.commandPort(name=":4434")
+
+#Luego ahi si copiamos esta ruta en el script editor de maya en la seccion python para ejecutar aplicacion de conejos
+# Solo es cambiarle la ruta 
 #import sys
 #import importlib
-#sys.path.append("C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode")
+#Aqui NO se puede copiar la ruta desde la barra de la carpeta deben ir asi /
+#sys.path.append("C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode/ProyectoFinal_001_Al_021_AntesDeDividirArchivos")
 #import Codigo_VisualStudioCode_021_Fk_Paso62c_FKCurvasDeControl
 #importlib.reload(Codigo_VisualStudioCode_021_Fk_Paso62c_FKCurvasDeControl)
 #Codigo_VisualStudioCode_021_Fk_Paso62c_FKCurvasDeControl.crear_ui()
 # endregion
-
-
 
 
 
