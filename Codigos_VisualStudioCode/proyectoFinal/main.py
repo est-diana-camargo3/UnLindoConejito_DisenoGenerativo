@@ -15,6 +15,8 @@ from proyectoFinal import sistemaChain
 from proyectoFinal import sistemaIKFK
 from proyectoFinal import crearConejo
 from proyectoFinal import funcionesFK
+from proyectoFinal import paletas
+from proyectoFinal import pintarConejo
 
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  Cambiar unidades a centimetros.                                ║                                                               ║
@@ -621,12 +623,14 @@ blanco = (1,1,1)
 def generar_conejo_ui(*args):
     
     seleccion = cmds.radioCollection("emociones", q=True, select=True)
+    estilo = cmds.radioCollection("estilos",q=True,select=True)
     crearConejo.crear_conejo(seleccion)
+    pintarConejo.aplicar_estilo(seleccion,estilo)
     ancho = crearConejo.m * 10
     cmds.text(
         "textoModulo",
         edit=True,
-        label=f"Ancho de cabeza: {ancho:.1f} cm"
+        label=f"Ancho cabeza: {ancho:.1f} cm | Morfología: {crearConejo.morfologia}"
     )
     crear_jerarquia_general()
     lista_fk = funcionesFK.crear_joints_coplanares(crearConejo.m)
@@ -724,16 +728,74 @@ def crear_ui():
     cmds.columnLayout(adjustableColumn=True, bgc=fondorosado)
 
     cmds.radioCollection("emociones")
-    cmds.radioButton("calma", label="Calma 😌", select=True)
-    cmds.radioButton("tristeza", label="Tristeza 😞")
-    cmds.radioButton("aPieria", label="APiería 😊")
-    cmds.radioButton("ternura", label="Ternura 😍")
-    cmds.radioButton("enojo", label="Enojo 😠")
+
+    cmds.radioButton(
+        "descanso",
+        label="Descanso 🌿",
+        select=True
+    )
+
+    cmds.radioButton(
+        "fantasia",
+        label="Fantasía ✨"
+    )
+
+    cmds.radioButton(
+        "odio",
+        label="Odio 😠"
+    )
+
+    cmds.radioButton(
+        "barato",
+        label="Barato 🛒"
+    )
+
+    cmds.radioButton(
+        "envidia",
+        label="Envidia 🟩"
+    )
+
+    cmds.radioButton(
+        "infidelidad",
+        label="Infidelidad 🖤"
+    )
+
+    cmds.radioButton(
+        "cortesia",
+        label="Cortesía 🌸"
+    )
+
+    cmds.radioButton(
+        "feo",
+        label="Feo 🪨"
+    )
 
     cmds.setParent('..')  # cerrar columnLayout
     cmds.setParent('..')  # cerrar rowLayout
 
     cmds.separator(h=15, style="none")
+
+    cmds.separator(h=15, style="none")
+
+    cmds.text(
+        label="Selecciona un estilo gráfico",
+        bgc=fondorosado
+    )
+
+    cmds.separator(h=10, style="none")
+
+    cmds.radioCollection("estilos")
+
+    cmds.radioButton(
+        "pixelart",
+        label="Pixel Art 🟪",
+        select=True
+    )
+
+    cmds.radioButton(
+        "bento",
+        label="Bento Art 🟦"
+    )
 
     # =========================
     # 4. BOTONES
