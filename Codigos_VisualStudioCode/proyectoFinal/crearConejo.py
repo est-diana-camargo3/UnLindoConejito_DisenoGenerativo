@@ -122,7 +122,7 @@ def crear_conejo(emocion="calma"):
     global m
     global morfologia
     global piezas_deformables
-  
+    
 
     # =========================
     # NUEVO MODULO ALEATORIO
@@ -138,6 +138,7 @@ def crear_conejo(emocion="calma"):
     # =========================
 
     morfologia = "vertical"
+    
 
     """if 20 <= ancho_cabeza <= 27:
         morfologia = "vertical"

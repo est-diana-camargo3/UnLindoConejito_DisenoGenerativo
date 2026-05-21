@@ -1,9 +1,9 @@
 
 import importlib
 import maya.cmds as cmds
-import proyectofinal02.funcionesFK as funcionesFK
-import proyectofinal02.sistemaIKFKleg as sistemaIKFKleg
-import proyectofinal02.sistemaIKFKleg as sistemaIKFKspline
+import proyectoFinal.funcionesFK as funcionesFK
+import proyectoFinal.sistemaIKFKleg as sistemaIKFKleg
+import proyectoFinal.sistemaIKFKspline as sistemaIKFKspline
 importlib.reload(funcionesFK)
 importlib.reload(sistemaIKFKleg)
 importlib.reload(sistemaIKFKspline)
