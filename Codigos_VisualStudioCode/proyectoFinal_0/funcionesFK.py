@@ -74,50 +74,22 @@ Porque es el plano que todas las primitivas comparten.
 # Obtenemos posicion de pivote y caja envolvente con extremos de geometria de cada primitiva.
 # =========================
 
-def datos_primitiva(obj):
-    bbox = cmds.exactWorldBoundingBox(obj)
-    xmin, ymin, zmin, xmax, ymax, zmax = bbox
-
-    # CENTRO EN X
-    cx = (xmin + xmax) / 2
-
-    # CENTRO EN Y
-    cy = (ymin + ymax) / 2
-
-    # CENTRO EN z
-    cz = (zmin + zmax) / 2
-
+def datos_primitiva(obj, PlanoCoplanarEnZ):
+    # Devuelve una lista [X, Y, Z] con la posicion del pivote  de la primitiva,
+    #  para colocar joints EXACTAMENTE en el centro x,y en z si es (z= -m*10/4)
+    centro = cmds.xform(obj, q=True, ws=True, rp=True) 
+    #devuelve una lista de [xmin, ymin, zmin, xmax, ymax, zmax] 
+    # para encontrar extremos de la geometría y colocar los 2 joints de las puntas o extremos (orejas, pies, etc.)
+    bbox = cmds.exactWorldBoundingBox(obj)     
     return {
-
-        # =========================
-        # CENTROS IMPORTANTES
-        # =========================
-
-        "centro": (cx, cy, cz),
-
-        # =========================
-        # EXTREMOS
-        # =========================
-
-        "xmin": xmin,
-        "ymin": ymin,
-        "zmin": zmin,
-
-        "xmax": xmax,
-        "ymax": ymax,
-        "zmax": zmax
+        "centro": (centro[0], centro[1], PlanoCoplanarEnZ),
+        "xmin": bbox[0],
+        "ymin": bbox[1],
+        "zmin": bbox[2],
+        "xmax": bbox[3],
+        "ymax": bbox[4],
+        "zmax": bbox[5]
     }
-
-
-def extremos_interno_externo_x(primitiva):
-    """Devuelve el extremo interior y el extremo exterior de una primitiva en X.
-
-    El hombro siempre está más cerca del centro del cuerpo (x=0), y la muñeca
-    está más alejada.
-    """
-    x_interno = min([primitiva["xmin"], primitiva["xmax"]], key=abs)
-    x_externo = max([primitiva["xmin"], primitiva["xmax"]], key=abs)
-    return x_interno, x_externo
 
 # Crear Y RENOMBRAR  joints 
 # =========================
@@ -164,72 +136,69 @@ def crear_joints_coplanares(m):
     """
     cmds.select(clear=True)
 
+    PlanoCoplanarEnZ = -(m*10)/4
 
     # =====================================================
     # DATOS PRIMITIVAS
     # =====================================================
 
-    cabeza = datos_primitiva("Cabeza_Primitiva_001")
-    tronco = datos_primitiva("Tronco_Primitiva_010")
-    brazoR = datos_primitiva("ManoDerecha_Primitiva_012")
-    brazoL = datos_primitiva("ManoIzquierda_Primitiva_011")
-    pieR = datos_primitiva("PieDerecho_Primitiva_009")
-    pieL = datos_primitiva("PieIzquierdo_Primitiva_008")
-    orejaR = datos_primitiva("Oreja_Derecha_007")
-    orejaL = datos_primitiva("Oreja_Izquierda_006")
-    cola = datos_primitiva("Cola_Primitiva_013")
+    cabeza = datos_primitiva("Cabeza_Primitiva_001",PlanoCoplanarEnZ)
+    tronco = datos_primitiva("Tronco_Primitiva_010",PlanoCoplanarEnZ)
+    brazoR = datos_primitiva("ManoDerecha_Primitiva_012", PlanoCoplanarEnZ)
+    brazoL = datos_primitiva("ManoIzquierda_Primitiva_011",PlanoCoplanarEnZ)
+    pieR = datos_primitiva("PieDerecho_Primitiva_009",PlanoCoplanarEnZ)
+    pieL = datos_primitiva("PieIzquierdo_Primitiva_008",PlanoCoplanarEnZ)
+    orejaR = datos_primitiva("Oreja_Derecha_007",PlanoCoplanarEnZ)
+    orejaL = datos_primitiva("Oreja_Izquierda_006", PlanoCoplanarEnZ)
+    cola = datos_primitiva("Cola_Primitiva_013",PlanoCoplanarEnZ)
 
     # =====================================================
     # ESPINA
     # =====================================================
 
     raiz = cmds.joint(n="FK_Joint_01_Interno_Columna",
-        p=(tronco["centro"][0],tronco["ymin"],tronco["centro"][2])
+        p=(tronco["centro"][0],tronco["ymin"],PlanoCoplanarEnZ)
     )
     espina = cmds.joint(n="FK_Joint_08_Interno_ColumnaCadera",
-        p=(tronco["centro"][0],tronco["centro"][1],tronco["centro"][2])
+        p=(tronco["centro"][0],tronco["centro"][1],PlanoCoplanarEnZ)
     )
     cuello = cmds.joint(n="FK_Joint_18_Medio_ColumnaCuello",
-        p=(tronco["centro"][0],tronco["ymax"],tronco["centro"][2] )
+        p=(tronco["centro"][0],tronco["ymax"],PlanoCoplanarEnZ )
     )
     cabeza = cmds.joint(n="FK_Joint_19_ColumnaFrente",
-        p=(cabeza["centro"][0], cabeza["ymax"], cabeza["centro"][2])
+        p=(cabeza["centro"][0], cabeza["ymax"], PlanoCoplanarEnZ)
     )
 
     # =====================================================
     # BRAZO DERECHO
     # =====================================================
 
-    x_interno_R, x_externo_R = extremos_interno_externo_x(brazoR)
-
     cmds.select(cuello)
 
     hombroD = cmds.joint(n="FK_Joint_15_Interno_ManoDerecha",
-        p=(x_interno_R, brazoR["centro"][1], brazoR["centro"][2])
+        p=(brazoR["xmax"],brazoR["centro"][1],PlanoCoplanarEnZ)
     )
     codoD = cmds.joint(n="FK_Joint_16_medio_ManoDerecha",
-        p=(brazoR["centro"][0], brazoR["centro"][1], brazoR["centro"][2])
+        p=(brazoR["centro"][0],brazoR["centro"][1], PlanoCoplanarEnZ)
     )
     munecaD = cmds.joint(n="FK_Joint_17_Externo_ManoDerecha",
-        p=(x_externo_R, brazoR["centro"][1], brazoR["centro"][2])
+        p=(brazoR["xmin"], brazoR["centro"][1], PlanoCoplanarEnZ)
     )
 
     # =====================================================
     # BRAZO IXQUIERDO
     # =====================================================
 
-    x_interno_I, x_externo_I = extremos_interno_externo_x(brazoL)
-
     cmds.select(cuello)
 
     hombroI = cmds.joint(n="FK_Joint_12_Interno_ManoIzquierda",
-        p=(x_interno_I, brazoL["centro"][1], brazoL["centro"][2])
+        p=(brazoL["xmin"],brazoL["centro"][1],PlanoCoplanarEnZ)
     )
     codoI = cmds.joint(n="FK_Joint_13_medio_ManoIzquierda",
-        p=(brazoL["centro"][0], brazoL["centro"][1], brazoL["centro"][2])
+        p=(brazoL["centro"][0],brazoL["centro"][1],PlanoCoplanarEnZ )
     )
-    munecaI = cmds.joint(n="FK_Joint_14_Externo_ManoIzquierda",
-        p=(x_externo_I, brazoL["centro"][1], brazoL["centro"][2])
+    munecaI = cmds.joint( n="FK_Joint_14_Externo_ManoIzquierda",
+        p=( brazoL["xmax"],brazoL["centro"][1], PlanoCoplanarEnZ)
     )
 
     # =====================================================
@@ -239,13 +208,13 @@ def crear_joints_coplanares(m):
     cmds.select(raiz)
 
     piernaD = cmds.joint(n="FK_Joint_05_Interno_PieDerecho",
-        p=(pieR["centro"][0],pieR["ymax"],pieR["centro"][2])
+        p=(pieR["centro"][0],pieR["ymax"],PlanoCoplanarEnZ)
     )
     rodillaD = cmds.joint(n="FK_Joint_06_medio_PieDerecho",
-        p=(pieR["centro"][0],pieR["centro"][1],pieR["centro"][2])
+        p=(pieR["centro"][0],pieR["centro"][1],PlanoCoplanarEnZ)
     )
     pieD = cmds.joint(n="FK_Joint_07_Externo_PieDerecho",
-        p=(pieR["centro"][0],pieR["ymin"],pieR["centro"][2])
+        p=(pieR["centro"][0],pieR["ymin"],PlanoCoplanarEnZ)
     )
 
     # =====================================================
@@ -255,13 +224,13 @@ def crear_joints_coplanares(m):
     cmds.select(raiz)
 
     piernaI = cmds.joint(n="FK_Joint_02_Interno_PieIzquierdo",
-        p=(pieL["centro"][0],pieL["ymax"],pieL["centro"][2])
+        p=(pieL["centro"][0],pieL["ymax"],PlanoCoplanarEnZ)
     )
     rodillaI = cmds.joint( n="FK_Joint_03_medio_PieIzquierdo",
-        p=(pieL["centro"][0],pieL["centro"][1],pieL["centro"][2])
+        p=(pieL["centro"][0],pieL["centro"][1], PlanoCoplanarEnZ )
     )
     pieI = cmds.joint( n="FK_Joint_04_Externo_PieIzquierdo",
-        p=(pieL["centro"][0],pieL["ymin"],pieL["centro"][2])
+        p=(pieL["centro"][0],pieL["ymin"], PlanoCoplanarEnZ)
     )
 
     # =====================================================
@@ -271,13 +240,13 @@ def crear_joints_coplanares(m):
     cmds.select(cabeza)
 
     orejaBaseD = cmds.joint(n="FK_Joint_23_Interno_OrejaDerecha",
-        p=(orejaR["centro"][0],orejaR["ymin"],orejaR["centro"][2])
+        p=(orejaR["centro"][0],orejaR["ymin"], PlanoCoplanarEnZ)
     )
     orejaMidD = cmds.joint(n="FK_Joint_24_Medio_OrejaDerecha",
-        p=(orejaR["centro"][0],orejaR["centro"][1],orejaR["centro"][2])
+        p=(orejaR["centro"][0],orejaR["centro"][1],PlanoCoplanarEnZ )
     )
     orejaPuntaD = cmds.joint(n="FK_Joint_25_Externo_OrejaDerecha",
-        p=(orejaR["centro"][0],orejaR["ymax"],orejaR["centro"][2])
+        p=(orejaR["centro"][0],orejaR["ymax"], PlanoCoplanarEnZ)
     )
 
     # =====================================================
@@ -287,13 +256,13 @@ def crear_joints_coplanares(m):
     cmds.select(cabeza)
 
     orejaBaseI = cmds.joint(n="FK_Joint_20_Interno_OrejaIzquierda",
-        p=(orejaL["centro"][0],orejaL["ymin"],orejaL["centro"][2])
+        p=(orejaL["centro"][0],orejaL["ymin"],PlanoCoplanarEnZ )
     )
     orejaMidI = cmds.joint(n="FK_Joint_21_Medio_OrejaIzquierda",
-        p=(orejaL["centro"][0],orejaL["centro"][1],orejaL["centro"][2])
+        p=(orejaL["centro"][0],orejaL["centro"][1],PlanoCoplanarEnZ)
     )
     orejaPuntaI = cmds.joint(n="FK_Joint_22_Externo_OrejaIzquierda",
-        p=(orejaL["centro"][0],orejaL["ymax"],orejaL["centro"][2])
+        p=(orejaL["centro"][0],orejaL["ymax"],PlanoCoplanarEnZ)
     )
 
     # =====================================================
@@ -664,10 +633,10 @@ def crear_fk_auto_root_control(ListaDelSistemaFK):
 
 
 
-# =========================
-# Curvas de control 
-# =========================
-def crear_curvas_de_control_FK(fk_joints):
+   # =========================
+    # Curvas de control 
+    # =========================
+    def crear_curvas_de_control_FK(fk_joints):
 
         ctrls = []
 

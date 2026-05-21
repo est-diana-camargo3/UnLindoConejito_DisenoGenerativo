@@ -6,7 +6,7 @@
 import maya.cmds as cmds
 import random
 
-from proyectofinal02 import paletas
+from proyectoFinal import paletas
 
 
 # =========================================================
