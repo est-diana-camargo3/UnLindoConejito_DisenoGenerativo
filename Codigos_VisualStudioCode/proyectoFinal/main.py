@@ -1,4 +1,5 @@
 
+# region 1. Importaciones
 import importlib
 import os
 import maya.cmds as cmds
@@ -7,37 +8,36 @@ import proyectoFinal.funcionesFK as funcionesFK
 import proyectoFinal.funcionesIniciales as funcionesIniciales
 import proyectoFinal.paletas as paletas
 import proyectoFinal.pintarConejo as pintarConejo
-
 importlib.reload(crearConejo)
 importlib.reload(funcionesFK)
 importlib.reload(funcionesIniciales)
 importlib.reload(paletas)
 importlib.reload(pintarConejo)
 
+# endregion
 
+# region 2. Definir colores
+#  
+# =========================
+# COLORES para interfaz (RGB normalizados 0–1)
+# =========================
 
-# region ui
-#                         ╔═════════════════════════════════════════════════════════════════╗
-#                         ║  Interfaz UI                                                    ║
-#                         ╚═════════════════════════════════════════════════════════════════╝
+fondorosado = (236/255, 188/255, 251/255)   # #ecbcfb
+morado = (182/255, 135/255, 232/255)   # 9C48CF
+lila = (204/255, 153/255, 255/255)   # CC99FF
+gris = (245/255, 240/255, 250/255)    #747474 
+grisoscuro = (220/255, 220/255, 220/255)    #545353
+blanco = (1,1,1)
 
+# endregion
+
+#region 3. Funciones UI
 
 # =========================
 # FUNCIÓN DEL BOTÓN GENERAR
 # =========================
 def generar_conejo_ui(*args):
     
-    #esto ya esta abajo en funcion_de_main_crear_conejo_cuadrado y funcion_de_main_pintarconejo  
-      
-    #seleccion = cmds.radioCollection("emociones", q=True, select=True)
-    #estilo = cmds.radioCollection("estilos",q=True,select=True)
-    #crearConejo.crear_conejo(seleccion)    
-    #pintarConejo.aplicar_estilo(seleccion,estilo)
-    #ancho = crearConejo.m * 10
-
-    cmds.text(    "textoModulo",  edit=True,  label=f"Ancho cabeza: {ancho:.1f} cm | Morfología: {crearConejo.morfologia}"   )
-    cmds.text(    "textoModulo2",  edit=True,  label=f"Dato Curioso: {pintarConejo.dato_curioso}"   )
-
     funcionesIniciales.crear_jerarquia_general()
     lista_fk = funcionesFK.crear_joints_coplanares(crearConejo.m)
     funcionesFK.orientar_joints_de_toda_la_cadena_FK(lista_fk)
@@ -66,39 +66,21 @@ def generar_conejo_ui(*args):
 
     
     #suavizar_conejo_preview()
-    
 
 # =========================
-# COLORES para interfaz (RGB normalizados 0–1)
-# =========================
-
-fondorosado = (236/255, 188/255, 251/255)   # #ecbcfb
-morado = (182/255, 135/255, 232/255)   # 9C48CF
-lila = (204/255, 153/255, 255/255)   # CC99FF
-gris = (245/255, 240/255, 250/255)    # #747474
-blanco = (1,1,1)
-
-
-# =========================
-# FUNCIÓN BOTÓN BORRAR
-# =========================
-def borrar_escena(*args):
-    cmds.select(all=True)
-    cmds.delete()
-
-# =========================
-# FUNCIÓN 
+# funcion_de_main_crear_conejo_cuadrado
 # =========================
 def funcion_de_main_crear_conejo_cuadrado(*args):
 
     seleccion = cmds.radioCollection("emociones",q=True, select=True )
     estilo = cmds.radioCollection("estilos",q=True,select=True)
     crearConejo.crear_conejo(seleccion)
-    ancho = crearConejo.m * 10
+    global ancho 
+    ancho= crearConejo.m * 10
     cmds.text( "textoModulo", edit=True,  label=f"Ancho cabeza: {ancho:.1f} cm | Morfología: {crearConejo.morfologia}" )
 
 # =========================
-# FUNCIÓN 
+# funcion_de_main_pintar_conejo
 # =========================
 def funcion_de_main_pintar_conejo(*args):
 
@@ -107,7 +89,9 @@ def funcion_de_main_pintar_conejo(*args):
     pintarConejo.aplicar_estilo(seleccion,estilo)
     cmds.text( "textoModulo2", edit=True,  label=f"Dato Curioso: {pintarConejo.dato_curioso}" )
 
-
+# =========================
+# funcion mostrar_gizmos_pivotes
+# =========================
 def mostrar_gizmos_pivotes(*args):
     # Mostramos los gizmos de los pivotes para poder ver donde esta el punto de ancla o pivote 
     # Display → Transform Display → Pivots    
@@ -123,7 +107,9 @@ def mostrar_gizmos_pivotes(*args):
         if cmds.objExists(obj):
             cmds.setAttr(obj + ".displayLocalAxis", 1)
 
-#Por si en un futuro queremos ocultar los gizmos de los pivotes 
+# =========================
+# funcion ocultar_gizmos_pivotes
+# ========================= 
 def ocultar_gizmos_pivotes(*args):
     objetos = [
         "Cabeza_Primitiva_001",
@@ -138,50 +124,50 @@ def ocultar_gizmos_pivotes(*args):
         if cmds.objExists(obj):
             cmds.setAttr(obj + ".displayLocalAxis", 0)
 
+# =========================
+# funcion_de_main_crear_jerarquia_general
+# ========================= 
+#def funcion_de_main_crear_jerarquia_general(*args):
+    #funcionesIniciales.crear_jerarquia_general()
 
 
+# =========================
+# FUNCIÓN BOTÓN BORRAR
+# =========================
+def borrar_escena(*args):
+    cmds.select(all=True)
+    cmds.delete()
 
+#endregion de la seccion borrar escena 
+
+#region 4. Interfaz UI
+
+#                         ╔═════════════════════════════════════════════════════════════════╗
+#                         ║  Interfaz UI                                                    ║
+#                         ╚═════════════════════════════════════════════════════════════════╝
+
+#region 4.1 Ventana Medidas   
 # =========================
 # CREACIÓN UI
 # =========================
 def crear_ui():
-
-    # rowLayout UNA sola fila horizontal.  
-    #                                       [ elemento ][ elemento ][ elemento ]
-    # rowColumnLayout sirve para organizar tablas 
-    #                                       [ elemento ][ elemento ][ elemento ]
-    #                                       [ elemento ][ elemento ][ elemento ]
-    #                                       [ elemento ][ elemento ][ elemento ]
-    # En Maya no creamos las filas de manera manual estas se crean con rowColumnLayout dependiendo de cuantos 
-    # elementos agreguemos, por ejemplo si hacemos un rowColumnLayout de 3 columnas y agregamos 6 elementos se van a organizar asi:
-    #  1 | 2 | 3
-    #  4 | 5 | 6...y asi sucesivamente dependiendo cuandos elementos agreguemos.
-    # cmds.columnLayout crea columna vertical
-    # cmds.columnLayout(  columnAttach=("left", 30)) #Padding interno
-    
-    #---Raya division lila
-    #cmds.separator(h=5, style="none") #espacio vacio
-    #cmds.text(label="", height=6, width=anchomenu,bgc=lila)
-    
+   
     if cmds.window("miVentanaConejo", exists=True):
         cmds.deleteUI("miVentanaConejo")
 
     # =========================
     # MEDIDAS
     # =========================
-    anchomenu=318
+    anchomenu=300
     anchoimagen=300
+    altoimagen=330
     anchoventana=anchomenu
-    altoventana=800
+    altoventana=850
     ventana = cmds.window("miVentanaConejo", title="MI DULCE FORTUNA", widthHeight=(anchoventana,altoventana),sizeable=False)
 
-    # =========================
-    # SCROLL GENERAL
-    # =========================
-    cmds.scrollLayout(
-        verticalScrollBarThickness=16,
-        horizontalScrollBarThickness=0
-    )
+#endregion de la seccion ventana medidas 
+
+#region 4.1.1.Imagen
 
     # =========================
     # LAYOUT PRINCIPAL (1 COLUMNA)
@@ -211,9 +197,12 @@ def crear_ui():
     #cmds.separator(h=20, style="none") #espacio vacio
     cmds.rowLayout(numberOfColumns=3,columnWidth3=(20, anchoimagen, 20),bgc=fondorosado)
     ruta_imagen = "C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Imagenes/ImagenMenu.png"
-    cmds.image(image=ruta_imagen,width=anchomenu)
+    cmds.image(image=ruta_imagen,width=anchoimagen,height=altoimagen)
     cmds.setParent('..') # cerrar rowLayout de la imagen para que el siguiente elemento no quede dentro de este
 
+#endregion de la seccion imagen 
+   
+#region 4.1.2.Menú
 
     # =========================
     # 🎛️ (MENÚ)
@@ -224,7 +213,7 @@ def crear_ui():
 
     #---titulo
     cmds.separator(h=4, style="none") #espacio vacio
-    cmds.text(label="MI DULCE FORTUNA",height=30, width=anchomenu,bgc=morado, font="boldLabelFont", align="center")
+    cmds.text(label="   🐰   MI DULCE FORTUNA   🐰  ",height=30, width=anchomenu,bgc=morado, font="boldLabelFont", align="center")
         
     #---Raya division lila
     cmds.separator(h=4, style="none") #espacio vacio
@@ -234,283 +223,184 @@ def crear_ui():
     cmds.separator(h=13, style="none") #espacio vacio
     cmds.text(label="Selecciona una emoción", bgc=fondorosado)
 
-    
+#region 4.1.2.1. Emociones 
+  
     # =========================
     # EMOCIONES A 3 COLUMNAS
     # =========================
        
-    cmds.separator(h=15, style="none") #espacio vacio
-    # layout de 2 columnas
-    cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,100), (2,100),(3,100)],columnSpacing=[(1,15)], rowSpacing=(1,5))
-    #mcolumnSpacing=[(1,15)]desde la columna 1 coloca → 15 px de separación entre columnas
+    cmds.separator(h=10, style="none")
+
+    # CONTENEDOR GENERAL PARA CENTRAR
+    cmds.rowLayout(
+        numberOfColumns=3,
+        columnWidth3=(40, 220, 40)
+    )
+
+    cmds.text(label="")  # espacio izquierdo
+
+    # =========================
+    # TABLA DE 4 COLUMNAS
+    # [ radio ] [ corazon ] [ radio ] [ corazon ]
+    # =========================
+
+    cmds.rowColumnLayout(
+        numberOfColumns=4,
+        columnWidth=[
+            (1,65),
+            (2,20),
+            (3,65),
+            (4,20)
+        ],
+        columnSpacing=[
+            (1,10),
+            (2,5),
+            (3,30)
+        ],
+        rowSpacing=(1,5)
+    )
 
     cmds.radioCollection("emociones")
 
-    cmds.radioButton("descanso",label="Descanso 🌿", select=True )
-    cmds.radioButton("fantasia",label="Fantasía ✨")
-    cmds.radioButton("odio",label="Odio 😠")
-    cmds.radioButton("barato",label="Barato 🛒")
-    cmds.radioButton("envidia",label="Envidia 🟩" )
-    cmds.radioButton("infidelidad", label="Infidelidad 💛" )
-    cmds.radioButton("cortesia", label="Cortesía 🌸" )
-    cmds.radioButton("feo", label="Feo 🪨" )
-    cmds.setParent('..')# cerrar rowColumnLayout de las columnas de las emociones 
+    # FILA 1
+    cmds.radioButton(
+        "descanso",
+        label="Descanso",
+        align="center",
+        select=True
+    )
+    cmds.text(label="💚", align="center")
 
-    # =========================
-    # 🎨 ESTILOS GRÁFICOS 
-    # =========================
-    cmds.separator(h=15, style="none")
-    cmds.text( label="Selecciona un estilo gráfico",  bgc=fondorosado )
-    cmds.separator(h=10, style="none") #espacio vacio
-    cmds.radioCollection("estilos")
-    cmds.radioButton( "pixelart", label=" Pixel Art ▀▄ ", select=True )
-    cmds.radioButton( "bento", label=" Bento Art 📦 " )
+    cmds.radioButton(
+        "infidelidad",
+        label="Feo",
+        align="center"
+    )
+    cmds.text(label="🤎", align="center")
+
+    # FILA 2
+    cmds.radioButton(
+        "barato",
+        label="Pequeño",
+        align="center"
+    )
+    cmds.text(label="🩷", align="center")
+
+    cmds.radioButton(
+        "fantasia",
+        label="Fantasía",
+        align="center"
+    )
+    cmds.text(label="🧡", align="center")
+
+    # FILA 3
+    cmds.radioButton(
+        "odio",
+        label="Odio",
+        align="center"
+    )
+    cmds.text(label="🖤", align="center")
+
+    cmds.radioButton(
+        "envidia2",
+        label="Envidia",
+        align="center"
+    )
+    cmds.text(label="💛", align="center")
+
+    # FILA 4
+    cmds.radioButton(
+        "cortesia",
+        label="Artificial",
+        align="center"
+    )
+    cmds.text(label="💜", align="center")
+
+    cmds.radioButton(
+        "envidia",
+        label="Verdad",
+        align="center"
+    )
+    cmds.text(label="🤍", align="center")
+
+    cmds.setParent('..')  # cerrar rowColumnLayout
+
+    cmds.text(label="")  # espacio derecho
+
+    cmds.setParent('..')  # cerrar rowLayout
+
+
+
+#endregion de la seccion emociones
+
+
+#region 4.1.2.2. Botones
 
     # =========================
     # 🔘 BOTONES 
     # =========================
      #---Raya division lila
-    cmds.separator(h=20, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
+    cmds.separator(h=15, style="none") #espacio vacio
+    cmds.text(label="", height=3, width=anchomenu,bgc=morado)
+    cmds.separator(h=3, style="none") #espacio vacio
+    cmds.text(label="", height=3, width=anchomenu,bgc=morado)
 
-    #---titulo
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="GEOMETRÍA BÁSICA",height=20, width=anchomenu,bgc=lila, font="boldLabelFont", align="left")
-   
-    #---Raya division lila
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
+    #---Texto instruccion
+    cmds.separator(h=13, style="none") #espacio vacio
+    cmds.text(label="Selecciona los botones en orden", bgc=fondorosado)
 
 
         # =========================
         # 🔘 BOTÓN GENERAR CONEJO CUADRADO
         # =========================
 
-    cmds.separator(h=15, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
+    cmds.separator(h=8, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🧊 Crear conejo cuadrado ",command=funcion_de_main_crear_conejo_cuadrado, bgc=gris,height=30 )
+    cmds.button(label="🧊 Crear conejo ",command=funcion_de_main_crear_conejo_cuadrado, bgc=gris,height=30 )
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
 
-    #texto para mostrar el ancho de cabeza generado y como varia 
-    cmds.separator(h=5, style="none")
-    cmds.text( "textoModulo", label="Ancho de cabeza: --- cm | Morfología: ---", bgc=fondorosado, align="center" )
-
         # =========================
-        # 🔘 BOTÓN mostrar gizmos pivotes
-        # =========================
-    cmds.separator(h=5, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🕹️ Mostrar gizmos pivotes de cubos ",command=mostrar_gizmos_pivotes,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
-    
-        # =========================
-        # 🔘 BOTÓN ocultar gizmos pivotes
-        # =========================
-    cmds.separator(h=5, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" 🫣 Ocultar gizmos pivotes de cubos ",command=ocultar_gizmos_pivotes,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
-
-    #texto 
-    cmds.separator(h=5, style="none")
-    cmds.text(label=" 💡 Recuerda: Lo que ves es el gizmo del CUBO ", height=15, width=anchomenu, bgc=fondorosado, align="center")
-    cmds.separator(h=5, style="none")
-    cmds.text(label="Los gizmos de los JOINTS lo veremos mas adelante", height=15, width=anchomenu, bgc=fondorosado, align="center")
-    cmds.separator(h=5, style="none")
-
-            # =========================
         # 🔘 BOTÓN PINTAR CONEJO
         # =========================
 
-    cmds.separator(h=5, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
+    cmds.separator(h=8, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,80)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
     cmds.button(label="🎨 Pintar conejo ",command=funcion_de_main_pintar_conejo, bgc=gris,height=30 )
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
 
-    #texto para mostrar el ancho de cabeza generado y como varia 
-    cmds.separator(h=5, style="none")
-    cmds.text( "textoModulo2", label="Dato Curioso: ---", bgc=fondorosado, align="center" )
-
-        # =========================
-        # 🔘 BOTÓNES FK IK 
-        # =========================
-
-     #---Raya division lila
-    cmds.separator(h=20, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
-
-    #---titulo
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="SISTEMA FK TO IK ",height=20, width=anchomenu,bgc=lila, font="boldLabelFont", align="left")
-
-    #---Raya division lila
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
-
-
-        # =========================
-        # 🔘 BOTÓN crear y renombrar joints 
-        # =========================
-
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" 👑 Crear Jerarquia general ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-   
-        # =========================
-        # 🔘 BOTÓN crear y renombrar joints 
-        # =========================
-
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" 🦴 Crear y Renombrar joints coplanares ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-        # =========================
-        # 🔘 BOTÓN orientar joints
-        # =========================
-        
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" ➕ Orientar joints ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-
-    
-        # =========================
-        # 🔘 BOTÓN duplicar y renombrar cadenas
-        # =========================
-        
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" Duplicar y renombrar cadenas IK Y MAIN ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-
-        # =========================
-        # 🔘 BOTÓN mostrar cadenas ik y main
-        # =========================
-        
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" mostrar cadenas ik y main ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-
-        # =========================
-        # 🔘 BOTÓN ocultar cadenas ik y main
-        # =========================
-        
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" ocultar cadenas ik y main ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-
-
-
-        # =========================
-        # 🔘 BOTÓN crear_fk_auto_root_control
-        # =========================
-        
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" crear_fk_auto_root_control ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-
-
         # =========================
         # 🔘 BOTÓN crear_sistema fk to ik 
         # =========================
         
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
+    cmds.separator(h=8, style="none")
+    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,80)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" Crear_sistema fk to ik  ",command=generar_conejo_ui,bgc=gris,height=30)
+    cmds.button(label="🦴 Crear esqueleto ",command=generar_conejo_ui,bgc=gris,height=30)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-        # =========================
-        # 🔘 BOTÓNES COLUMNA
-        # =========================
-
-     #---Raya division lila
-    cmds.separator(h=20, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
-
-    #---titulo
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="SISTEMA COLUMNA ",height=20, width=anchomenu,bgc=lila, font="boldLabelFont", align="left")
-
-    #---Raya division lila
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
-
-
-        # =========================
-        # 🔘 BOTÓN sistema columna
-        # =========================
-
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" 👑 Crear sistema columna ",command=generar_conejo_ui,bgc=gris,height=30)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-
-        # =========================
-        # 🔘 BOTÓNES LIMPIEZA
-        # =========================
-
-     #---Raya division lila
-    cmds.separator(h=20, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
-
-    #---titulo
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="LIMPIEZA ",height=20, width=anchomenu,bgc=lila, font="boldLabelFont", align="left")
-
-    #---Raya division lila
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=lila)
-
 
         # =========================
         # 🔘 BOTÓN Borrar escena 
         # =========================
-    cmds.separator(h=15, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,50), (2,200),(3,50)]) # izquierda, botón, derecha
+    cmds.separator(h=10, style="none")
+    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,80)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label=" Borrar Escena 🧹 ",command=borrar_escena,bgc=gris,height=30)
+    cmds.button(label="🧹 Borrar Escena ",command=borrar_escena,bgc=grisoscuro,height=30)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
     cmds.separator(h=10, style="none") #espacio vacio
+#endregion de la seccion botones
 
+
+#region 4.2. creditos 
+
+        # =========================
+        # CRÉDITOS FINALES 
+        # =========================
     # Raya division
     cmds.text(label="", bgc=lila,height=6) 
     cmds.separator(h=1, style="in")
@@ -528,11 +418,15 @@ def crear_ui():
 
     cmds.showWindow(ventana)
 
+#endregion de la seccion creditos
+# endregion de la seccion menu
+#endregion de la seccion interfaz UI
+
 # =========================
 # EJECUTAR UI
 # =========================
 crear_ui()
-# endregion
+
 
 # region Notas
 
