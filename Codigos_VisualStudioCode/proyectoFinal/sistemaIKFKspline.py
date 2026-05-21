@@ -50,10 +50,21 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
     # =========================
     # IK HANDLE
     # =========================
-    ik_handle, effector = cmds.ikHandle(sj=ik_chain[0],ee=ik_chain[-1],
-        solver="ikSplineSolver", createCurve=True,parentCurve=False
+    ik_result = cmds.ikHandle(
+        sj=ik_chain[0],
+        ee=ik_chain[-1],
+        solver="ikSplineSolver",
+        createCurve=True,
+        parentCurve=False
     )
-    ik_handle = cmds.rename(ik_handle,f"{prefix}_IKHandle_001")
+
+    ik_handle = ik_result[0]
+    effector = ik_result[1] if len(ik_result) > 1 else None
+    curve = ik_result[2] if len(ik_result) > 2 else None
+
+    ik_handle = cmds.rename(ik_handle, f"{prefix}_IKHandle_001")
+    if curve:
+        curve = cmds.rename(curve, f"{prefix}_IKCurve_001")
 
     # =========================
     # IK CONTROL
@@ -63,7 +74,8 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         f"{prefix}_IK_CTRL_001",
         ik_handle,
         ik_chain[-1],
-        size=tamano 
+        size=tamano,
+        align_to_target=False
     )
 
  
@@ -113,17 +125,16 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
 
     print(f"✅ Sistema IKFK creado -> {prefix}")
     # =========================
-    # XONTROLES
+    # CONTROLES DE CURVA SPLINE
     # =========================
 
     clusters = []
-    num_cvs = cmds.getAttr(f"{curve}.spans") + cmds.getAttr(f"{curve}.degree")
+    if curve and cmds.objExists(curve):
+        num_cvs = cmds.getAttr(f"{curve}.spans") + cmds.getAttr(f"{curve}.degree")
 
-    for i in range(num_cvs):
-
-        cluster = cmds.cluster(f"{curve}.cv[{i}]")[1]
-
-        clusters.append(cluster)
+        for i in range(num_cvs):
+            cluster = cmds.cluster(f"{curve}.cv[{i}]")[1]
+            clusters.append(cluster)
 
     spine_controls = []
 
@@ -138,14 +149,14 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         cmds.parentConstraint(ctrl, cluster, mo=True)
 
         spine_controls.append(ctrl)
-    chest_ctrl = spine_controls[-1]
 
-    cmds.connectAttr(
-        f"{chest_ctrl}.rotateY",
-        f"{ik_handle}.twist"
-    )
+    if spine_controls:
+        chest_ctrl = spine_controls[-1]
+        cmds.connectAttr(
+            f"{chest_ctrl}.rotateY",
+            f"{ik_handle}.twist"
+        )
 
-    
     return {
         "ikHandle": ik_handle,
         "ikControl": ik_ctrl,
@@ -155,31 +166,58 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
 
 def bind_skin_cube(mesh, joints):
 
+    if not cmds.objExists(mesh):
+        cmds.warning(f"bind_skin_cube: mesh no existe -> {mesh}")
+        return None
+
+    valid_joints = [j for j in joints if cmds.objExists(j)]
+    if not valid_joints:
+        cmds.warning(f"bind_skin_cube: no existen joints válidos -> {joints}")
+        return None
+
+    shapes = cmds.listRelatives(mesh, shapes=True, noIntermediate=True)
+    if not shapes:
+        cmds.warning(f"bind_skin_cube: el objeto no tiene forma -> {mesh}")
+        return None
+
     # =========================
     # 1. SUBDIVISIÓN DEL MESH
     # =========================
-    cmds.polySmooth(mesh, divisions=2)
+    try:
+        cmds.polySmooth(mesh, divisions=2)
+    except Exception as e:
+        cmds.warning(f"polySmooth falló en {mesh}: {e}")
 
     # =========================
     # 2. LIMPIEZA BASE
     # =========================
-    cmds.makeIdentity(mesh, apply=True, t=True, r=True, s=True, n=False)
-
-    cmds.delete(mesh, ch=True)
+    try:
+        cmds.makeIdentity(mesh, apply=True, t=True, r=True, s=True, n=False)
+        cmds.delete(mesh, ch=True)
+    except Exception as e:
+        cmds.warning(f"Limpieza de mesh falló en {mesh}: {e}")
 
     # =========================
     # 3. SMOOTH BIND
     # =========================
-    skin = cmds.skinCluster(
-        joints,
-        mesh,
-        toSelectedBones=True,
-        bindMethod=0,        # Closest Distance (estable)
-        skinMethod=0,        # Linear
-        normalizeWeights=1,
-        maximumInfluences=3,
-        dropoffRate=4.0
-    )[0]
+    cmds.select(valid_joints, replace=True)
+    try:
+        skin_result = cmds.skinCluster(
+            valid_joints,
+            mesh,
+            toSelectedBones=True,
+            bindMethod=0,
+            skinMethod=0,
+            normalizeWeights=1,
+            maximumInfluences=3,
+            dropoffRate=4.0
+        )
+    except Exception as e:
+        cmds.warning(f"skinCluster falló en {mesh}: {e}")
+        cmds.select(clear=True)
+        return None
+
+    skin = skin_result[0] if isinstance(skin_result, (list, tuple)) else skin_result
 
     # =========================
     # 4. MEJORA DE DEFORMACIÓN (OPCIONAL PERO RECOMENDADO)
@@ -191,7 +229,7 @@ def bind_skin_cube(mesh, joints):
             smoothingStep=0.5,
             pinBorderVertices=1
         )
-    except:
+    except Exception:
         cmds.warning("Delta Mush no disponible o falló")
 
     # =========================
@@ -238,7 +276,7 @@ def crear_control(nombre, target, size=1, color=17):
 
     return ctrl, offset
 
-def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13):
+def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13, align_to_target=True):
 
     ctrl = cmds.circle(
         n=nombre,
@@ -249,9 +287,12 @@ def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13):
     root = cmds.group(ctrl, n=f"{nombre}_ROOT")
     auto = cmds.group(root, n=f"{nombre}_AUTO")
 
-    # alinear
+    # alinear posición
     cmds.delete(cmds.pointConstraint(target, root))
-    cmds.delete(cmds.orientConstraint(target, root))
+    if align_to_target:
+        cmds.delete(cmds.orientConstraint(target, root))
+    else:
+        cmds.xform(root, ws=True, rotation=(0, 0, 0))
 
     # color
     shapes = cmds.listRelatives(ctrl, s=True)

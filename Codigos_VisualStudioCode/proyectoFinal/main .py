@@ -2,11 +2,11 @@
 import importlib
 import os
 import maya.cmds as cmds
-import proyectofinal02.crearConejo as crearConejo
-import proyectofinal02.funcionesFK as funcionesFK
-import proyectofinal02.funcionesIniciales as funcionesIniciales
-import proyectofinal02.paletas as paletas
-import proyectofinal02.pintarConejo as pintarConejo
+import proyectoFinal.crearConejo as crearConejo
+import proyectoFinal.funcionesFK as funcionesFK
+import proyectoFinal.funcionesIniciales as funcionesIniciales
+import proyectoFinal.paletas as paletas
+import proyectoFinal.pintarConejo as pintarConejo
 
 importlib.reload(crearConejo)
 importlib.reload(funcionesFK)
@@ -50,9 +50,9 @@ def generar_conejo_ui(*args):
         crearConejo.piezas_deformables
     )
 
-    funcionesIniciales.crear_master_control()
+    #funcionesIniciales.crear_master_control()
     
-    funcionesIniciales.crear_controles_anatomicos()
+    #funcionesIniciales.crear_controles_anatomicos()
 
     funcionesIniciales.crear_jerarquia_anatomica()
 

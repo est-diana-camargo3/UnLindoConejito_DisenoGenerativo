@@ -1,9 +1,9 @@
 
 import importlib
 import maya.cmds as cmds
-import proyectofinal02.funcionesFK as funcionesFK
-import proyectofinal02.sistemaIKFKleg as sistemaIKFKleg
-import proyectofinal02.sistemaIKFKleg as sistemaIKFKspline
+import proyectoFinal.funcionesFK as funcionesFK
+import proyectoFinal.sistemaIKFKleg as sistemaIKFKleg
+import proyectoFinal.sistemaIKFKspline as sistemaIKFKspline
 importlib.reload(funcionesFK)
 importlib.reload(sistemaIKFKleg)
 importlib.reload(sistemaIKFKspline)
@@ -373,31 +373,88 @@ def conectar_partes_secundarias():
 
 def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
 
+    def rename_chain(joints, prefix):
+        return [j.replace("FK_", prefix + "_", 1) for j in joints]
+
     sistemas = [
+        # extremidades con IK-RP
         {
+            "module": sistemaIKFKleg,
             "fk": lista_fk["brazoR_FK"],
-            "ik": [
-                "IK_Joint_15_Interno_ManoDerecha",
-                "IK_Joint_16_medio_ManoDerecha",
-                "IK_Joint_17_Externo_ManoDerecha"
-            ],
-            "main": [
-                "MAIN_Joint_15_Interno_ManoDerecha",
-                "MAIN_Joint_16_medio_ManoDerecha",
-                "MAIN_Joint_17_Externo_ManoDerecha"
-            ],
-            "meshes": [
-                "ManoDerecha_Primitiva_012"
-            ],
+            "ik": rename_chain(lista_fk["brazoR_FK"], "IK"),
+            "main": rename_chain(lista_fk["brazoR_FK"], "MAIN"),
+            "meshes": ["ManoDerecha_Primitiva_012"],
             "prefix": "BrazoR"
+        },
+        {
+            "module": sistemaIKFKleg,
+            "fk": lista_fk["brazoL_FK"],
+            "ik": rename_chain(lista_fk["brazoL_FK"], "IK"),
+            "main": rename_chain(lista_fk["brazoL_FK"], "MAIN"),
+            "meshes": ["ManoIzquierda_Primitiva_011"],
+            "prefix": "BrazoL"
+        },
+        {
+            "module": sistemaIKFKleg,
+            "fk": lista_fk["piernaR_FK"],
+            "ik": rename_chain(lista_fk["piernaR_FK"], "IK"),
+            "main": rename_chain(lista_fk["piernaR_FK"], "MAIN"),
+            "meshes": ["PieDerecho_Primitiva_009"],
+            "prefix": "PiernaR"
+        },
+        {
+            "module": sistemaIKFKleg,
+            "fk": lista_fk["piernaL_FK"],
+            "ik": rename_chain(lista_fk["piernaL_FK"], "IK"),
+            "main": rename_chain(lista_fk["piernaL_FK"], "MAIN"),
+            "meshes": ["PieIzquierdo_Primitiva_008"],
+            "prefix": "PiernaL"
+        },
+        {
+            "module": sistemaIKFKleg,
+            "fk": lista_fk["orejaR_FK"],
+            "ik": rename_chain(lista_fk["orejaR_FK"], "IK"),
+            "main": rename_chain(lista_fk["orejaR_FK"], "MAIN"),
+            "meshes": ["Oreja_Derecha_007"],
+            "prefix": "OrejaR"
+        },
+        {
+            "module": sistemaIKFKleg,
+            "fk": lista_fk["orejaL_FK"],
+            "ik": rename_chain(lista_fk["orejaL_FK"], "IK"),
+            "main": rename_chain(lista_fk["orejaL_FK"], "MAIN"),
+            "meshes": ["Oreja_Izquierda_006"],
+            "prefix": "OrejaL"
+        },
+        {
+            "module": sistemaIKFKleg,
+            "fk": lista_fk["cola_FK"],
+            "ik": rename_chain(lista_fk["cola_FK"], "IK"),
+            "main": rename_chain(lista_fk["cola_FK"], "MAIN"),
+            "meshes": ["Cola_Primitiva_013"],
+            "prefix": "Cola"
+        },
+        # cabeza + tronco con IK spline
+        {
+            "module": sistemaIKFKspline,
+            "fk": lista_fk["columna_FK"],
+            "ik": rename_chain(lista_fk["columna_FK"], "IK"),
+            "main": rename_chain(lista_fk["columna_FK"], "MAIN"),
+            "meshes": ["Tronco_Primitiva_010", "Cabeza_Primitiva_001"],
+            "prefix": "Columna"
         }
     ]
 
     resultados = {}
     for s in sistemas:
 
+        missing = [obj for obj in (s["fk"] + s["ik"] + s["main"]) if not cmds.objExists(obj)]
+        if missing:
+            cmds.warning(f"No se puede crear el sistema {s['prefix']}: faltan joints -> {missing}")
+            continue
+
         meshes_sistema = s.get("meshes", meshes)
-        resultado = sistemaIKFKspline.crear_sistema_ikfk(
+        resultado = s["module"].crear_sistema_ikfk(
             fk_chain=s["fk"],
             ik_chain=s["ik"],
             main_chain=s["main"],
@@ -413,7 +470,7 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
                 cmds.warning(f"bind_skin_cube: mesh no existe -> {mesh}")
                 continue
 
-            sistemaIKFKspline.bind_skin_cube(
+            s["module"].bind_skin_cube(
                 mesh,
                 s["main"]
             )
@@ -421,4 +478,8 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
     print("✅ FKIK GENERAL COMPLETO")
 
     return resultados
+
+
 # endregion
+
+
