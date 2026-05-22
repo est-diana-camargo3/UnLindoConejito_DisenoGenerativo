@@ -17,31 +17,31 @@ from proyectoFinal.paletas import PALETAS
 
 def generar_dato_curioso(emocion="calma"):
 
-    global dato_curioso
-
     if emocion == "descanso":
-        dato_curioso = "La piedra de jade esta relacionada \ncon la buena suerte y el descanso"
+        return "Dato Curioso:\nSi se le regala una piedra de jade a una mujer, esta tendrá buena suerte y descanso."
 
     elif emocion == "feo":
-        dato_curioso = "El color mostaza ocre junto con \ngris opaco y violeta no es bello a la vista\n debido a su falta de luz"
+        return "Dato Curioso:\nEl color mostaza ocre es el color de la cobardía; por eso Judas viste ese color en las películas."
 
     elif emocion == "pequeno":
-        dato_curioso = "Los colores gris, cafe y rosado eran \nusados por personas de clase baja que no \nse podian permitir una tintura pura"
+        return "Dato Curioso:\nEl rosado pastel es pequeño, pero el rosado saturado es extravagante y se asocia a lo ordinario."
 
     elif emocion == "fantasia":
-        dato_curioso = "El color púrpura se relaciona con la \niglesia, de ahi que se relacione con los milagros \ny la fantasía"
+        return "Dato Curioso:\nEn la religión católica solo los obispos pueden vestirse de morado, los cardenales de rojo y los párrocos de negro."
 
     elif emocion == "odio":
-        dato_curioso = "El color negro transforma la cualidad \npositiva de un color en negativa ejm: el \nrojo es amor, pero con negro es odio"
+        return "Dato Curioso:\nEl color negro transforma la cualidad positiva de un color en negativa; por ejemplo, el rojo es amor, pero con negro es odio."
 
-    elif emocion == "envidia":
-        dato_curioso = "El amarillo intenso es el color \nde la envidia."
+    elif emocion == "infiel":
+        return "Dato Curioso:\nDicen que si un hombre te da rosas amarillas es porque fue infiel."
 
     elif emocion == "artificial":
-        dato_curioso = "El color morado representa lo artificial y mágico."
+        return "Dato Curioso:\nEl color lila o morado claro representa la soltería femenina y la frivolidad."
 
     elif emocion == "verdad":
-        dato_curioso = "El color oro representa lo digno, poderoso y verdadero."
+        return "Dato Curioso:\nNinguna joya, ni siquiera la de 24 kilates, es pura porque el oro puro es blanco e inmanejable; todo son aleaciones."
+
+    return "Dato Curioso:\nEste conejo guarda un detalle especial según la emoción seleccionada."
 
 
 # =========================================================
