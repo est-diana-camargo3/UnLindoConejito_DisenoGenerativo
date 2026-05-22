@@ -33,13 +33,13 @@ def generar_dato_curioso(emocion="calma"):
         return "Dato Curioso:\nEl color negro transforma la cualidad positiva de un color en negativa; por ejemplo, el rojo es amor, pero con negro es odio."
 
     elif emocion == "infiel":
-        return "Dato Curioso:\nDicen que si un hombre te da rosas amarillas es porque fue infiel."
+        return "Dato Curioso:\nDicen que si un hombre regala rosas amarillas a su pareja es porque fue infiel."
 
     elif emocion == "artificial":
         return "Dato Curioso:\nEl color lila o morado claro representa la soltería femenina y la frivolidad."
 
     elif emocion == "verdad":
-        return "Dato Curioso:\nNinguna joya, ni siquiera la de 24 kilates, es pura porque el oro puro es blanco e inmanejable; todo son aleaciones."
+        return "Dato Curioso:\nNinguna joya, ni siquiera la de 24 kilates, es pura porque el oro puro es blando e inmanejable; todo son aleaciones."
 
     return "Dato Curioso:\nEste conejo guarda un detalle especial según la emoción seleccionada."
 
