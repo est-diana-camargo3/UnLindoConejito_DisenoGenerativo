@@ -62,17 +62,17 @@ def generar_conejo_ui(*args):
     
     funcionesIniciales.crear_sistema_fkik( lista_fk, resultado_dup, crearConejo.piezas_deformables )
 
-    #funcionesIniciales.crear_master_control()
+    funcionesIniciales.crear_master_control()
     
-    #funcionesIniciales.crear_controles_anatomicos()
+    funcionesIniciales.crear_controles_anatomicos()
 
-    #funcionesIniciales.crear_jerarquia_anatomica()
+    funcionesIniciales.crear_jerarquia_anatomica()
 
-    #funcionesIniciales.conectar_columna_a_controles()
+    funcionesIniciales.conectar_columna_a_controles()
 
-    #funcionesIniciales.conectar_extremidades()
+    funcionesIniciales.conectar_extremidades()
 
-    #funcionesIniciales.conectar_partes_secundarias()
+    funcionesIniciales.conectar_partes_secundarias()
 
     
     #suavizar_conejo_preview()
@@ -179,13 +179,15 @@ def mostrar_popup_final(*args):
     elif 36 <= ancho_cabeza <= 43:
         morfologia = "Horizontal"
 
-    emocion = cmds.radioCollection(  "emociones",  q=True,  select=True )
+    emocion = cmds.radioCollection("emociones", q=True, select=True)
+    dato_curioso = pintarConejo.generar_dato_curioso(emocion)
 
     mensaje = (
         "\n¡Haz creado una Dulce Fortuna! 🐇 \n\n"        
         f" 🐰 Morfología: {morfologia} "
         f" ({ancho_cabeza} cm)\n\n"
-        f" 🐰 Emoción: {emocion}\n"
+        f" 🐰 Emoción: {emocion}\n\n"
+        f"{dato_curioso}\n"
     )
 
     cmds.confirmDialog(
@@ -324,7 +326,7 @@ def crear_ui(*args):
 
     cmds.radioButton( "odio",label="Odio",align="center" )
     cmds.text(label="🖤", align="center")
-    cmds.radioButton("envidia",label="Envidia",align="center" )
+    cmds.radioButton("infiel",label="Infiel",align="center" )
     cmds.text(label="💛", align="center")
 
     cmds.radioButton("artificial",label="Artificial",align="center" )
