@@ -72,64 +72,19 @@ def generar_conejo_ui(*args):
 # =========================
 def funcion_de_main_crear_conejo_cuadrado(*args):
 
+    borrar_escena()
     seleccion = cmds.radioCollection("emociones",q=True, select=True )
-    estilo = cmds.radioCollection("estilos",q=True,select=True)
     crearConejo.crear_conejo(seleccion)
     global ancho 
     ancho= crearConejo.m * 10
-    cmds.text( "textoModulo", edit=True,  label=f"Ancho cabeza: {ancho:.1f} cm | Morfología: {crearConejo.morfologia}" )
 
 # =========================
 # funcion_de_main_pintar_conejo
 # =========================
 def funcion_de_main_pintar_conejo(*args):
 
-    seleccion = cmds.radioCollection("emociones",q=True, select=True )
-    estilo = cmds.radioCollection("estilos",q=True,select=True)
-    pintarConejo.aplicar_estilo(seleccion,estilo)
-    cmds.text( "textoModulo2", edit=True,  label=f"Dato Curioso: {pintarConejo.dato_curioso}" )
-
-# =========================
-# funcion mostrar_gizmos_pivotes
-# =========================
-def mostrar_gizmos_pivotes(*args):
-    # Mostramos los gizmos de los pivotes para poder ver donde esta el punto de ancla o pivote 
-    # Display → Transform Display → Pivots    
-    objetos = [
-        "Cabeza_Primitiva_001",
-        "Oreja_Izquierda_006", "Oreja_Derecha_007",
-        "Tronco_Primitiva_010",
-        "ManoIzquierda_Primitiva_011", "ManoDerecha_Primitiva_012",
-        "PieIzquierdo_Primitiva_008", "PieDerecho_Primitiva_009",
-        "Cola_Primitiva_013"
-    ]
-    for obj in objetos: 
-        if cmds.objExists(obj):
-            cmds.setAttr(obj + ".displayLocalAxis", 1)
-
-# =========================
-# funcion ocultar_gizmos_pivotes
-# ========================= 
-def ocultar_gizmos_pivotes(*args):
-    objetos = [
-        "Cabeza_Primitiva_001",
-        "Oreja_Izquierda_006", "Oreja_Derecha_007",
-        "Tronco_Primitiva_010",
-        "ManoIzquierda_Primitiva_011", "ManoDerecha_Primitiva_012",
-        "PieIzquierdo_Primitiva_008", "PieDerecho_Primitiva_009",
-        "Cola_Primitiva_013"
-    ]
-    
-    for obj in objetos:
-        if cmds.objExists(obj):
-            cmds.setAttr(obj + ".displayLocalAxis", 0)
-
-# =========================
-# funcion_de_main_crear_jerarquia_general
-# ========================= 
-#def funcion_de_main_crear_jerarquia_general(*args):
-    #funcionesIniciales.crear_jerarquia_general()
-
+    seleccion = cmds.radioCollection("emociones",q=True, select=True ) 
+    pintarConejo.aplicar_pixelart(seleccion)
 
 # =========================
 # FUNCIÓN BOTÓN BORRAR
@@ -160,9 +115,9 @@ def crear_ui():
     # =========================
     anchomenu=300
     anchoimagen=300
-    altoimagen=330
+    altoimagen=300
     anchoventana=anchomenu
-    altoventana=850
+    altoventana=820
     ventana = cmds.window("miVentanaConejo", title="MI DULCE FORTUNA", widthHeight=(anchoventana,altoventana),sizeable=False)
 
 #endregion de la seccion ventana medidas 
@@ -208,128 +163,68 @@ def crear_ui():
     # 🎛️ (MENÚ)
     # =========================
     #---Raya division lila
-    cmds.separator(h=10, style="none") #espacio vacio    
-    cmds.text(label="", height=5, width=anchomenu,bgc=morado)
+    cmds.separator(h=2, style="none") #espacio vacio    
+    # Raya division
+    cmds.text(label="", bgc=lila,height=4) 
+
 
     #---titulo
     cmds.separator(h=4, style="none") #espacio vacio
-    cmds.text(label="   🐰   MI DULCE FORTUNA   🐰  ",height=30, width=anchomenu,bgc=morado, font="boldLabelFont", align="center")
+    cmds.text(label="   🐰   MI DULCE FORTUNA   🐰  ",height=27, width=anchomenu,bgc=lila, font="boldLabelFont", align="center")
         
     #---Raya division lila
     cmds.separator(h=4, style="none") #espacio vacio
-    cmds.text(label="", height=5, width=anchomenu,bgc=morado)
+    # Raya division
+    cmds.text(label="", bgc=lila,height=4) 
+
 
     #---Texto instruccion
-    cmds.separator(h=13, style="none") #espacio vacio
-    cmds.text(label="Selecciona una emoción", bgc=fondorosado)
+    cmds.separator(h=10, style="none") #espacio vacio
+    cmds.text(label="Selecciona una emoción y luego los botones en orden", bgc=fondorosado)
 
 #region 4.1.2.1. Emociones 
   
-    # =========================
-    # EMOCIONES A 3 COLUMNAS
-    # =========================
+        # =========================
+        # EMOCIONES A 3 COLUMNAS
+        # =========================
        
     cmds.separator(h=10, style="none")
 
     # CONTENEDOR GENERAL PARA CENTRAR
-    cmds.rowLayout(
-        numberOfColumns=3,
-        columnWidth3=(40, 220, 40)
-    )
-
+    cmds.rowLayout( numberOfColumns=3,columnWidth3=(40, 220, 40))
     cmds.text(label="")  # espacio izquierdo
 
-    # =========================
-    # TABLA DE 4 COLUMNAS
-    # [ radio ] [ corazon ] [ radio ] [ corazon ]
-    # =========================
+        # =========================
+        # TABLA DE 4 COLUMNAS
+        # [ radio ] [ corazon ] [ radio ] [ corazon ]
+        # =========================
 
-    cmds.rowColumnLayout(
-        numberOfColumns=4,
-        columnWidth=[
-            (1,65),
-            (2,20),
-            (3,65),
-            (4,20)
-        ],
-        columnSpacing=[
-            (1,10),
-            (2,5),
-            (3,30)
-        ],
-        rowSpacing=(1,5)
-    )
-
+    cmds.rowColumnLayout( numberOfColumns=4,columnWidth=[(1,65), (2,20), (3,65),(4,20)], columnSpacing=[(1,10),(2,5),(3,30)], rowSpacing=(1,3) )
     cmds.radioCollection("emociones")
 
-    # FILA 1
-    cmds.radioButton(
-        "descanso",
-        label="Descanso",
-        align="center",
-        select=True
-    )
+    cmds.radioButton( "descanso",  label="Descanso", align="center",  select=True  )
     cmds.text(label="💚", align="center")
-
-    cmds.radioButton(
-        "infidelidad",
-        label="Feo",
-        align="center"
-    )
+    cmds.radioButton(  "infidelidad", label="Feo", align="center"  )
     cmds.text(label="🤎", align="center")
 
-    # FILA 2
-    cmds.radioButton(
-        "barato",
-        label="Pequeño",
-        align="center"
-    )
+    cmds.radioButton( "barato", label="Pequeño", align="center" )
     cmds.text(label="🩷", align="center")
-
-    cmds.radioButton(
-        "fantasia",
-        label="Fantasía",
-        align="center"
-    )
+    cmds.radioButton( "fantasia", label="Fantasía", align="center")
     cmds.text(label="🧡", align="center")
 
-    # FILA 3
-    cmds.radioButton(
-        "odio",
-        label="Odio",
-        align="center"
-    )
+    cmds.radioButton( "odio",label="Odio",align="center" )
     cmds.text(label="🖤", align="center")
-
-    cmds.radioButton(
-        "envidia2",
-        label="Envidia",
-        align="center"
-    )
+    cmds.radioButton("envidia2",label="Envidia",align="center" )
     cmds.text(label="💛", align="center")
 
-    # FILA 4
-    cmds.radioButton(
-        "cortesia",
-        label="Artificial",
-        align="center"
-    )
+    cmds.radioButton("cortesia",label="Artificial",align="center" )
     cmds.text(label="💜", align="center")
-
-    cmds.radioButton(
-        "envidia",
-        label="Verdad",
-        align="center"
-    )
+    cmds.radioButton("envidia",label="Verdad",align="center"  )
     cmds.text(label="🤍", align="center")
 
     cmds.setParent('..')  # cerrar rowColumnLayout
-
     cmds.text(label="")  # espacio derecho
-
     cmds.setParent('..')  # cerrar rowLayout
-
-
 
 #endregion de la seccion emociones
 
@@ -340,24 +235,19 @@ def crear_ui():
     # 🔘 BOTONES 
     # =========================
      #---Raya division lila
-    cmds.separator(h=15, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=morado)
-    cmds.separator(h=3, style="none") #espacio vacio
-    cmds.text(label="", height=3, width=anchomenu,bgc=morado)
-
-    #---Texto instruccion
-    cmds.separator(h=13, style="none") #espacio vacio
-    cmds.text(label="Selecciona los botones en orden", bgc=fondorosado)
+    cmds.separator(h=10, style="none") #espacio vacio
+    # Raya division
+    cmds.text(label="", bgc=lila,height=5) 
 
 
         # =========================
         # 🔘 BOTÓN GENERAR CONEJO CUADRADO
         # =========================
 
-    cmds.separator(h=8, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,60)]) # izquierda, botón, derecha
+    cmds.separator(h=10, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🧊 Crear conejo ",command=funcion_de_main_crear_conejo_cuadrado, bgc=gris,height=30 )
+    cmds.button(label="🧊 Crear conejo",command=funcion_de_main_crear_conejo_cuadrado, bgc=gris,height=28 )
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
 
@@ -366,33 +256,77 @@ def crear_ui():
         # =========================
 
     cmds.separator(h=8, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,80)]) # izquierda, botón, derecha
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🎨 Pintar conejo ",command=funcion_de_main_pintar_conejo, bgc=gris,height=30 )
+    cmds.button(label="🎨 Pintar ",command=funcion_de_main_pintar_conejo, bgc=gris,height=28 )
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
+
+    
+        # =========================
+        # 🔘 BOTÓN Redondear (suavizar forma)
+        # =========================
+        
+    cmds.separator(h=8, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
+    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
+    cmds.button(label="🛞 Redondear ",command=generar_conejo_ui,bgc=gris,height=28)
+    cmds.text(label="", bgc=fondorosado) # espacio derecho
+    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
+
 
         # =========================
         # 🔘 BOTÓN crear_sistema fk to ik 
         # =========================
         
     cmds.separator(h=8, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,80)]) # izquierda, botón, derecha
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🦴 Crear esqueleto ",command=generar_conejo_ui,bgc=gris,height=30)
+    cmds.button(label="🦴 Crear esqueleto ",command=generar_conejo_ui,bgc=gris,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
+
+    # =========================
+    # CHECKS FK / IK
+    # =========================
+
+    cmds.separator(h=5, style="none")
+    cmds.rowColumnLayout( numberOfColumns=3, columnWidth=[(1,50),(2,190),(3,50) ] )
+    cmds.text(label="")
+
+    # FK
+    cmds.checkBox("check_fk",label="Quiero rotar hueso por hueso (Fk)", value=True )
+    cmds.text(label="")
+    cmds.text(label="")
+
+    # IK
+    cmds.checkBox("check_ik",label="Quiero rotar hueso con vecinos (Ik)", value=False )
+    cmds.text(label="")
+    cmds.setParent('..')
+
+    #---Raya division lila
+    cmds.separator(h=8, style="none") # espacio vacio
+    cmds.text(label="", bgc=lila,height=4) # Raya division
+
+    #---titulo
+    cmds.separator(h=4, style="none") #espacio vacio
+    cmds.text(label="  ¡ Ya puedes mover tu conejo ! ",height=27, width=anchomenu,bgc=lila, font="boldLabelFont", align="center")
+        
+    #---Raya division lila
+    cmds.separator(h=4, style="none") # espacio vacio
+    cmds.text(label="", bgc=lila,height=4) # Raya division
 
         # =========================
         # 🔘 BOTÓN Borrar escena 
         # =========================
-    cmds.separator(h=10, style="none")
-    cmds.rowLayout(numberOfColumns=3,columnWidth= [(1,80), (2,140),(3,80)]) # izquierda, botón, derecha
+    cmds.separator(h=8, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,205), (2,80),(3,20)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🧹 Borrar Escena ",command=borrar_escena,bgc=grisoscuro,height=30)
+    cmds.button(label="🧹 Borrar todo ",command=borrar_escena,bgc=grisoscuro,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
-    cmds.separator(h=10, style="none") #espacio vacio
+    cmds.separator(h=8, style="none") #espacio vacio
+
 #endregion de la seccion botones
 
 
@@ -402,17 +336,11 @@ def crear_ui():
         # CRÉDITOS FINALES 
         # =========================
     # Raya division
-    cmds.text(label="", bgc=lila,height=6) 
-    cmds.separator(h=1, style="in")
-
-    cmds.separator(h=10, style="none") #espacio vacio
-    cmds.text(label="Mayerly Camargo Pedraza Código 1202327", bgc=fondorosado)
-    cmds.text(label="Jennifer Lizeth Leiva Código 1202617", bgc=fondorosado)
-    cmds.text(label="Docente: Diego Felipe Beltrán Cardona", bgc=fondorosado)
-    cmds.text(label="UMNG 2026", bgc=fondorosado)
-   
-    cmds.separator(h=20, style="none") #espacio vacio
-
+    cmds.text(label="", bgc=lila,height=5) # Raya division
+    cmds.separator(h=8, style="none") #espacio vacio 
+    cmds.text(label="Mayerly Camargo - Jennifer Leiva", bgc=fondorosado)
+    cmds.text(label="Docente: Diego Beltrán - UMNG 2026", bgc=fondorosado)   
+    cmds.separator(h=15, style="none") #espacio vacio
     cmds.setParent('..')  # ← cerrar columnLayout derecha
     cmds.setParent('..')  # ← cerrar rowLayout principal
 

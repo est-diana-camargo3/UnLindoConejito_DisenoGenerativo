@@ -213,22 +213,5 @@ def aplicar_bento(emocion):
     print("✅ Estilo Bento aplicado")
 
 
-# =========================================================
-# FUNCIÓN PRINCIPAL
-# =========================================================
 
-def aplicar_estilo(emocion, estilo):
 
-    generar_dato_curioso(emocion)
-
-    if estilo == "pixelart":
-
-        aplicar_pixelart(emocion)
-
-    elif estilo == "bento":
-
-        aplicar_bento(emocion)
-
-    else:
-
-        print("⚠ Estilo no reconocido")
