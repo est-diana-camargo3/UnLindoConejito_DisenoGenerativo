@@ -85,6 +85,19 @@ def funcion_de_main_pintar_conejo(*args):
 
     seleccion = cmds.radioCollection("emociones",q=True, select=True ) 
     pintarConejo.aplicar_pixelart(seleccion)
+    # =========================
+    # MATERIAL DEGRADADO
+    # =========================
+
+    material = pintarConejo.crear_material_degradado(
+        "Conejo",
+        seleccion
+    )
+
+    cmds.select(crearConejo.piezas_deformables)
+
+    cmds.hyperShade(assign=material)
+
 
 # =========================
 # FUNCIÓN BOTÓN BORRAR
@@ -204,22 +217,22 @@ def crear_ui():
 
     cmds.radioButton( "descanso",  label="Descanso", align="center",  select=True  )
     cmds.text(label="💚", align="center")
-    cmds.radioButton(  "infidelidad", label="Feo", align="center"  )
+    cmds.radioButton(  "feo", label="Feo", align="center"  )
     cmds.text(label="🤎", align="center")
 
-    cmds.radioButton( "barato", label="Pequeño", align="center" )
+    cmds.radioButton( "pequeno", label="Pequeño", align="center" )
     cmds.text(label="🩷", align="center")
     cmds.radioButton( "fantasia", label="Fantasía", align="center")
     cmds.text(label="🧡", align="center")
 
     cmds.radioButton( "odio",label="Odio",align="center" )
     cmds.text(label="🖤", align="center")
-    cmds.radioButton("envidia2",label="Envidia",align="center" )
+    cmds.radioButton("envidia",label="Envidia",align="center" )
     cmds.text(label="💛", align="center")
 
-    cmds.radioButton("cortesia",label="Artificial",align="center" )
+    cmds.radioButton("artificial",label="Artificial",align="center" )
     cmds.text(label="💜", align="center")
-    cmds.radioButton("envidia",label="Verdad",align="center"  )
+    cmds.radioButton("verdad",label="Verdad",align="center"  )
     cmds.text(label="🤍", align="center")
 
     cmds.setParent('..')  # cerrar rowColumnLayout
@@ -310,7 +323,7 @@ def crear_ui():
 
     #---titulo
     cmds.separator(h=4, style="none") #espacio vacio
-    cmds.text(label="  ¡ Ya puedes mover tu conejo ! ",height=27, width=anchomenu,bgc=lila, font="boldLabelFont", align="center")
+    cmds.text(label="  ¡ Ya puedes GIRAR tu conejo ! ",height=27, width=anchomenu,bgc=lila, font="boldLabelFont", align="center")
         
     #---Raya division lila
     cmds.separator(h=4, style="none") # espacio vacio
