@@ -143,38 +143,6 @@ def funcion_de_main_pintar_conejo(*args):
 
     print("✅ Conejo pintado correctamente")
 
-# =========================
-# POPUP FINAL CONEJITO
-# =========================
-def mostrar_popup_final(*args):
-
-    ancho_cabeza = crearConejo.ancho_cabeza
-
-    if 20 <= ancho_cabeza <= 27:
-        morfologia = "Vertical"
-
-    elif 28 <= ancho_cabeza <= 35:
-        morfologia = "Estandar"
-
-    elif 36 <= ancho_cabeza <= 43:
-        morfologia = "Horizontal"
-
-    emocion = cmds.radioCollection(  "emociones",  q=True,  select=True )
-
-    mensaje = (
-        "\n¡Haz creado una Dulce Fortuna! 🐇 \n\n"        
-        f" 🐰 Morfología: {morfologia} "
-        f" ({ancho_cabeza} cm)\n\n"
-        f" 🐰 Emoción: {emocion}\n"
-    )
-
-    cmds.confirmDialog(
-        title="Mi Dulce Fortuna",
-        message=mensaje,
-        button=["¡ Quiero girarlo ! "],
-        defaultButton="¡ Quiero girarlo ! ",
-        bgc=fondorosado
-    )
 
 # =========================
 # FUNCIÓN BOTÓN BORRAR
@@ -390,7 +358,7 @@ def crear_ui(*args):
     cmds.text(label="")
 
     # IK
-    cmds.checkBox("check_ik",label="Quiero rotar hueso afectando vecinos (Ik)", value=False )
+    cmds.checkBox("check_ik",label="Quiero rotar hueso con vecinos (Ik)", value=False )
     cmds.text(label="")
     cmds.setParent('..')
 
@@ -402,7 +370,7 @@ def crear_ui(*args):
     cmds.separator(h=8, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,75), (2,140),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🐇 Terminar mi conejito ",command=mostrar_popup_final,bgc=lila,height=28)
+    cmds.button(label="🐇 Terminar mi conejito ",command=generar_conejo_ui,bgc=lila,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 

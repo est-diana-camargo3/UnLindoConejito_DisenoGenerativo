@@ -122,7 +122,6 @@ def crear_conejo(emocion="calma"):
 
     global m
     global piezas_deformables
-    global ancho_cabeza
   
 
     # =========================
@@ -205,18 +204,13 @@ def crear_conejo(emocion="calma"):
         tronco = crear_cubo("Tronco_Primitiva_010",          (m*19,   m*13,         (m*16)/2 ),    ((-m*9.5),    (-m*9),          (m*8)/2 ),  tipo="tronco")
         mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*7,    m*5,          m*5      ),    ((-m*9.5)+(-m*6), (-m*10.5),         (m*2.5) ),  tipo="manos")
         mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*7,    m*5,          m*5      ),    ((m*8.5), (-m*10.5),         (m*2.5) ),  tipo="manos")
-        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*5,    m*6,          m*5      ),    ((-m*2)+(-m*5), (-m*21),         (m*2.5) ),  tipo="piernas")
-        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*5,    m*6,          m*5      ),    ((m*2), (-m*21),         (m*2.5) ),  tipo="piernas")
+        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*5,    m*7,          m*5      ),    ((-m*2)+(-m*5), (-m*21),         (m*2.5) ),  tipo="piernas")
+        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*5,    m*7,          m*5      ),    ((m*2), (-m*21),         (m*2.5) ),  tipo="piernas")
         cola = crear_cubo("Cola_Primitiva_013",              (m*5,    m*5,          m*5      ),    ((-m*2.5),     (-m*9)+(-m*7.2), (-m*3.5) ),  tipo="cola")
 
     parte_superior = cmds.group(cabeza, ojo_izq, ojo_der, nariz, oreja_izq, oreja_der, name="ParteSuperior_Grupo")
     parte_inferior = cmds.group(tronco, mano_izq, mano_der, pie_izq, pie_der, cola, name="ParteInferior_Grupo")
-
-   
-    conejo = cmds.group(parte_superior, parte_inferior, name="Conej_Grupo_001") # grupo temporal por eso le falta una o a conejo 
-    base = base_giratoria(nombre="Base_Conejo_014", morfologia=morfologia, emocion=emocion, conejo=conejo)
-    conejocompleto =   cmds.group(conejo, base, name="Conejo_Grupo_001")
-
+    conejo = cmds.group(parte_superior, parte_inferior, name="Conejo_Grupo_001") 
 
     piezas_deformables = [
         cabeza,
@@ -231,41 +225,7 @@ def crear_conejo(emocion="calma"):
 
 # endregion
 
-
-# =====================================================
-# CREAR BASE DEL CONEJO
-# =====================================================
-def base_giratoria(nombre, morfologia, emocion, conejo):
-
-    bbox = cmds.exactWorldBoundingBox(conejo)
-    xmin, ymin, zmin, xmax, ymax, zmax = bbox
-    ancho_conejo = (xmax - xmin)
-    centro_x = (xmin + xmax) / 2
-    centro_z = (zmin + zmax) / 2
-
-    # ALTURA BASE SEGÚN MORFOLOGÍA
-
-    if morfologia == "vertical":
-        posicion_y = (-m*39.6)
-        altura_base = m * 3
-    else: # estándar y horizontal        
-        posicion_y = (-m*27.6)
-        altura_base = m * 3
-
-    base = cmds.polyCylinder(   name="Base_Conejo",  r=(ancho_conejo / 2) + (m * 4),   h=altura_base,   sx=30 )[0]     # CREAR CILINDRO
-    cmds.delete(base, ch=True)# eliminar history para que no se deforme con el escalado
-    cmds.move(   centro_x, posicion_y, centro_z,   base) # POSICIONAR BASE
-
-    return base
-        
-    # =====================================================
-    # SUAVIZAR BASE
-    # =====================================================
-
-    #cmds.polySmooth(
-        #base,
-        #dv=1      
-    #) 
-
-
-
+#region suavizado
+#                         ╔═════════════════════════════════════════════════════════════════╗
+#                         ║  Suavizar las formas                                            ║                                                               ║
+#                         ╚═════════════════════════════════════════════════════════════════╝
