@@ -108,7 +108,10 @@ def crear_material_degradado(nombre, emocion):
     # PALETA
     # =====================================================
 
-    paleta = PALETAS[emocion]
+    paleta = PALETAS[emocion][:]
+
+    # mezclar orden cada vez
+    random.shuffle(paleta)
 
     total_colores = len(paleta)
 
