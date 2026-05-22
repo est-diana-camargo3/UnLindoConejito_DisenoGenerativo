@@ -465,19 +465,22 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
 
         resultados[s["prefix"]] = resultado
 
-        for mesh in meshes_sistema:
-            if not cmds.objExists(mesh):
-                cmds.warning(f"bind_skin_cube: mesh no existe -> {mesh}")
-                continue
+        # este suavizado se hizo con el boton de suavizar desde el main directamente 
+        #for mesh in meshes_sistema:
+            #if not cmds.objExists(mesh):
+                #cmds.warning(f"bind_skin_cube: mesh no existe -> {mesh}")
+                #continue
 
-            s["module"].bind_skin_cube(
-                mesh,
-                s["main"]
-            )
+            #s["module"].bind_skin_cube(
+                #mesh,
+                #s["main"]
+            #)
 
     print("✅ FKIK GENERAL COMPLETO")
 
     return resultados
+
+
 
 
 # endregion

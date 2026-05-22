@@ -60,23 +60,19 @@ def generar_conejo_ui(*args):
     funcionesIniciales.organizar_cadenas_principales()
     funcionesFK.crear_fk_auto_root_control(lista_fk)
     
-    funcionesIniciales.crear_sistema_fkik(
-        lista_fk,
-        resultado_dup,
-        crearConejo.piezas_deformables
-    )
+    funcionesIniciales.crear_sistema_fkik( lista_fk, resultado_dup, crearConejo.piezas_deformables )
 
-    funcionesIniciales.crear_master_control()
+    #funcionesIniciales.crear_master_control()
     
-    funcionesIniciales.crear_controles_anatomicos()
+    #funcionesIniciales.crear_controles_anatomicos()
 
-    funcionesIniciales.crear_jerarquia_anatomica()
+    #funcionesIniciales.crear_jerarquia_anatomica()
 
-    funcionesIniciales.conectar_columna_a_controles()
+    #funcionesIniciales.conectar_columna_a_controles()
 
-    funcionesIniciales.conectar_extremidades()
+    #funcionesIniciales.conectar_extremidades()
 
-    funcionesIniciales.conectar_partes_secundarias()
+    #funcionesIniciales.conectar_partes_secundarias()
 
     
     #suavizar_conejo_preview()
@@ -142,6 +138,30 @@ def funcion_de_main_pintar_conejo(*args):
     cmds.refresh(force=True)
 
     print("✅ Conejo pintado correctamente")
+
+
+def suavizar_geometria_de_conejo(*args):
+
+    if not crearConejo.piezas_deformables:
+        cmds.warning("No hay geometría de conejo para suavizar. Primero crea el conejo.")
+        return
+
+    meshes = [mesh for mesh in crearConejo.piezas_deformables if cmds.objExists(mesh)]
+    if not meshes:
+        cmds.warning("No se encontraron las piezas del conejo para suavizar.")
+        return
+
+    for mesh in meshes:
+        try:
+            # Mismo nivel de suavizado que bind_skin_cube() en sistemaIKFKleg.py
+            # durante la creación del rig FKIK.
+            # Si el rig FKIK ya aplicó esta subdivisión, entonces usar este botón
+            # después de riggear hará un suavizado extra.
+            cmds.polySmooth(mesh, divisions=2, mth=0, keepBorder=1)
+        except Exception as e:
+            cmds.warning(f"No se pudo suavizar {mesh}: {e}")
+
+
 
 # =========================
 # POPUP FINAL CONEJITO
@@ -360,7 +380,7 @@ def crear_ui(*args):
     cmds.separator(h=8, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🛞 Redondear ",command=generar_conejo_ui,bgc=gris,height=28)
+    cmds.button(label="🛞 Redondear ",command=suavizar_geometria_de_conejo,bgc=gris,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
