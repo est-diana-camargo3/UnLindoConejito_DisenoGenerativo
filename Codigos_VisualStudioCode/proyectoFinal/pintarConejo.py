@@ -127,6 +127,8 @@ def variar_saturacion(color):
 # =========================================================
 
 def pintar_plano_fondo(emocion):
+    # se pinta con uno de los colores de la paleta de la emocion seleccionada 
+    # pero desaturado al 60%
 
     if not cmds.objExists("Plano_Fondo"):
         return
@@ -160,9 +162,9 @@ def pintar_plano_fondo(emocion):
 
     cmds.setAttr(
         f"{material}.color",
-        color_final[0]+0.5,
-        color_final[1]+0.5,
-        color_final[2]+0.5,
+        color_final[0]+0.6,
+        color_final[1]+0.6,
+        color_final[2]+0.6,
         type="double3"
     )
 
