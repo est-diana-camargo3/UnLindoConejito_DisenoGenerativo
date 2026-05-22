@@ -5,6 +5,7 @@
 
 import maya.cmds as cmds
 import random
+import colorsys #colores aleatorios del plano 
 import proyectoFinal.crearConejo as crearConejo
 
 from proyectoFinal.paletas import PALETAS
@@ -97,6 +98,79 @@ def pintar_cilindro_base():
     cmds.hyperShade(assign=material)
 
     print("✅ Base pintada")
+
+
+
+# =========================================================
+# COLOR CON SATURACIÓN VARIABLE
+# =========================================================
+def variar_saturacion(color):
+
+    r, g, b = color
+
+    # RGB → HSV
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+
+    # saturación aleatoria 40%–60%
+    nueva_s = random.uniform(0.4, 0.6)
+
+    # HSV → RGB
+    nuevo_r, nuevo_g, nuevo_b = colorsys.hsv_to_rgb(
+        h,
+        nueva_s,
+        v
+    )
+    return (nuevo_r, nuevo_g, nuevo_b)
+
+# =========================================================
+# PINTAR PLANO DE FONDO
+# =========================================================
+
+def pintar_plano_fondo(emocion):
+
+    if not cmds.objExists("Plano_Fondo"):
+        return
+
+    # color random de la paleta
+    color_original, porcentaje = random.choice(
+        PALETAS[emocion]
+    )
+
+    # variar saturación
+    color_final = variar_saturacion(color_original)
+
+    material = cmds.shadingNode(
+        "lambert",
+        asShader=True,
+        name="Plano_Fondo_MAT"
+    )
+
+    sg = cmds.sets(
+        renderable=True,
+        noSurfaceShader=True,
+        empty=True,
+        name="Plano_Fondo_MATSG"
+    )
+
+    cmds.connectAttr(
+        f"{material}.outColor",
+        f"{sg}.surfaceShader",
+        force=True
+    )
+
+    cmds.setAttr(
+        f"{material}.color",
+        color_final[0]+0.5,
+        color_final[1]+0.5,
+        color_final[2]+0.5,
+        type="double3"
+    )
+
+    cmds.select("Plano_Fondo")
+
+    cmds.hyperShade(assign=material)
+
+    print("✅ Plano pintado")
 
 
 # =========================================================
@@ -296,5 +370,10 @@ def crear_material_degradado(nombre, emocion):
 
     
     pintar_cilindro_base()
+    pintar_plano_fondo(emocion)
     return material
+
+
+
+
 

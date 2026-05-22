@@ -390,7 +390,7 @@ def crear_ui(*args):
     cmds.text(label="")
 
     # IK
-    cmds.checkBox("check_ik",label="Quiero rotar hueso afectando vecinos (Ik)", value=False )
+    cmds.checkBox("check_ik",label="Quiero rotar hueso con vecinos (Ik)", value=False )
     cmds.text(label="")
     cmds.setParent('..')
 
