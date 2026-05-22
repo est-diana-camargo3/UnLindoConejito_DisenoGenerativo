@@ -137,7 +137,9 @@ def bind_skin_cube(mesh, joints):
     # =========================
     # 1. SUBDIVISIÓN DEL MESH
     # =========================
-    cmds.polySmooth(mesh, divisions=2)
+    # Suavizado aplicado en el rig FKIK. Esta intensidad es la que
+    # queremos replicar en suavizar_geometria_de_conejo().
+    #cmds.polySmooth(mesh, divisions=2)
 
     # =========================
     # 2. LIMPIEZA BASE
