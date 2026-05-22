@@ -213,9 +213,11 @@ def crear_conejo(emocion="calma"):
     parte_inferior = cmds.group(tronco, mano_izq, mano_der, pie_izq, pie_der, cola, name="ParteInferior_Grupo")
 
    
-    conejo = cmds.group(parte_superior, parte_inferior, name="Conej_Grupo_001") # grupo temporal por eso le falta una o a conejo 
+    conejo = cmds.group(parte_superior, parte_inferior, name="Conej_Grupo_001") # solo conejo sin base ni plano fondo
+    plano_fondo(nombre="Plano_Fondo_015", morfologia=morfologia, emocion=emocion, conejo=conejo)
     base = base_giratoria(nombre="Base_Conejo_014", morfologia=morfologia, emocion=emocion, conejo=conejo)
-    conejocompleto =   cmds.group(conejo, base, name="Conejo_Grupo_001")
+    conejo2= cmds.group(conejo, base,name="Conejo_Grupo_001") # conejo+base
+
 
 
     piezas_deformables = [
@@ -257,7 +259,8 @@ def base_giratoria(nombre, morfologia, emocion, conejo):
     cmds.move(   centro_x, posicion_y, centro_z,   base) # POSICIONAR BASE
 
     return base
-        
+
+     
     # =====================================================
     # SUAVIZAR BASE
     # =====================================================
@@ -266,6 +269,63 @@ def base_giratoria(nombre, morfologia, emocion, conejo):
         #base,
         #dv=1      
     #) 
+
+
+
+
+# =====================================================
+# CREAR plano fondo
+# =====================================================
+def plano_fondo(nombre, morfologia, emocion, conejo):
+
+    bbox = cmds.exactWorldBoundingBox(conejo)
+    xmin, ymin, zmin, xmax, ymax, zmax = bbox
+    ancho_conejo = (xmax - xmin)
+    centro_x = (xmin + xmax) / 2
+    centro_y = (ymin + ymax) / 2
+    centro_z = (zmin + zmax) / 2
+    r=(ancho_conejo / 2) + (m * 4)
+
+    # ALTURA BASE SEGÚN MORFOLOGÍA
+
+    if morfologia == "vertical":
+        posicion_y = (-m*39.6)
+        altura_base = m * 3
+    else: # estándar y horizontal        
+        posicion_y = (-m*27.6)
+        altura_base = m * 3
+        
+    # =====================================================
+    # PLANO DE FONDO
+    # =====================================================
+
+    plano = cmds.polyPlane(
+        name="Plano_Fondo",
+        w=ancho_conejo * 20,
+        h=ancho_conejo * 20,
+        sx=1,
+        sy=1
+    )[0]
+
+    cmds.delete(plano, ch=True)# eliminar history para que no se deforme con el escalado
+
+    # rotar para que quede como pared
+    cmds.rotate(
+        90,
+        0,
+        0,
+        plano
+    )
+
+    # mover debajo del conejo
+    cmds.move(
+        centro_x,
+        centro_y ,
+        centro_z-r-m,
+        plano
+    )
+
+
 
 
 
