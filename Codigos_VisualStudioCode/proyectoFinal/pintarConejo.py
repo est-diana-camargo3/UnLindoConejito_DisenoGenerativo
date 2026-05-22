@@ -5,6 +5,7 @@
 
 import maya.cmds as cmds
 import random
+import proyectoFinal.crearConejo as crearConejo
 
 from proyectoFinal.paletas import PALETAS
 
@@ -42,9 +43,6 @@ def generar_dato_curioso(emocion="calma"):
         dato_curioso = "El color oro representa lo digno, poderoso y verdadero."
 
 
-# =========================================================
-# MATERIAL DEGRADADO SUAVE
-# =========================================================
 
 # =========================================================
 # MATERIAL DEGRADADO CABEZA → PIES
@@ -53,7 +51,7 @@ def generar_dato_curioso(emocion="calma"):
 def crear_material_degradado(nombre, emocion):
 
     # =====================================================
-    # MATERIAL BLINN
+    # MATERIAL
     # =====================================================
 
     material = cmds.shadingNode(
@@ -62,7 +60,7 @@ def crear_material_degradado(nombre, emocion):
         name=f"{nombre}_{emocion}_MAT"
     )
 
-    shading_group = cmds.sets(
+    sg = cmds.sets(
         renderable=True,
         noSurfaceShader=True,
         empty=True,
@@ -71,7 +69,7 @@ def crear_material_degradado(nombre, emocion):
 
     cmds.connectAttr(
         f"{material}.outColor",
-        f"{shading_group}.surfaceShader",
+        f"{sg}.surfaceShader",
         force=True
     )
 
@@ -80,7 +78,7 @@ def crear_material_degradado(nombre, emocion):
     # =====================================================
 
     cmds.setAttr(f"{material}.eccentricity", 0.25)
-    cmds.setAttr(f"{material}.specularRollOff", 0.45)
+    cmds.setAttr(f"{material}.specularRollOff", 0.4)
 
     cmds.setAttr(
         f"{material}.specularColor",
@@ -100,34 +98,11 @@ def crear_material_degradado(nombre, emocion):
         name=f"{nombre}_{emocion}_RAMP"
     )
 
-    # degradado suave
-    cmds.setAttr(f"{ramp}.interpolation", 3)
-
     # vertical
-    cmds.setAttr(f"{ramp}.type", 0)
+    cmds.setAttr(f"{ramp}.type", 1)
 
-    # =====================================================
-    # PLACE2D
-    # =====================================================
-
-    place2d = cmds.shadingNode(
-        "place2dTexture",
-        asUtility=True,
-        name=f"{nombre}_{emocion}_PLACE2D"
-    )
-
-    # conexiones necesarias
-    cmds.connectAttr(
-        f"{place2d}.outUV",
-        f"{ramp}.uvCoord",
-        force=True
-    )
-
-    cmds.connectAttr(
-        f"{place2d}.outUvFilterSize",
-        f"{ramp}.uvFilterSize",
-        force=True
-    )
+    # suave
+    cmds.setAttr(f"{ramp}.interpolation", 3)
 
     # =====================================================
     # PALETA
@@ -135,25 +110,11 @@ def crear_material_degradado(nombre, emocion):
 
     paleta = PALETAS[emocion]
 
-    # =====================================================
-    # USAR CADA COLOR SOLO UNA VEZ
-    # =====================================================
+    total_colores = len(paleta)
 
-    paleta_ordenada = sorted(
-        paleta,
-        key=lambda x: x[1],
-        reverse=True
-    )
+    for i, (color, porcentaje) in enumerate(paleta):
 
-    total_pesos = sum(
-        porcentaje for color, porcentaje in paleta_ordenada
-    )
-
-    acumulado = 0
-
-    for i, (color, porcentaje) in enumerate(paleta_ordenada):
-
-        posicion = acumulado / float(total_pesos)
+        posicion = float(i) / float(total_colores - 1)
 
         cmds.setAttr(
             f"{ramp}.colorEntryList[{i}].position",
@@ -168,36 +129,111 @@ def crear_material_degradado(nombre, emocion):
             type="double3"
         )
 
-        acumulado += porcentaje
+    # =====================================================
+    # PROJECTION
+    # =====================================================
 
-    # último color abajo
-    cmds.setAttr(
-        f"{ramp}.colorEntryList[{len(paleta_ordenada)-1}].position",
-        1
+    projection = cmds.shadingNode(
+        "projection",
+        asTexture=True,
+        name=f"{nombre}_{emocion}_PROJ"
+    )
+
+    place3d = cmds.shadingNode(
+        "place3dTexture",
+        asUtility=True,
+        name=f"{nombre}_{emocion}_PLACE3D"
+    )
+
+    # conectar projection
+    cmds.defaultNavigation(
+        connectToExisting=True,
+        source=ramp,
+        destination=projection
+    )
+
+    cmds.connectAttr(
+        f"{place3d}.worldInverseMatrix",
+        f"{projection}.placementMatrix",
+        force=True
     )
 
     # =====================================================
-    # ESCALA DEL DEGRADADO
+    # PLANAR
     # =====================================================
 
-    cmds.setAttr(
-        f"{place2d}.repeatUV",
-        1,
-        1,
-        type="double2"
+    cmds.setAttr(f"{projection}.projType", 1)
+
+    # =====================================================
+    # CENTRAR PROYECCIÓN EN EL CONEJO
+    # =====================================================
+
+    bbox = cmds.exactWorldBoundingBox(
+        crearConejo.piezas_deformables
     )
 
+    xmin, ymin, zmin, xmax, ymax, zmax = bbox
+
+    centro_x = (xmin + xmax) / 2
+    centro_y = (ymin + ymax) / 2
+    centro_z = (zmin + zmax) / 2
+
+    # mover projection al centro
+    cmds.setAttr(f"{place3d}.translateX", centro_x)
+    cmds.setAttr(f"{place3d}.translateY", centro_y)
+    cmds.setAttr(f"{place3d}.translateZ", centro_z)
+
     # =====================================================
-    # RAMP → MATERIAL
+    # PROYECTAR DESDE EL FRENTE
+    # =====================================================
+
+    cmds.setAttr(f"{place3d}.rotateX", 0)
+    cmds.setAttr(f"{place3d}.rotateY", 0)
+    cmds.setAttr(f"{place3d}.rotateZ", 90)
+
+    # =====================================================
+    # ESCALA AUTOMÁTICA SEGÚN MORFOLOGÍA (proporcion)
+    # =====================================================
+
+    ancho = xmax - xmin
+    alto = ymax - ymin
+    profundo = zmax - zmin
+
+    # =====================================================
+    # VERTICAL
+    # =====================================================
+
+    if crearConejo.morfologia == "vertical":
+
+        cmds.setAttr(f"{place3d}.scaleX", alto * 1.5)
+        cmds.setAttr(f"{place3d}.scaleY", ancho * 0.9)
+        cmds.setAttr(f"{place3d}.scaleZ", profundo * 1.2)
+
+    # =====================================================
+    # ESTÁNDAR - Horizontal
+    # =====================================================
+
+    else:
+
+        cmds.setAttr(f"{place3d}.scaleX", alto * 0.5)
+        cmds.setAttr(f"{place3d}.scaleY", ancho * 0.50)
+        cmds.setAttr(f"{place3d}.scaleZ", profundo * 1.2)
+
+
+
+
+    # =====================================================
+    # CONECTAR MATERIAL
     # =====================================================
 
     cmds.connectAttr(
-        f"{ramp}.outColor",
+        f"{projection}.outColor",
         f"{material}.color",
         force=True
     )
 
     return material
+
 
 # =========================================================
 # CREAR MATERIAL SIMPLE

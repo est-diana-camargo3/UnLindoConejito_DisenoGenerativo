@@ -5,6 +5,7 @@ import random
 
 # Variable global para modulo
 m = 1
+global morfologia
 morfologia= "estandar"
 piezas_deformables = []
 
@@ -120,7 +121,6 @@ def crear_conejo(emocion="calma"):
 
 
     global m
-    global morfologia
     global piezas_deformables
   
 
