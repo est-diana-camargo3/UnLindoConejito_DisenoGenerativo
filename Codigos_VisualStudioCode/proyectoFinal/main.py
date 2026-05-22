@@ -163,7 +163,7 @@ def borrar_escena(*args):
 # =========================
 # CREACIÓN UI
 # =========================
-def crear_ui():
+def crear_ui(*args):
    
     if cmds.window("miVentanaConejo", exists=True):
         cmds.deleteUI("miVentanaConejo")
