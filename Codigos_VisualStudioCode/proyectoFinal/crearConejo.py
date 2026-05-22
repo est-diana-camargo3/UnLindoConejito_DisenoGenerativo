@@ -296,13 +296,13 @@ def plano_fondo(nombre, morfologia, emocion, conejo):
         altura_base = m * 3
         
     # =====================================================
-    # PLANO DE FONDO
+    # PLANO DE FONDO (tamaño)
     # =====================================================
 
     plano = cmds.polyPlane(
         name="Plano_Fondo",
-        w=ancho_conejo * 20,
-        h=ancho_conejo * 20,
+        w=ancho_conejo * 25,
+        h=ancho_conejo * 25,
         sx=1,
         sy=1
     )[0]
