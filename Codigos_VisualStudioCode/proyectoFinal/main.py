@@ -16,7 +16,7 @@ importlib.reload(pintarConejo)
 
 # endregion
 
-# region 2. Definir colores
+# region 2. Colores
 #  
 # =========================
 # COLORES para interfaz (RGB normalizados 0–1)
@@ -39,7 +39,7 @@ fondorosado = hex_a_rgb("#ECBCFB")
 morado = hex_a_rgb("#FDC8FE")
 lila = hex_a_rgb("#CC99FF")
 gris = hex_a_rgb("#FBE8FC")
-grisoscuro = hex_a_rgb("#BDBDBD")
+grisoscuro = hex_a_rgb("#E9E6E6")
 blanco = hex_a_rgb("#FFFFFF")
 
 
@@ -97,11 +97,11 @@ def funcion_de_main_crear_conejo_cuadrado(*args):
 # =========================
 def funcion_de_main_pintar_conejo(*args):
 
-    seleccion = cmds.radioCollection("emociones",q=True, select=True ) 
-    pintarConejo.aplicar_pixelart(seleccion)
-    # =========================
-    # MATERIAL DEGRADADO
-    # =========================
+    seleccion = cmds.radioCollection(
+        "emociones",
+        q=True,
+        select=True
+    )
 
     material = pintarConejo.crear_material_degradado(
         "Conejo",
@@ -112,7 +112,23 @@ def funcion_de_main_pintar_conejo(*args):
 
     cmds.hyperShade(assign=material)
 
+    # activar texturas en viewport
+    paneles = cmds.getPanel(type='modelPanel')
 
+    for panel in paneles:
+
+        cmds.modelEditor(
+            panel,
+            edit=True,
+            displayTextures=True,
+            displayAppearance='smoothShaded'
+        )
+
+    cmds.refresh(force=True)
+
+    print("✅ Conejo pintado correctamente")
+
+    
 # =========================
 # FUNCIÓN BOTÓN BORRAR
 # =========================
@@ -350,7 +366,7 @@ def crear_ui():
     cmds.separator(h=8, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,205), (2,80),(3,20)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🧹 Borrar todo ",command=borrar_escena,bgc=grisoscuro,height=28)
+    cmds.button(label="🧹Borrar todo ",command=borrar_escena,bgc=grisoscuro,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
     cmds.separator(h=8, style="none") #espacio vacio

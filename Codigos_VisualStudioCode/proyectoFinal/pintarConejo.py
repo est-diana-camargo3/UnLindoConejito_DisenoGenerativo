@@ -8,6 +8,11 @@ import random
 
 from proyectoFinal.paletas import PALETAS
 
+
+# =========================================================
+# DATOS CURIOSOS
+# =========================================================
+
 def generar_dato_curioso(emocion="calma"):
 
     global dato_curioso
@@ -18,7 +23,7 @@ def generar_dato_curioso(emocion="calma"):
     elif emocion == "feo":
         dato_curioso = "El color mostaza ocre junto con \ngris opaco y violeta no es bello a la vista\n debido a su falta de luz"
 
-    elif emocion == "pequeño":
+    elif emocion == "pequeno":
         dato_curioso = "Los colores gris, cafe y rosado eran \nusados por personas de clase baja que no \nse podian permitir una tintura pura"
 
     elif emocion == "fantasia":
@@ -31,84 +36,171 @@ def generar_dato_curioso(emocion="calma"):
         dato_curioso = "El amarillo intenso es el color \nde la envidia."
 
     elif emocion == "artificial":
-            dato_curioso = "El color morado repsenta lo artificial y magico."
+        dato_curioso = "El color morado representa lo artificial y mágico."
 
     elif emocion == "verdad":
-            dato_curioso = "El color oro representa lo digno, poderoso y veradero."
-
-
-def crear_material_degradado(nombre, emocion):
-
-    colores = PALETAS[emocion]
-
-    # tomar 2 colores aleatorios
-    color1 = random.choice(colores)[0]
-    color2 = random.choice(colores)[0]
-
-    # =========================
-    # MATERIAL
-    # =========================
-    material = cmds.shadingNode(
-        "lambert",
-        asShader=True,
-        name=f"{nombre}_MAT"
-    )
-
-    # =========================
-    # RAMP
-    # =========================
-    ramp = cmds.shadingNode(
-        "ramp",
-        asTexture=True,
-        name=f"{nombre}_RAMP"
-    )
-
-    cmds.connectAttr(
-        ramp + ".outColor",
-        material + ".color",
-        force=True
-    )
-
-    # =========================
-    # COLOR 1
-    # =========================
-    cmds.setAttr(
-        ramp + ".colorEntryList[0].color",
-        color1[0],
-        color1[1],
-        color1[2],
-        type="double3"
-    )
-
-    cmds.setAttr(
-        ramp + ".colorEntryList[0].position",
-        0
-    )
-
-    # =========================
-    # COLOR 2
-    # =========================
-    cmds.setAttr(
-        ramp + ".colorEntryList[1].color",
-        color2[0],
-        color2[1],
-        color2[2],
-        type="double3"
-    )
-
-    cmds.setAttr(
-        ramp + ".colorEntryList[1].position",
-        1
-    )
-
-    # vertical
-    cmds.setAttr(ramp + ".type", 0)
-
-    return material
+        dato_curioso = "El color oro representa lo digno, poderoso y verdadero."
 
 
 # =========================================================
-# CREAR MATERIAL
+# MATERIAL DEGRADADO SUAVE
+# =========================================================
+
+# =========================================================
+# MATERIAL DEGRADADO CABEZA → PIES
+# =========================================================
+
+def crear_material_degradado(nombre, emocion):
+
+    # =====================================================
+    # MATERIAL BLINN
+    # =====================================================
+
+    material = cmds.shadingNode(
+        "blinn",
+        asShader=True,
+        name=f"{nombre}_{emocion}_MAT"
+    )
+
+    shading_group = cmds.sets(
+        renderable=True,
+        noSurfaceShader=True,
+        empty=True,
+        name=f"{material}SG"
+    )
+
+    cmds.connectAttr(
+        f"{material}.outColor",
+        f"{shading_group}.surfaceShader",
+        force=True
+    )
+
+    # =====================================================
+    # LOOK BRILLANTE
+    # =====================================================
+
+    cmds.setAttr(f"{material}.eccentricity", 0.25)
+    cmds.setAttr(f"{material}.specularRollOff", 0.45)
+
+    cmds.setAttr(
+        f"{material}.specularColor",
+        1,
+        1,
+        1,
+        type="double3"
+    )
+
+    # =====================================================
+    # RAMP
+    # =====================================================
+
+    ramp = cmds.shadingNode(
+        "ramp",
+        asTexture=True,
+        name=f"{nombre}_{emocion}_RAMP"
+    )
+
+    # degradado suave
+    cmds.setAttr(f"{ramp}.interpolation", 3)
+
+    # vertical
+    cmds.setAttr(f"{ramp}.type", 0)
+
+    # =====================================================
+    # PLACE2D
+    # =====================================================
+
+    place2d = cmds.shadingNode(
+        "place2dTexture",
+        asUtility=True,
+        name=f"{nombre}_{emocion}_PLACE2D"
+    )
+
+    # conexiones necesarias
+    cmds.connectAttr(
+        f"{place2d}.outUV",
+        f"{ramp}.uvCoord",
+        force=True
+    )
+
+    cmds.connectAttr(
+        f"{place2d}.outUvFilterSize",
+        f"{ramp}.uvFilterSize",
+        force=True
+    )
+
+    # =====================================================
+    # PALETA
+    # =====================================================
+
+    paleta = PALETAS[emocion]
+
+    # =====================================================
+    # USAR CADA COLOR SOLO UNA VEZ
+    # =====================================================
+
+    paleta_ordenada = sorted(
+        paleta,
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    total_pesos = sum(
+        porcentaje for color, porcentaje in paleta_ordenada
+    )
+
+    acumulado = 0
+
+    for i, (color, porcentaje) in enumerate(paleta_ordenada):
+
+        posicion = acumulado / float(total_pesos)
+
+        cmds.setAttr(
+            f"{ramp}.colorEntryList[{i}].position",
+            posicion
+        )
+
+        cmds.setAttr(
+            f"{ramp}.colorEntryList[{i}].color",
+            color[0],
+            color[1],
+            color[2],
+            type="double3"
+        )
+
+        acumulado += porcentaje
+
+    # último color abajo
+    cmds.setAttr(
+        f"{ramp}.colorEntryList[{len(paleta_ordenada)-1}].position",
+        1
+    )
+
+    # =====================================================
+    # ESCALA DEL DEGRADADO
+    # =====================================================
+
+    cmds.setAttr(
+        f"{place2d}.repeatUV",
+        1,
+        1,
+        type="double2"
+    )
+
+    # =====================================================
+    # RAMP → MATERIAL
+    # =====================================================
+
+    cmds.connectAttr(
+        f"{ramp}.outColor",
+        f"{material}.color",
+        force=True
+    )
+
+    return material
+
+# =========================================================
+# CREAR MATERIAL SIMPLE
 # =========================================================
 
 def crear_material(nombre, color):
@@ -144,12 +236,12 @@ def crear_material(nombre, color):
 
 
 # =========================================================
-# OBTENER COLOR ALEATORIO SEGÚN PALETA
+# COLOR ALEATORIO
 # =========================================================
 
 def obtener_color_aleatorio(emocion):
 
-    datos_paleta = paletas.PALETAS[emocion]
+    datos_paleta = PALETAS[emocion]
 
     colores = []
     pesos = []
@@ -169,8 +261,7 @@ def obtener_color_aleatorio(emocion):
 
 
 # =========================================================
-# ESTILO PIXEL ART
-# Cada cara obtiene un color distinto
+# PIXEL ART
 # =========================================================
 
 def aplicar_pixelart(emocion):
@@ -188,15 +279,7 @@ def aplicar_pixelart(emocion):
 
         for cara in caras:
 
-            # =========================
-            # COLOR ALEATORIO
-            # =========================
-
             color = obtener_color_aleatorio(emocion)
-
-            # =========================
-            # MATERIAL
-            # =========================
 
             nombre_material = f"PIXEL_MAT_{contador}"
 
@@ -204,10 +287,6 @@ def aplicar_pixelart(emocion):
                 nombre_material,
                 color
             )
-
-            # =========================
-            # ASIGNAR MATERIAL
-            # =========================
 
             cmds.sets(
                 cara,
@@ -221,8 +300,7 @@ def aplicar_pixelart(emocion):
 
 
 # =========================================================
-# ESTILO BENTO ART
-# Bloques de caras comparten color
+# BENTO ART
 # =========================================================
 
 def aplicar_bento(emocion):
@@ -238,10 +316,6 @@ def aplicar_bento(emocion):
             flatten=True
         )
 
-        # =========================
-        # DIVIDIR EN BLOQUES
-        # =========================
-
         bloques = [
             caras[i:i+6]
             for i in range(0, len(caras), 6)
@@ -249,15 +323,7 @@ def aplicar_bento(emocion):
 
         for bloque in bloques:
 
-            # =========================
-            # COLOR DEL BLOQUE
-            # =========================
-
             color = obtener_color_aleatorio(emocion)
-
-            # =========================
-            # MATERIAL
-            # =========================
 
             nombre_material = f"BENTO_MAT_{contador}"
 
@@ -265,10 +331,6 @@ def aplicar_bento(emocion):
                 nombre_material,
                 color
             )
-
-            # =========================
-            # ASIGNAR A TODAS LAS CARAS
-            # =========================
 
             for cara in bloque:
 
@@ -281,7 +343,3 @@ def aplicar_bento(emocion):
             contador += 1
 
     print("✅ Estilo Bento aplicado")
-
-
-
-
