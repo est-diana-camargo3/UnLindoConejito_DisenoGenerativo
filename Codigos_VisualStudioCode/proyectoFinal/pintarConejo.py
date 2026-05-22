@@ -15,26 +15,28 @@ def generar_dato_curioso(emocion="calma"):
     if emocion == "descanso":
         dato_curioso = "La piedra de jade esta relacionada \ncon la buena suerte y el descanso"
 
+    elif emocion == "feo":
+        dato_curioso = "El color mostaza ocre junto con \ngris opaco y violeta no es bello a la vista\n debido a su falta de luz"
+
+    elif emocion == "pequeño":
+        dato_curioso = "Los colores gris, cafe y rosado eran \nusados por personas de clase baja que no \nse podian permitir una tintura pura"
+
     elif emocion == "fantasia":
         dato_curioso = "El color púrpura se relaciona con la \niglesia, de ahi que se relacione con los milagros \ny la fantasía"
 
     elif emocion == "odio":
         dato_curioso = "El color negro transforma la cualidad \npositiva de un color en negativa ejm: el \nrojo es amor, pero con negro es odio"
 
-    elif emocion == "barato":
-        dato_curioso = "Los colores gris, cafe y rosado eran \nusados por personas de clase baja que no \nse podian permitir una tintura pura"
-    
     elif emocion == "envidia":
         dato_curioso = "El amarillo intenso es el color \nde la envidia."
 
-    elif emocion == "infidelidad":
-            dato_curioso = "Dice el dicho que si un \nhombre regala flores amarillas \nfue porque fue infiel."
+    elif emocion == "artificial":
+            dato_curioso = "El color morado repsenta lo artificial y magico."
 
-    elif emocion == "cortesia":
-            dato_curioso = "El verde al estar entre el rojo y el \nazul representa la cortesiay equilibrio \nentre la amabilidad y la frialdad."
+    elif emocion == "verdad":
+            dato_curioso = "El color oro representa lo digno, poderoso y veradero."
 
-    elif emocion == "feo":
-            dato_curioso = "El color mostaza ocre junto con \ngris opaco y violeta no es bello a la vista\n debido a su falta de luz"
+   
 
 
 # =========================================================
