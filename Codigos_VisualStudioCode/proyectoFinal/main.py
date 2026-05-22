@@ -92,6 +92,21 @@ def funcion_de_main_crear_conejo_cuadrado(*args):
     global ancho 
     ancho= crearConejo.m * 10
 
+    # =====================================================
+    # ACTIVAR SIEMPRE VISTA PERSPECTIVA  3/4
+    # =====================================================
+
+    cmds.setAttr("persp.rotateX", -15)
+    cmds.setAttr("persp.rotateY", 45)
+    cmds.setAttr("persp.rotateZ", 0)
+
+    cmds.setAttr("persp.translateX", 80)
+    cmds.setAttr("persp.translateY", 60)
+    cmds.setAttr("persp.translateZ", 80)
+
+    # centrar cámara al conejo
+    cmds.viewFit("persp")
+
 # =========================
 # funcion_de_main_pintar_conejo
 # =========================
@@ -128,7 +143,7 @@ def funcion_de_main_pintar_conejo(*args):
 
     print("✅ Conejo pintado correctamente")
 
-    
+
 # =========================
 # FUNCIÓN BOTÓN BORRAR
 # =========================
