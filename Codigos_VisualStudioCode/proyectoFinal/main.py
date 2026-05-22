@@ -22,12 +22,26 @@ importlib.reload(pintarConejo)
 # COLORES para interfaz (RGB normalizados 0–1)
 # =========================
 
-fondorosado = (236/255, 188/255, 251/255)   # #ecbcfb
-morado = (182/255, 135/255, 232/255)   # 9C48CF
-lila = (204/255, 153/255, 255/255)   # CC99FF
-gris = (245/255, 240/255, 250/255)    #747474 
-grisoscuro = (220/255, 220/255, 220/255)    #545353
-blanco = (1,1,1)
+# =========================
+# HEX → RGB NORMALIZADO MAYA, porque los botones solo reciben rgb pero en hex puedo ver el cuadrito de color aqui en codigo 
+# =========================
+def hex_a_rgb(hex_color):
+
+    hex_color = hex_color.lstrip("#")
+
+    r = int(hex_color[0:2], 16) / 255.0
+    g = int(hex_color[2:4], 16) / 255.0
+    b = int(hex_color[4:6], 16) / 255.0
+
+    return (r, g, b)
+
+fondorosado = hex_a_rgb("#ECBCFB")
+morado = hex_a_rgb("#FDC8FE")
+lila = hex_a_rgb("#CC99FF")
+gris = hex_a_rgb("#FBE8FC")
+grisoscuro = hex_a_rgb("#BDBDBD")
+blanco = hex_a_rgb("#FFFFFF")
+
 
 # endregion
 
@@ -130,7 +144,7 @@ def crear_ui():
     anchoimagen=300
     altoimagen=300
     anchoventana=anchomenu
-    altoventana=820
+    altoventana=825
     ventana = cmds.window("miVentanaConejo", title="MI DULCE FORTUNA", widthHeight=(anchoventana,altoventana),sizeable=False)
 
 #endregion de la seccion ventana medidas 
@@ -176,14 +190,14 @@ def crear_ui():
     # 🎛️ (MENÚ)
     # =========================
     #---Raya division lila
-    cmds.separator(h=2, style="none") #espacio vacio    
+    cmds.separator(h=4, style="none") #espacio vacio    
     # Raya division
     cmds.text(label="", bgc=lila,height=4) 
 
 
     #---titulo
     cmds.separator(h=4, style="none") #espacio vacio
-    cmds.text(label="   🐰   MI DULCE FORTUNA   🐰  ",height=27, width=anchomenu,bgc=lila, font="boldLabelFont", align="center")
+    cmds.text(label="   🐇   MI DULCE FORTUNA   🐇  ",height=27, width=anchomenu,bgc=lila, font="boldLabelFont", align="center")
         
     #---Raya division lila
     cmds.separator(h=4, style="none") #espacio vacio
@@ -317,17 +331,18 @@ def crear_ui():
     cmds.text(label="")
     cmds.setParent('..')
 
-    #---Raya division lila
-    cmds.separator(h=8, style="none") # espacio vacio
-    cmds.text(label="", bgc=lila,height=4) # Raya division
 
-    #---titulo
-    cmds.separator(h=4, style="none") #espacio vacio
-    cmds.text(label="  ¡ Ya puedes GIRAR tu conejo ! ",height=27, width=anchomenu,bgc=lila, font="boldLabelFont", align="center")
+        # =========================
+        # 🔘 BOTÓN crear_sistema fk to ik 
+        # =========================
         
-    #---Raya division lila
-    cmds.separator(h=4, style="none") # espacio vacio
-    cmds.text(label="", bgc=lila,height=4) # Raya division
+    cmds.separator(h=8, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,75), (2,140),(3,60)]) # izquierda, botón, derecha
+    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
+    cmds.button(label="🐇 Terminar mi conejito ",command=generar_conejo_ui,bgc=lila,height=28)
+    cmds.text(label="", bgc=fondorosado) # espacio derecho
+    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
+
 
         # =========================
         # 🔘 BOTÓN Borrar escena 
@@ -351,9 +366,10 @@ def crear_ui():
     # Raya division
     cmds.text(label="", bgc=lila,height=5) # Raya division
     cmds.separator(h=8, style="none") #espacio vacio 
-    cmds.text(label="Mayerly Camargo - Jennifer Leiva", bgc=fondorosado)
-    cmds.text(label="Docente: Diego Beltrán - UMNG 2026", bgc=fondorosado)   
-    cmds.separator(h=15, style="none") #espacio vacio
+    cmds.text(label="Mayerly Camargo Pedraza - Código 1202327", bgc=fondorosado,font="smallPlainLabelFont")
+    cmds.text(label="Jennifer Leiva Martín - Código 1202617", bgc=fondorosado,font="smallPlainLabelFont")
+    cmds.text(label="Docente: Diego Beltrán Cardona- UMNG 2026", bgc=fondorosado,font="smallPlainLabelFont")   
+    cmds.separator(h=20, style="none") #espacio vacio
     cmds.setParent('..')  # ← cerrar columnLayout derecha
     cmds.setParent('..')  # ← cerrar rowLayout principal
 
@@ -366,6 +382,7 @@ def crear_ui():
 # =========================
 # EJECUTAR UI
 # =========================
+borrar_escena() #limpio
 crear_ui()
 
 

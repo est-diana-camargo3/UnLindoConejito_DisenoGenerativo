@@ -6,7 +6,7 @@
 import maya.cmds as cmds
 import random
 
-from proyectoFinal import paletas
+from proyectoFinal.paletas import PALETAS
 
 def generar_dato_curioso(emocion="calma"):
 
@@ -36,7 +36,75 @@ def generar_dato_curioso(emocion="calma"):
     elif emocion == "verdad":
             dato_curioso = "El color oro representa lo digno, poderoso y veradero."
 
-   
+
+def crear_material_degradado(nombre, emocion):
+
+    colores = PALETAS[emocion]
+
+    # tomar 2 colores aleatorios
+    color1 = random.choice(colores)[0]
+    color2 = random.choice(colores)[0]
+
+    # =========================
+    # MATERIAL
+    # =========================
+    material = cmds.shadingNode(
+        "lambert",
+        asShader=True,
+        name=f"{nombre}_MAT"
+    )
+
+    # =========================
+    # RAMP
+    # =========================
+    ramp = cmds.shadingNode(
+        "ramp",
+        asTexture=True,
+        name=f"{nombre}_RAMP"
+    )
+
+    cmds.connectAttr(
+        ramp + ".outColor",
+        material + ".color",
+        force=True
+    )
+
+    # =========================
+    # COLOR 1
+    # =========================
+    cmds.setAttr(
+        ramp + ".colorEntryList[0].color",
+        color1[0],
+        color1[1],
+        color1[2],
+        type="double3"
+    )
+
+    cmds.setAttr(
+        ramp + ".colorEntryList[0].position",
+        0
+    )
+
+    # =========================
+    # COLOR 2
+    # =========================
+    cmds.setAttr(
+        ramp + ".colorEntryList[1].color",
+        color2[0],
+        color2[1],
+        color2[2],
+        type="double3"
+    )
+
+    cmds.setAttr(
+        ramp + ".colorEntryList[1].position",
+        1
+    )
+
+    # vertical
+    cmds.setAttr(ramp + ".type", 0)
+
+    return material
 
 
 # =========================================================
