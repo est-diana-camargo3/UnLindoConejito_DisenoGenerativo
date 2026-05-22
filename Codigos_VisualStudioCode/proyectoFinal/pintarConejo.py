@@ -1,6 +1,6 @@
 #                         ╔═══════════════════════════════════════════════════════════════╗
 #                         ║                    PINTAR CONEJO PROCEDURAL                   ║
-#                         ║              Estilos: PixelArt y Bento Art                   ║
+#                         ║         Estilos: Degradado procedural +Bento art              ║
 #                         ╚═══════════════════════════════════════════════════════════════╝
 
 import maya.cmds as cmds
@@ -43,11 +43,67 @@ def generar_dato_curioso(emocion="calma"):
         dato_curioso = "El color oro representa lo digno, poderoso y verdadero."
 
 
+# =========================================================
+# MATERIAL BASE NEGRA BRILLANTE
+# =========================================================
+def pintar_cilindro_base():
+
+    # verificar que exista la base
+    if not cmds.objExists("Base_Conejo"):
+        print("⚠️ No existe la base")
+        return
+
+    # =====================================================
+    # CREAR MATERIAL
+    # =====================================================
+
+    material = cmds.shadingNode(
+        "blinn",
+        asShader=True,
+        name="Base_Negra_MAT"
+    )
+
+    sg = cmds.sets(
+        renderable=True,
+        noSurfaceShader=True,
+        empty=True,
+        name="Base_Negra_MATSG"
+    )
+
+    cmds.connectAttr(
+        f"{material}.outColor",
+        f"{sg}.surfaceShader",
+        force=True
+    )
+
+
+
+    # =====================================================
+    # Color y BRILLO
+    # =====================================================
+    cmds.setAttr( f"{material}.color", 0.05, 0.05, 0.05, type="double3" )     # COLOR NEGRO
+    
+    #brillo
+    cmds.setAttr(f"{material}.eccentricity", 0.18)
+    cmds.setAttr(f"{material}.specularRollOff", 0.8)
+    cmds.setAttr( f"{material}.specularColor", 1,1,1, type="double3"  )
+
+    # =====================================================
+    # ASIGNAR A BASE
+    # =====================================================
+
+    cmds.select("Base_Conejo")
+
+    cmds.hyperShade(assign=material)
+
+    print("✅ Base pintada")
+
 
 # =========================================================
 # MATERIAL DEGRADADO CABEZA → PIES
 # =========================================================
-
+#nos basamos en el estilo bento que consiste en dividir todo en caja , en nuestro caso "caras" y pintar caras o cajas contiguas 
+# nosotros quisimos hacerlo con degradado para una transicion mas suave 
 def crear_material_degradado(nombre, emocion):
 
     # =====================================================
@@ -148,6 +204,9 @@ def crear_material_degradado(nombre, emocion):
         name=f"{nombre}_{emocion}_PLACE3D"
     )
 
+    # ocultar cuadrito del projection osea el cuadrito del degradado
+    cmds.setAttr(f"{place3d}.visibility", 0)
+
     # conectar projection
     cmds.defaultNavigation(
         connectToExisting=True,
@@ -235,150 +294,7 @@ def crear_material_degradado(nombre, emocion):
         force=True
     )
 
+    
+    pintar_cilindro_base()
     return material
 
-
-# =========================================================
-# CREAR MATERIAL SIMPLE
-# =========================================================
-
-def crear_material(nombre, color):
-
-    shader = cmds.shadingNode(
-        "lambert",
-        asShader=True,
-        name=nombre
-    )
-
-    cmds.setAttr(
-        shader + ".color",
-        color[0],
-        color[1],
-        color[2],
-        type="double3"
-    )
-
-    sg = cmds.sets(
-        renderable=True,
-        noSurfaceShader=True,
-        empty=True,
-        name=nombre + "SG"
-    )
-
-    cmds.connectAttr(
-        shader + ".outColor",
-        sg + ".surfaceShader",
-        force=True
-    )
-
-    return sg
-
-
-# =========================================================
-# COLOR ALEATORIO
-# =========================================================
-
-def obtener_color_aleatorio(emocion):
-
-    datos_paleta = PALETAS[emocion]
-
-    colores = []
-    pesos = []
-
-    for color, porcentaje in datos_paleta:
-
-        colores.append(color)
-        pesos.append(porcentaje)
-
-    color_elegido = random.choices(
-        colores,
-        weights=pesos,
-        k=1
-    )[0]
-
-    return color_elegido
-
-
-# =========================================================
-# PIXEL ART
-# =========================================================
-
-def aplicar_pixelart(emocion):
-
-    objetos = cmds.ls("*Primitiva*")
-
-    contador = 0
-
-    for obj in objetos:
-
-        caras = cmds.ls(
-            obj + ".f[*]",
-            flatten=True
-        )
-
-        for cara in caras:
-
-            color = obtener_color_aleatorio(emocion)
-
-            nombre_material = f"PIXEL_MAT_{contador}"
-
-            sg = crear_material(
-                nombre_material,
-                color
-            )
-
-            cmds.sets(
-                cara,
-                edit=True,
-                forceElement=sg
-            )
-
-            contador += 1
-
-    print("✅ Estilo PixelArt aplicado")
-
-
-# =========================================================
-# BENTO ART
-# =========================================================
-
-def aplicar_bento(emocion):
-
-    objetos = cmds.ls("*Primitiva*")
-
-    contador = 0
-
-    for obj in objetos:
-
-        caras = cmds.ls(
-            obj + ".f[*]",
-            flatten=True
-        )
-
-        bloques = [
-            caras[i:i+6]
-            for i in range(0, len(caras), 6)
-        ]
-
-        for bloque in bloques:
-
-            color = obtener_color_aleatorio(emocion)
-
-            nombre_material = f"BENTO_MAT_{contador}"
-
-            sg = crear_material(
-                nombre_material,
-                color
-            )
-
-            for cara in bloque:
-
-                cmds.sets(
-                    cara,
-                    edit=True,
-                    forceElement=sg
-                )
-
-            contador += 1
-
-    print("✅ Estilo Bento aplicado")
