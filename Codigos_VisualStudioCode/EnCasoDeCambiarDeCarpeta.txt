@@ -1,0 +1,22 @@
+
+#SI SE CAMBIA DE CARPETA de ejecucion se debe cambiar la ruta en el userSetup
+#Ruta C:\Users\USUARIO\Documents\Maya\scripts
+#Debe quedar asi:
+#
+#import maya.cmds as cmds
+#import sys
+##Aqui se puede copiar directamente la ruta desde la barra de la carpeta, los slash deben ir asi \
+#sys.path.append(r"C:\Users\USUARIO\Documents\GitHub\UnLindoConejito_DisenoGenerativo\Codigos_VisualStudioCode\ProyectoFinal_023_CorreccionDeCurvasFk")
+#sys.path.append(r"C:\Users\USUARIO\Documents\GitHub\vscode-environment-for-maya\.venv\Lib\site-packages")
+#if not cmds.commandPort(":4434", query=True):
+#    cmds.commandPort(name=":4434")
+
+#Luego ahi si copiamos esta ruta en el script editor de maya en la seccion python para ejecutar aplicacion de conejos
+# Solo es cambiarle la ruta 
+#import sys
+#import importlib
+#Aqui NO se puede copiar la ruta desde la barra de la carpeta deben ir asi /
+#sys.path.append("C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode/ProyectoFinal_023_CorreccionDeCurvasFk")
+#import main
+#importlib.reload(main)
+#main.crear_ui()
