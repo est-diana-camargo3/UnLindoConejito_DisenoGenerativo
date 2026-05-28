@@ -63,22 +63,6 @@ def crear_jerarquia_general():
     print("✅ Jerarquía general creada")
 
     return grupos
-def crear_master_control():
-
-    ctrl = cmds.circle(
-        n="MASTER_CTRL",
-        nr=(0,1,0),
-        r=40
-    )[0]
-
-    root = cmds.group(ctrl, n="MASTER_CTRL_ROOT")
-
-    cmds.parent("RIG_GRP", ctrl)
-    cmds.parent("GEO_GRP", ctrl)
-
-    print("✅ MASTER CTRL creado")
-
-    return ctrl
 
 def organizar_cadenas_principales():
 
@@ -161,147 +145,7 @@ def organizar_chain_system(
 
 # endregion
 
-def crear_controles_anatomicos():
 
-    controles = {}
-
-    # =========================
-    # COG / PELVIS
-    # =========================
-
-    size = funcionesFK.tamano_desde_geometria(
-        "Tronco_Primitiva_010",
-        1.3
-    )
-
-    cog = cmds.circle(
-        n="COG_CTRL",
-        nr=(0,1,0),
-        r=size
-    )[0]
-
-    cog_offset = cmds.group(
-        cog,
-        n="COG_CTRL_OFFSET"
-    )
-
-    cmds.delete(
-        cmds.parentConstraint(
-            "FK_Joint_08_Interno_ColumnaCadera",
-            cog_offset
-        )
-    )
-
-    controles["cog"] = cog
-
-    # =========================
-    # CHEST
-    # =========================
-
-    chest = cmds.circle(
-        n="CHEST_CTRL",
-        nr=(0,1,0),
-        r=size * 0.8
-    )[0]
-
-    chest_offset = cmds.group(
-        chest,
-        n="CHEST_CTRL_OFFSET"
-    )
-
-    cmds.delete(
-        cmds.parentConstraint(
-            "FK_Joint_18_Medio_ColumnaCuello",
-            chest_offset
-        )
-    )
-
-    controles["chest"] = chest
-
-    # =========================
-    # HEAD
-    # =========================
-
-    head_size = funcionesFK.tamano_desde_geometria(
-        "Cabeza_Primitiva_001"
-    )
-
-    head = cmds.circle(
-        n="HEAD_CTRL",
-        nr=(0,1,0),
-        r=head_size
-    )[0]
-
-    head_offset = cmds.group(
-        head,
-        n="HEAD_CTRL_OFFSET"
-    )
-
-    cmds.delete(
-        cmds.parentConstraint(
-            "FK_Joint_19_ColumnaFrente",
-            head_offset
-        )
-    )
-
-    controles["head"] = head
-
-    print("✅ Controles anatómicos creados")
-
-    return controles
-
-def crear_jerarquia_anatomica():
-
-    # =========================
-    # MASTER -> COG
-    # =========================
-
-    cmds.parent(
-        "COG_CTRL_OFFSET",
-        "MASTER_CTRL"
-    )
-
-    # =========================
-    # COG -> CHEST
-    # =========================
-
-    cmds.parent(
-        "CHEST_CTRL_OFFSET",
-        "COG_CTRL"
-    )
-
-    # =========================
-    # CHEST -> HEAD
-    # =========================
-
-    cmds.parent(
-        "HEAD_CTRL_OFFSET",
-        "CHEST_CTRL"
-    )
-
-    print("✅ Jerarquía anatómica creada")
-
-def conectar_columna_a_controles():
-
-    cmds.parentConstraint(
-        "COG_CTRL",
-        "FK_root_08_Interno_ColumnaCadera",
-        mo=True
-    )
-
-    cmds.parentConstraint(
-        "CHEST_CTRL",
-        "FK_root_18_Medio_ColumnaCuello",
-        mo=True
-    )
-
-    cmds.parentConstraint(
-        "HEAD_CTRL",
-        "FK_root_19_ColumnaFrente",
-        mo=True
-    )
-
-    print("✅ Columna conectada")
 
 
 def conectar_extremidades():
@@ -462,19 +306,20 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
             prefix=s["prefix"],
             joint_attr=s["main"][0]
         )
+       
 
         resultados[s["prefix"]] = resultado
 
         # este suavizado se hizo con el boton de suavizar desde el main directamente 
-        #for mesh in meshes_sistema:
-            #if not cmds.objExists(mesh):
-                #cmds.warning(f"bind_skin_cube: mesh no existe -> {mesh}")
-                #continue
+        for mesh in meshes_sistema:
+            if not cmds.objExists(mesh):
+                cmds.warning(f"bind_skin_cube: mesh no existe -> {mesh}")
+                continue
 
-            #s["module"].bind_skin_cube(
-                #mesh,
-                #s["main"]
-            #)
+            s["module"].bind_skin_cube(
+                mesh,
+                s["main"]
+            )
 
     print("✅ FKIK GENERAL COMPLETO")
 
