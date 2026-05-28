@@ -1,4 +1,5 @@
 import math
+from pickle import GLOBAL
 
 import maya.cmds as cmds
 
@@ -19,7 +20,8 @@ def obtener_tamano_mesh(meshes, factor=0):
 
 def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_offset=5):
 
-# =========================
+
+    # =========================
     # CALCULAR TAMAÑO
     # =========================
     tamano = obtener_tamano_mesh(meshes, factor=0.3)
@@ -35,7 +37,8 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         ctrl, offset = crear_control(
             f"{prefix}_FK_CTRL_{i+1:03}",
             jnt,
-            size=tamano
+            size=tamano,
+            fk=True
         )
 
         cmds.parentConstraint(ctrl, jnt, mo=True)
@@ -47,6 +50,8 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
             f"{fk_controls[i]}_OFFSET",
             fk_controls[i-1]
         )
+
+  
     # =========================
     # IK HANDLE
     # =========================
@@ -69,7 +74,8 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
     # =========================
     # IK CONTROL
     # =========================
-
+    global IK_CTRL_GLOBAL
+    
     ik_ctrl, ik_root, ik_auto = crear_ik_control(
         f"{prefix}_IK_CTRL_001",
         ik_handle,
@@ -77,7 +83,10 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         size=tamano,
         align_to_target=False
     )
+    
+    IK_CTRL_GLOBAL = ik_ctrl
 
+    print("CONTROL GLOBAL:", IK_CTRL_GLOBAL)
  
     # =========================
     # CONSTRAINTS FK IK -> MAIN
@@ -124,6 +133,8 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         cmds.connectAttr(f"{shape}.FKIK",f"{c}.{weights[1]}",force=True)
 
     print(f"✅ Sistema IKFK creado -> {prefix}")
+
+   
     # =========================
     # CONTROLES DE CURVA SPLINE
     # =========================
@@ -143,7 +154,8 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         ctrl, offset = crear_control(
             f"{prefix}_SPINE_CTRL_{i+1:03}",
             cluster,
-            size=tamano
+            size=tamano,
+            fk=False
         )
 
         cmds.parentConstraint(ctrl, cluster, mo=True)
@@ -156,16 +168,63 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
             f"{chest_ctrl}.rotateY",
             f"{ik_handle}.twist"
         )
+    
+    # =========================
+    # VISIBILIDAD FK / IK
+    # =========================
+
+    # FK visibles cuando FKIK = 0
+    for ctrl in fk_controls:
+        cmds.connectAttr(
+            f"{reverse}.outputX",
+            f"{ctrl}.visibility",
+            force=True
+        )
+
+    # IK visibles cuando FKIK = 1
+    cmds.connectAttr(
+        f"{shape}.FKIK",
+        f"{ik_ctrl}.visibility",
+        force=True
+    )
+
+    # spine controls visibles en IK
+    for ctrl in spine_controls:
+        cmds.connectAttr(
+            f"{shape}.FKIK",
+            f"{ctrl}.visibility",
+            force=True
+        )
 
     return {
         "ikHandle": ik_handle,
         "ikControl": ik_ctrl,
         "attrShape": shape,
         "constraints": constraints
+        
     }
+
+    
+
+
+def cambiar_fkik(ctrl, valor):
+
+    if not cmds.objExists(ctrl):
+        cmds.warning(f"No existe el control: {ctrl}")
+        return
+
+    if not cmds.attributeQuery("FKIK", node=ctrl, exists=True):
+        cmds.warning(f"{ctrl} no tiene atributo FKIK")
+        return
+
+    cmds.setAttr(f"{ctrl}.FKIK", valor)
+
+    print(f"FKIK cambiado a {valor} en {ctrl}")
+
 
 def bind_skin_cube(mesh, joints):
 
+    
     if not cmds.objExists(mesh):
         cmds.warning(f"bind_skin_cube: mesh no existe -> {mesh}")
         return None
@@ -252,12 +311,12 @@ def distancia_entre(a, b):
     )
 
 
-def crear_control(nombre, target, size=1, color=17):
+def crear_control(nombre, target, size=1, color=17, fk=True):
 
     # círculo controlador
     ctrl = cmds.circle(
         n=nombre,
-        normal=[1,0,0],
+        normal=[0,1,0],
         radius=size
     )[0]
 
@@ -267,6 +326,9 @@ def crear_control(nombre, target, size=1, color=17):
     # mover al joint
     cmds.delete(cmds.parentConstraint(target, offset))
 
+    # orientación mundial
+    cmds.xform(offset, ws=True, rotation=(0,0,0))
+
     # color
     shapes = cmds.listRelatives(ctrl, s=True)
 
@@ -274,13 +336,26 @@ def crear_control(nombre, target, size=1, color=17):
         cmds.setAttr(f"{s}.overrideEnabled", 1)
         cmds.setAttr(f"{s}.overrideColor", color)
 
+        #  BLOQUEO AUTOMÁTICO
+    if fk:
+        # FK → solo rotate
+        for a in ["tx","ty","tz","sx","sy","sz"]:
+            cmds.setAttr(f"{ctrl}.{a}", lock=True, keyable=False, channelBox=False)
+
+    else:
+        # IK → sin scale
+        for a in ["rx","ry","rz","sx","sy","sz"]:
+            cmds.setAttr(f"{ctrl}.{a}", lock=True, keyable=False, channelBox=False)
+        
+
     return ctrl, offset
+
 
 def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13, align_to_target=True):
 
     ctrl = cmds.circle(
         n=nombre,
-        normal=[1,0,0],
+        normal=[0,1,0],
         radius=size
     )[0]
 
@@ -288,11 +363,11 @@ def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13, align_to_tar
     auto = cmds.group(root, n=f"{nombre}_AUTO")
 
     # alinear posición
+    # SOLO posición
     cmds.delete(cmds.pointConstraint(target, root))
-    if align_to_target:
-        cmds.delete(cmds.orientConstraint(target, root))
-    else:
-        cmds.xform(root, ws=True, rotation=(0, 0, 0))
+
+    # orientación mundial
+    cmds.xform(root, ws=True, rotation=(0,0,0))
 
     # color
     shapes = cmds.listRelatives(ctrl, s=True)

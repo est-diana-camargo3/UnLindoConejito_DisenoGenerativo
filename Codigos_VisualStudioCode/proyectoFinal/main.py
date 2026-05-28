@@ -3,6 +3,7 @@
 import importlib
 import os
 import maya.cmds as cmds
+from proyectoFinal import sistemaIKFKleg, sistemaIKFKspline
 import proyectoFinal.crearConejo as crearConejo
 import proyectoFinal.funcionesFK as funcionesFK
 import proyectoFinal.funcionesIniciales as funcionesIniciales
@@ -13,7 +14,6 @@ importlib.reload(funcionesFK)
 importlib.reload(funcionesIniciales)
 importlib.reload(paletas)
 importlib.reload(pintarConejo)
-
 # endregion
 
 # region 2. Colores
@@ -59,10 +59,18 @@ def generar_conejo_ui(*args):
     funcionesFK.ocultar_cadenas_IK_y_MAIN()
     funcionesIniciales.organizar_cadenas_principales()
     funcionesFK.crear_fk_auto_root_control(lista_fk)
-    
-    funcionesIniciales.crear_sistema_fkik( lista_fk, resultado_dup, crearConejo.piezas_deformables )
+    global IK_CTRL_COLUMNA
+   
 
-    funcionesIniciales.crear_master_control()
+    resultado_ikfk = funcionesIniciales.crear_sistema_fkik(
+        lista_fk,
+        resultado_dup,
+        crearConejo.piezas_deformables
+    )
+
+    IK_CTRL_COLUMNA = resultado_ikfk["Columna"]["ikControl"]
+
+    print(IK_CTRL_COLUMNA)
     
     funcionesIniciales.crear_controles_anatomicos()
 
@@ -142,26 +150,44 @@ def funcion_de_main_pintar_conejo(*args):
 
 def suavizar_geometria_de_conejo(*args):
 
-    if not crearConejo.piezas_deformables:
-        cmds.warning("No hay geometría de conejo para suavizar. Primero crea el conejo.")
+    crearConejo.suavizar_conejo()
+    crearConejo.deformar_cara_con_plano()
+
+
+
+def cambiar_fk_ik(*args):
+
+    global IK_CTRL_COLUMNA
+
+    if not IK_CTRL_COLUMNA:
+        cmds.warning("Primero crea el esqueleto IK/FK")
         return
 
-    meshes = [mesh for mesh in crearConejo.piezas_deformables if cmds.objExists(mesh)]
-    if not meshes:
-        cmds.warning("No se encontraron las piezas del conejo para suavizar.")
-        return
+    seleccion = cmds.radioCollection(
+        "fkik_collection",
+        q=True,
+        select=True
+    )
 
-    for mesh in meshes:
-        try:
-            # Mismo nivel de suavizado que bind_skin_cube() en sistemaIKFKleg.py
-            # durante la creación del rig FKIK.
-            # Si el rig FKIK ya aplicó esta subdivisión, entonces usar este botón
-            # después de riggear hará un suavizado extra.
-            cmds.polySmooth(mesh, divisions=2, mth=0, keepBorder=1)
-        except Exception as e:
-            cmds.warning(f"No se pudo suavizar {mesh}: {e}")
+    if seleccion == "radio_fk":
 
+        sistemaIKFKspline.cambiar_fkik(
+            IK_CTRL_COLUMNA,
+            0
+        )
+        sistemaIKFKleg.cambiar_fkik_leg(0)
 
+        print("Modo FK")
+
+    elif seleccion == "radio_ik":
+
+        sistemaIKFKspline.cambiar_fkik(
+            IK_CTRL_COLUMNA,
+            1
+        )
+        sistemaIKFKleg.cambiar_fkik_leg(1)
+
+        print("Modo IK")
 
 # =========================
 # POPUP FINAL CONEJITO
@@ -229,9 +255,13 @@ def crear_ui(*args):
     anchoimagen=300
     altoimagen=300
     anchoventana=anchomenu
-    altoventana=825
+    altoventana=900
     ventana = cmds.window("miVentanaConejo", title="MI DULCE FORTUNA", widthHeight=(anchoventana,altoventana),sizeable=False)
-
+    cmds.window(
+    ventana,
+    edit=True,
+    widthHeight=(anchoventana, altoventana)
+)
 #endregion de la seccion ventana medidas 
 
 #region 4.1.1.Imagen
@@ -398,30 +428,55 @@ def crear_ui(*args):
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
+
     # =========================
-    # CHECKS FK / IK
+    # FK / IK RADIO BUTTONS
     # =========================
 
-    cmds.separator(h=5, style="none")
-    cmds.rowColumnLayout( numberOfColumns=3, columnWidth=[(1,50),(2,190),(3,50) ] )
+    cmds.separator(h=10, style="none")
+
+    # CONTENEDOR CENTRADO
+    cmds.rowColumnLayout(
+        numberOfColumns=3,
+        columnWidth=[(1,40), (2,220), (3,40)]
+    )
+
+    # espacio izquierdo
     cmds.text(label="")
 
-    # FK
-    cmds.checkBox("check_fk",label="Quiero rotar hueso por hueso (Fk)", value=True )
-    cmds.text(label="")
+    # columna central
+    cmds.columnLayout(adjustableColumn=True)
+
+    cmds.radioCollection("fkik_collection")
+
+    cmds.radioButton(
+        "radio_fk",
+        label="Quiero rotar hueso por hueso (FK)",
+        select=True,
+        onc=cambiar_fk_ik
+    )
+
+    cmds.separator(h=3, style="none")
+
+    cmds.radioButton(
+        "radio_ik",
+        label="Quiero rotar hueso con vecinos (IK)",
+        onc=cambiar_fk_ik
+    )
+
+    cmds.setParent('..')  # cerrar columnLayout
+
+    # espacio derecho
     cmds.text(label="")
 
-    # IK
-    cmds.checkBox("check_ik",label="Quiero rotar hueso con vecinos (Ik)", value=False )
-    cmds.text(label="")
-    cmds.setParent('..')
+    cmds.setParent('..')  # cerrar rowColumnLayout
 
 
         # =========================
         # 🔘 BOTÓN crear_sistema fk to ik 
         # =========================
         
-    cmds.separator(h=8, style="none")
+    cmds.separator(h=5, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,75), (2,140),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
     cmds.button(label="🐇 Terminar mi conejito ",command=mostrar_popup_final,bgc=lila,height=28)
@@ -429,16 +484,18 @@ def crear_ui(*args):
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
 
+
         # =========================
         # 🔘 BOTÓN Borrar escena 
         # =========================
-    cmds.separator(h=8, style="none")
+    cmds.separator(h=5, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,205), (2,80),(3,20)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
     cmds.button(label="🧹Borrar todo ",command=borrar_escena,bgc=grisoscuro,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
     cmds.separator(h=8, style="none") #espacio vacio
+
 
 #endregion de la seccion botones
 
@@ -451,12 +508,33 @@ def crear_ui(*args):
     # Raya division
     cmds.text(label="", bgc=lila,height=5) # Raya division
     cmds.separator(h=8, style="none") #espacio vacio 
-    cmds.text(label="Mayerly Camargo Pedraza - Código 1202327", bgc=fondorosado,font="smallPlainLabelFont")
-    cmds.text(label="Jennifer Leiva Martín - Código 1202617", bgc=fondorosado,font="smallPlainLabelFont")
-    cmds.text(label="Docente: Diego Beltrán Cardona- UMNG 2026", bgc=fondorosado,font="smallPlainLabelFont")   
+    cmds.columnLayout(adjustableColumn=True)
+
+    cmds.text(
+        label="Mayerly Camargo Pedraza - Código 1202327",
+        align="center",
+        bgc=fondorosado,
+        font="smallPlainLabelFont"
+    )
+
+    cmds.text(
+        label="Jennifer Leiva Martín - Código 1202617",
+        align="center",
+        bgc=fondorosado,
+        font="smallPlainLabelFont"
+    )
+
+    cmds.text(
+        label="Docente: Diego Beltrán Cardona - UMNG 2026",
+        align="center",
+        bgc=fondorosado,
+        font="smallPlainLabelFont"
+    )
+
+    cmds.setParent('..')
     cmds.separator(h=20, style="none") #espacio vacio
     cmds.setParent('..')  # ← cerrar columnLayout derecha
-    cmds.setParent('..')  # ← cerrar rowLayout principal
+
 
     cmds.showWindow(ventana)
 

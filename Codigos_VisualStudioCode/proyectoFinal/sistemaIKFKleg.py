@@ -123,7 +123,33 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
 
     print(f"✅ Sistema IKFK creado -> {prefix}")
 
-    
+    # =========================
+    # VISIBILIDAD FK / IK
+    # =========================
+
+    # FK visibles cuando FKIK = 0
+    for ctrl in fk_controls:
+
+        cmds.connectAttr(
+            f"{reverse}.outputX",
+            f"{ctrl}.visibility",
+            force=True
+        )
+
+    # IK visibles cuando FKIK = 1
+    cmds.connectAttr(
+        f"{shape}.FKIK",
+        f"{ik_ctrl}.visibility",
+        force=True
+    )
+
+    # Pole Vector visible en IK
+    cmds.connectAttr(
+        f"{shape}.FKIK",
+        f"{pv_ctrl}.visibility",
+        force=True
+    )
+
     return {
         "ikHandle": ik_handle,
         "ikControl": ik_ctrl,
@@ -131,6 +157,33 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         "attrShape": shape,
         "constraints": constraints
     }
+
+
+def cambiar_fkik_leg(valor):
+
+    controles_fkik = []
+
+    # buscar todos los transforms
+    transforms = cmds.ls(type="transform")
+
+    for obj in transforms:
+
+        if cmds.attributeQuery("FKIK", node=obj, exists=True):
+            controles_fkik.append(obj)
+
+    if not controles_fkik:
+        cmds.warning("No se encontraron controles FKIK")
+        return
+
+    # cambiar todos
+    for ctrl in controles_fkik:
+
+        try:
+            cmds.setAttr(f"{ctrl}.FKIK", valor)
+            print(f"FKIK cambiado a {valor} en {ctrl}")
+
+        except:
+            cmds.warning(f"No se pudo cambiar FKIK en {ctrl}")
 
 def bind_skin_cube(mesh, joints):
 
