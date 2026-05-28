@@ -29,6 +29,7 @@ Solo es cambiarle la ruta
 Aqui NO se puede copiar la ruta desde la barra de la carpeta deben ir asi /
 
 
+# desde mi compu 
 
 import sys
 
@@ -41,6 +42,25 @@ from proyectoFinal import main
 importlib.reload(main)
 
 main.crear\_ui()
+
+
+
+#desde el laboratorio 
+
+import sys
+
+import importlib
+
+sys.path.append("C:/Users/Estudiante/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode")
+
+from proyectoFinal import main
+
+importlib.reload(main)
+
+main.crear_ui()
+
+
+
 
 
 
