@@ -428,18 +428,24 @@ def crear_ui(*args):
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
-    # =========================
-    # CHECKS FK / IK
-    # =========================
 
-    cmds.separator(h=5, style="none")
-    cmds.rowColumnLayout( numberOfColumns=3, columnWidth=[(1,50),(2,190),(3,50) ] )
-    cmds.text(label="")
-
-    # FK
-        # =========================
+    # =========================
     # FK / IK RADIO BUTTONS
     # =========================
+
+    cmds.separator(h=10, style="none")
+
+    # CONTENEDOR CENTRADO
+    cmds.rowColumnLayout(
+        numberOfColumns=3,
+        columnWidth=[(1,40), (2,220), (3,40)]
+    )
+
+    # espacio izquierdo
+    cmds.text(label="")
+
+    # columna central
+    cmds.columnLayout(adjustableColumn=True)
 
     cmds.radioCollection("fkik_collection")
 
@@ -450,18 +456,27 @@ def crear_ui(*args):
         onc=cambiar_fk_ik
     )
 
+    cmds.separator(h=3, style="none")
+
     cmds.radioButton(
         "radio_ik",
         label="Quiero rotar hueso con vecinos (IK)",
         onc=cambiar_fk_ik
-)
+    )
+
+    cmds.setParent('..')  # cerrar columnLayout
+
+    # espacio derecho
+    cmds.text(label="")
+
+    cmds.setParent('..')  # cerrar rowColumnLayout
 
 
         # =========================
         # 🔘 BOTÓN crear_sistema fk to ik 
         # =========================
         
-    cmds.separator(h=8, style="none")
+    cmds.separator(h=5, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,75), (2,140),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
     cmds.button(label="🐇 Terminar mi conejito ",command=mostrar_popup_final,bgc=lila,height=28)
@@ -469,16 +484,18 @@ def crear_ui(*args):
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
 
+
         # =========================
         # 🔘 BOTÓN Borrar escena 
         # =========================
-    cmds.separator(h=8, style="none")
+    cmds.separator(h=5, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,205), (2,80),(3,20)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
     cmds.button(label="🧹Borrar todo ",command=borrar_escena,bgc=grisoscuro,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
     cmds.separator(h=8, style="none") #espacio vacio
+
 
 #endregion de la seccion botones
 
@@ -491,12 +508,33 @@ def crear_ui(*args):
     # Raya division
     cmds.text(label="", bgc=lila,height=5) # Raya division
     cmds.separator(h=8, style="none") #espacio vacio 
-    cmds.text(label="Mayerly Camargo Pedraza - Código 1202327", bgc=fondorosado,font="smallPlainLabelFont")
-    cmds.text(label="Jennifer Leiva Martín - Código 1202617", bgc=fondorosado,font="smallPlainLabelFont")
-    cmds.text(label="Docente: Diego Beltrán Cardona- UMNG 2026", bgc=fondorosado,font="smallPlainLabelFont")   
+    cmds.columnLayout(adjustableColumn=True)
+
+    cmds.text(
+        label="Mayerly Camargo Pedraza - Código 1202327",
+        align="center",
+        bgc=fondorosado,
+        font="smallPlainLabelFont"
+    )
+
+    cmds.text(
+        label="Jennifer Leiva Martín - Código 1202617",
+        align="center",
+        bgc=fondorosado,
+        font="smallPlainLabelFont"
+    )
+
+    cmds.text(
+        label="Docente: Diego Beltrán Cardona - UMNG 2026",
+        align="center",
+        bgc=fondorosado,
+        font="smallPlainLabelFont"
+    )
+
+    cmds.setParent('..')
     cmds.separator(h=20, style="none") #espacio vacio
     cmds.setParent('..')  # ← cerrar columnLayout derecha
-    cmds.setParent('..')  # ← cerrar rowLayout principal
+
 
     cmds.showWindow(ventana)
 
