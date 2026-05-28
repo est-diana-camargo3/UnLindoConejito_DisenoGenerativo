@@ -3,6 +3,7 @@
 import importlib
 import os
 import maya.cmds as cmds
+from proyectoFinal import sistemaIKFKleg, sistemaIKFKspline
 import proyectoFinal.crearConejo as crearConejo
 import proyectoFinal.funcionesFK as funcionesFK
 import proyectoFinal.funcionesIniciales as funcionesIniciales
@@ -13,7 +14,6 @@ importlib.reload(funcionesFK)
 importlib.reload(funcionesIniciales)
 importlib.reload(paletas)
 importlib.reload(pintarConejo)
-
 # endregion
 
 # region 2. Colores
@@ -59,10 +59,18 @@ def generar_conejo_ui(*args):
     funcionesFK.ocultar_cadenas_IK_y_MAIN()
     funcionesIniciales.organizar_cadenas_principales()
     funcionesFK.crear_fk_auto_root_control(lista_fk)
-    
-    funcionesIniciales.crear_sistema_fkik( lista_fk, resultado_dup, crearConejo.piezas_deformables )
+    global IK_CTRL_COLUMNA
+   
 
-    funcionesIniciales.crear_master_control()
+    resultado_ikfk = funcionesIniciales.crear_sistema_fkik(
+        lista_fk,
+        resultado_dup,
+        crearConejo.piezas_deformables
+    )
+
+    IK_CTRL_COLUMNA = resultado_ikfk["Columna"]["ikControl"]
+
+    print(IK_CTRL_COLUMNA)
     
     funcionesIniciales.crear_controles_anatomicos()
 
@@ -142,26 +150,44 @@ def funcion_de_main_pintar_conejo(*args):
 
 def suavizar_geometria_de_conejo(*args):
 
-    if not crearConejo.piezas_deformables:
-        cmds.warning("No hay geometría de conejo para suavizar. Primero crea el conejo.")
+    crearConejo.suavizar_conejo()
+    crearConejo.deformar_cara_con_plano()
+
+
+
+def cambiar_fk_ik(*args):
+
+    global IK_CTRL_COLUMNA
+
+    if not IK_CTRL_COLUMNA:
+        cmds.warning("Primero crea el esqueleto IK/FK")
         return
 
-    meshes = [mesh for mesh in crearConejo.piezas_deformables if cmds.objExists(mesh)]
-    if not meshes:
-        cmds.warning("No se encontraron las piezas del conejo para suavizar.")
-        return
+    seleccion = cmds.radioCollection(
+        "fkik_collection",
+        q=True,
+        select=True
+    )
 
-    for mesh in meshes:
-        try:
-            # Mismo nivel de suavizado que bind_skin_cube() en sistemaIKFKleg.py
-            # durante la creación del rig FKIK.
-            # Si el rig FKIK ya aplicó esta subdivisión, entonces usar este botón
-            # después de riggear hará un suavizado extra.
-            cmds.polySmooth(mesh, divisions=2, mth=0, keepBorder=1)
-        except Exception as e:
-            cmds.warning(f"No se pudo suavizar {mesh}: {e}")
+    if seleccion == "radio_fk":
 
+        sistemaIKFKspline.cambiar_fkik(
+            IK_CTRL_COLUMNA,
+            0
+        )
+        sistemaIKFKleg.cambiar_fkik_leg(0)
 
+        print("Modo FK")
+
+    elif seleccion == "radio_ik":
+
+        sistemaIKFKspline.cambiar_fkik(
+            IK_CTRL_COLUMNA,
+            1
+        )
+        sistemaIKFKleg.cambiar_fkik_leg(1)
+
+        print("Modo IK")
 
 # =========================
 # POPUP FINAL CONEJITO
@@ -229,9 +255,13 @@ def crear_ui(*args):
     anchoimagen=300
     altoimagen=300
     anchoventana=anchomenu
-    altoventana=825
+    altoventana=900
     ventana = cmds.window("miVentanaConejo", title="MI DULCE FORTUNA", widthHeight=(anchoventana,altoventana),sizeable=False)
-
+    cmds.window(
+    ventana,
+    edit=True,
+    widthHeight=(anchoventana, altoventana)
+)
 #endregion de la seccion ventana medidas 
 
 #region 4.1.1.Imagen
@@ -407,14 +437,24 @@ def crear_ui(*args):
     cmds.text(label="")
 
     # FK
-    cmds.checkBox("check_fk",label="Quiero rotar hueso por hueso (Fk)", value=True )
-    cmds.text(label="")
-    cmds.text(label="")
+        # =========================
+    # FK / IK RADIO BUTTONS
+    # =========================
 
-    # IK
-    cmds.checkBox("check_ik",label="Quiero rotar hueso con vecinos (Ik)", value=False )
-    cmds.text(label="")
-    cmds.setParent('..')
+    cmds.radioCollection("fkik_collection")
+
+    cmds.radioButton(
+        "radio_fk",
+        label="Quiero rotar hueso por hueso (FK)",
+        select=True,
+        onc=cambiar_fk_ik
+    )
+
+    cmds.radioButton(
+        "radio_ik",
+        label="Quiero rotar hueso con vecinos (IK)",
+        onc=cambiar_fk_ik
+)
 
 
         # =========================

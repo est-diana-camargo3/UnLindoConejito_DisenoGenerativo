@@ -93,6 +93,14 @@ def crear_conejo(emocion="calma"):
     print(" 📐🐰 Morfología:", morfologia)
 
     if morfologia == "vertical":
+        ancho_cabeza = m * 10
+        ancho_oreja = m * 3
+
+        mitad_cabeza = ancho_cabeza / 2
+        mitad_oreja = ancho_oreja / 2
+
+        offset_oreja_x = mitad_cabeza - mitad_oreja
+        
         #                            nombre                            escala                            posicion 
         cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,         (m*10)/2 ),    (0,     0,                  0          )  ) 
         ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m,      m,            (m*1.7)  ),    (m*7,   (-(m*10)/3.7),      (m*1.7)-m  )  )
@@ -113,6 +121,37 @@ def crear_conejo(emocion="calma"):
     
     elif morfologia == "estandar":
         #                            nombre                            escala                            posicion 
+<<<<<<<< HEAD:Codigos_VisualStudioCode/proyectoFinal/crearConejo.py
+        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)-10, (((m*10)/3)*2)-m,   m        ),  tipo="orejas")
+        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)+10, (((m*10)/3)*2)-m,   m        ),  tipo="orejas")
+        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,         m*10   ),    ((-m*5),       0,                 (m*5)    ),  tipo="cabeza") 
+        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)-7, (-(m*10)/3.7),      (m/4)+15 ),  tipo="ojos")
+        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)+7, (-(m*10)/3.7),      (m/4)+15 ),  tipo="ojos")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m/2)  ),    ((-m/2),      (-(m*10)/2),        (m/4)+15 ),  tipo="nariz")
+      
+        tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*13,         (m*16)/2 ),    ((-m*6.5),  (-m*9),          (m*8)/2    ),  tipo="tronco")
+        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*6,    m*4,          m*4      ),    ((-m*3)-30, (-m*12),         (m*2)      ),  tipo="manos")
+        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*6,    m*4,          m*4      ),    ((-m*3)+30, (-m*12),         (m*2)      ),  tipo="manos")
+        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*4,    m*6,          m*4      ),    ((-m*2)-10, (-m*21),         (m*2)      ),  tipo="piernas")
+        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*4,    m*6,          m*4      ),    ((-m*2)+10, (-m*21),         (m*2)      ),  tipo="piernas")
+        cola = crear_cubo("Cola_Primitiva_013",              (m*3,    m*3,          m*3      ),    ((-m*3),    (-m*9)+(-m*7.2), (m*1.5)-20 ),  tipo="cola") #CAMBIÓ
+
+    elif morfologia == "horizontal":
+        #                            nombre                            escala                            posicion 
+        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)-10, (((m*10)/3)*2)-m, m        ),  tipo="orejas")
+        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)+10, (((m*10)/3)*2)-m, m        ),  tipo="orejas")
+        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*12,   m*10,         m*10   ),    ((-m*6),      0,                (m*5)    ),  tipo="cabeza")
+        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)-7, (-(m*10)/3.7),    (m/4)+15 ),  tipo="ojos")
+        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)+7, (-(m*10)/3.7),    (m/4)+15 ),  tipo="ojos")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m/2)  ),    ((-m/2),      (-(m*10)/2),      (m/4)+15 ),  tipo="nariz")
+
+        tronco = crear_cubo("Tronco_Primitiva_010",          (m*19,   m*13,         (m*16)/2 ),    ((-m*9.5),    (-m*9),          (m*8)/2 ),  tipo="tronco")
+        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*7,    m*5,          m*5      ),    ((-m*3.5)-30, (-m*12),         (m*2.5) ),  tipo="manos")
+        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*7,    m*5,          m*5      ),    ((-m*3.5)+30, (-m*12),         (m*2.5) ),  tipo="manos")
+        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*5,    m*7,          m*5      ),    ((-m*2.5)-10, (-m*21),         (m*2.5) ),  tipo="piernas")
+        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*5,    m*7,          m*5      ),    ((-m*2.5)+10, (-m*21),         (m*2.5) ),  tipo="piernas")
+        cola = crear_cubo("Cola_Primitiva_013",              (m*4,    m*4,          m*4      ),    ((-m*4),     (-m*9)+(-m*7.2), (m*2)-20 ),  tipo="cola")
+========
         cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,         (m*10)/2 ),    (0,     0,                  0          )  ) 
         ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m,      m,            (m*1.7)  ),    (m*7,   (-(m*10)/3.7),      (m*1.7)-m  )  )
         ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m,      m,            (m*1.7)  ),    (m*2,   (-(m*10)/3.7),      (m*1.7)-m  )  )
@@ -139,6 +178,7 @@ def crear_conejo(emocion="calma"):
         oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    ((m*10)/3)*2, m*2      ),    (m*6,   (((m*10)/3)*2)-m,   (-m*1.5)   )  )
         oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    ((m*10)/3)*2, m*2      ),    (m,     (((m*10)/3)*2)-m,   (-m*1.5)   )  )
         
+>>>>>>>> 45d3ff312de2713e8fb1194ce87e87e8c8b94713:Codigos_VisualStudioCode/proyectoFinal_0/crearConejo.py
 
         pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*4,    m*3,          m*2      ),    (m*6,    (-m*21),              (-m*1.5)))#CAMBIÓ
         pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*4,    m*3,          m*2      ),    (0,      (-m*21),              (-m*1.5)))#CAMBIÓ

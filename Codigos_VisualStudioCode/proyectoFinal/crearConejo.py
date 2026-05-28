@@ -8,6 +8,7 @@ m = 1
 global morfologia
 morfologia= "estandar"
 piezas_deformables = []
+cara = []
 
 
 
@@ -122,7 +123,9 @@ def crear_conejo(emocion="calma"):
 
     global m
     global piezas_deformables
+    global cara
     global ancho_cabeza
+    global morfologia
   
 
     # =========================
@@ -152,13 +155,7 @@ def crear_conejo(emocion="calma"):
     print(" 📐🐰 Morfología:", morfologia)
 
     if morfologia == "vertical":
-        ancho_cabeza = m * 10
-        ancho_oreja = m * 3
-
-        mitad_cabeza = ancho_cabeza / 2
-        mitad_oreja = ancho_oreja / 2
-
-        offset_oreja_x = mitad_cabeza - mitad_oreja
+        
         
         #                            nombre                            escala                            posicion 
         oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    m*9,   m*2      ),    ((-m*1)+(-m*3), (m*9)-m, m         ),  tipo="orejas")
@@ -178,48 +175,44 @@ def crear_conejo(emocion="calma"):
     
     elif morfologia == "estandar":
         #                            nombre                            escala                            posicion 
+
         oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)-10, (((m*10)/3)*2)-m,   m        ),  tipo="orejas")
         oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)+10, (((m*10)/3)*2)-m,   m        ),  tipo="orejas")
-        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,         m*10   ),    ((-m*5),       0,                 (m*5)    ),  tipo="cabeza")  
-        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m)  ),    ((-m*1.7)+(-m*1.5), (-(m*10)/3.7),      (m*5.5) ),  tipo="ojos")#CAMBIÓ
-        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m)  ),    ((m*1.7), (-(m*10)/3.7),      (m*5.5) ),  tipo="ojos")#CAMBIÓ
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m)  ),    ((-m/2),      (-(m*10)/2),        (m*5.5) ),  tipo="nariz")#CAMBIÓ
+        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,         m*10   ),    ((-m*5),       0,                 (m*5)    ),  tipo="cabeza") 
+        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)-7, (-(m*10)/3.7),      (m/4)+15 ),  tipo="ojos")
+        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)+7, (-(m*10)/3.7),      (m/4)+15 ),  tipo="ojos")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m/2)  ),    ((-m/2),      (-(m*10)/2),        (m/4)+15 ),  tipo="nariz")
       
         tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*13,         (m*16)/2 ),    ((-m*6.5),  (-m*9),          (m*8)/2    ),  tipo="tronco")
-        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*6,    m*4,          m*4      ),    ((-m*7)+(-m*4.5), (-m*11.5),         (m*2)      ),  tipo="manos")
-        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*6,    m*4,          m*4      ),    ((m*5.5), (-m*11.5),         (m*2)      ),  tipo="manos")
+        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*6,    m*4,          m*4      ),    ((-m*3)-30, (-m*12),         (m*2)      ),  tipo="manos")
+        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*6,    m*4,          m*4      ),    ((-m*3)+30, (-m*12),         (m*2)      ),  tipo="manos")
         pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*4,    m*6,          m*4      ),    ((-m*2)-10, (-m*21),         (m*2)      ),  tipo="piernas")
         pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*4,    m*6,          m*4      ),    ((-m*2)+10, (-m*21),         (m*2)      ),  tipo="piernas")
-        cola = crear_cubo("Cola_Primitiva_013",              (m*3,    m*3,          m*4      ),    ((-m*1.5),    (-m*9)+(-m*7.2), (-m*3.5 )),  tipo="cola") #CAMBIÓ
-        
+        cola = crear_cubo("Cola_Primitiva_013",              (m*3,    m*3,          m*3      ),    ((-m*3),    (-m*9)+(-m*7.2), (m*1.5)-20 ),  tipo="cola") #CAMBIÓ
 
     elif morfologia == "horizontal":
         #                            nombre                            escala                            posicion 
-        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*5,    ((m*10)/3)*2, m*2    ),    ((-m*2)+(-m*5), (((m*10)/3)*2)-m, m        ),  tipo="orejas")
-        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*5,    ((m*10)/3)*2, m*2    ),    ((m*2), (((m*10)/3)*2)-m, m        ),  tipo="orejas")
-        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*14,   m*10,         m*10   ),    ((-m*7),      0,                (m*5)    ),  tipo="cabeza")
-        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m)  ),    ((-m*0.75)-7, (-(m*10)/3.7),    (m*5.5) ),  tipo="ojos")
-        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m)  ),    ((-m*0.75)+7, (-(m*10)/3.7),    (m*5.5) ),  tipo="ojos")
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m)  ),    ((-m/2),      (-(m*10)/2),      (m*5.5) ),  tipo="nariz")
+        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)-10, (((m*10)/3)*2)-m, m        ),  tipo="orejas")
+        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)+10, (((m*10)/3)*2)-m, m        ),  tipo="orejas")
+        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*12,   m*10,         m*10   ),    ((-m*6),      0,                (m*5)    ),  tipo="cabeza")
+        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)-7, (-(m*10)/3.7),    (m/4)+15 ),  tipo="ojos")
+        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)+7, (-(m*10)/3.7),    (m/4)+15 ),  tipo="ojos")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m/2)  ),    ((-m/2),      (-(m*10)/2),      (m/4)+15 ),  tipo="nariz")
 
         tronco = crear_cubo("Tronco_Primitiva_010",          (m*19,   m*13,         (m*16)/2 ),    ((-m*9.5),    (-m*9),          (m*8)/2 ),  tipo="tronco")
-        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*7,    m*5,          m*5      ),    ((-m*9.5)+(-m*6), (-m*10.5),         (m*2.5) ),  tipo="manos")
-        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*7,    m*5,          m*5      ),    ((m*8.5), (-m*10.5),         (m*2.5) ),  tipo="manos")
-        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*5,    m*6,          m*5      ),    ((-m*2)+(-m*5), (-m*21),         (m*2.5) ),  tipo="piernas")
-        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*5,    m*6,          m*5      ),    ((m*2), (-m*21),         (m*2.5) ),  tipo="piernas")
-        cola = crear_cubo("Cola_Primitiva_013",              (m*5,    m*5,          m*5      ),    ((-m*2.5),     (-m*9)+(-m*7.2), (-m*3.5) ),  tipo="cola")
+        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*7,    m*5,          m*5      ),    ((-m*3.5)-30, (-m*12),         (m*2.5) ),  tipo="manos")
+        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*7,    m*5,          m*5      ),    ((-m*3.5)+30, (-m*12),         (m*2.5) ),  tipo="manos")
+        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*5,    m*7,          m*5      ),    ((-m*2.5)-10, (-m*21),         (m*2.5) ),  tipo="piernas")
+        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*5,    m*7,          m*5      ),    ((-m*2.5)+10, (-m*21),         (m*2.5) ),  tipo="piernas")
+        cola = crear_cubo("Cola_Primitiva_013",              (m*4,    m*4,          m*4      ),    ((-m*4),     (-m*9)+(-m*7.2), (m*2)-20 ),  tipo="cola")
 
+        
     parte_superior = cmds.group(cabeza, ojo_izq, ojo_der, nariz, oreja_izq, oreja_der, name="ParteSuperior_Grupo")
     parte_inferior = cmds.group(tronco, mano_izq, mano_der, pie_izq, pie_der, cola, name="ParteInferior_Grupo")
+    conejo = cmds.group(parte_superior, parte_inferior, name="Conejo_Grupo_001")
 
-   
-    conejo = cmds.group(parte_superior, parte_inferior, name="Conej_Grupo_001") # solo conejo sin base ni plano fondo
-    plano_fondo(nombre="Plano_Fondo_015", morfologia=morfologia, emocion=emocion, conejo=conejo)
-    base = base_giratoria(nombre="Base_Conejo_014", morfologia=morfologia, emocion=emocion, conejo=conejo)
-    conejo2= cmds.group(conejo, base,name="Conejo_Grupo_001") # conejo+base
-
-
-
+    base = base_giratoria("Base_Conejo", morfologia, emocion, conejo)
+    plano = plano_fondo("Plano_Fondo", morfologia, emocion, conejo)
     piezas_deformables = [
         cabeza,
         tronco,
@@ -227,11 +220,131 @@ def crear_conejo(emocion="calma"):
         mano_der,
         pie_izq,
         pie_der,
+        cola,
         oreja_izq,
-        oreja_der
+        oreja_der,
+        ojo_der,
+        ojo_izq,
+        nariz
     ]
 
+    cara= [cabeza, ojo_der, ojo_izq, nariz]
+
+
 # endregion
+
+#region suavizado
+# region suavizado real
+# ╔════════════════════════════════════════════════════╗
+# ║  Suavizado REAL del conejo                        ║
+# ╚════════════════════════════════════════════════════╝
+
+def suavizar_conejo():
+
+    global piezas_deformables
+
+    if not piezas_deformables:
+        cmds.warning("No hay piezas deformables.")
+        return
+
+    for mesh in piezas_deformables:
+
+        if cmds.objExists(mesh):
+
+            try:
+
+                cmds.polySmooth(
+                    mesh,
+                    divisions=2,
+                    mth=0,
+                    keepBorder=1
+                )
+
+            except Exception as e:
+
+                cmds.warning(f"No se pudo suavizar {mesh}: {e}")
+
+
+    print("🐰 Conejo suavizado correctamente")
+#                         ╔═════════════════════════════════════════════════════════════════╗
+#                         ║  Construccion cara                                              ║                                                               ║
+#                         ╚═════════════════════════════════════════════════════════════════╝
+
+def deformar_cara_con_plano(cabeza, ojo_der, ojo_izq, nariz):
+
+    # =====================================================
+    # CREAR PLANO
+    # =====================================================
+
+    plano = cmds.polyPlane(
+        name="Plano_Deformador_Cara",
+        w=m * 12,
+        h=m * 12,
+        sx=16,
+        sy=16
+    )[0]
+
+    cmds.rotate(90, 0, 0, plano)
+
+    bbox = cmds.exactWorldBoundingBox(cabeza)
+
+    xmin, ymin, zmin, xmax, ymax, zmax = bbox
+
+    centro_x = (xmin + xmax) / 2
+    centro_y = (ymin + ymax) / 2
+
+    cmds.move(
+        centro_x,
+        centro_y,
+        zmax + (m * 2),
+        plano
+    )
+
+    # =====================================================
+    # COMBINAR OJOS + NARIZ
+    # =====================================================
+
+    combinado = cmds.polyUnite(
+        ojo_der,
+        ojo_izq,
+        nariz,
+        ch=False,
+        name="Cara_Combinada"
+    )[0]
+
+    # =====================================================
+    # WRAP
+    # =====================================================
+
+    cmds.select(plano, combinado)
+
+    cmds.deformer(type="wrap")
+
+    # =====================================================
+    # DEFORMAR PLANO
+    # =====================================================
+
+    cmds.move(0, 0, m * 3, f"{plano}.f[123]", r=True)
+
+    cmds.move(0, 0, -m * 1.5, f"{plano}.f[56]", r=True)
+
+    # =====================================================
+    # TRANSFERIR A CABEZA
+    # =====================================================
+
+    cmds.transferAttributes(
+        plano,
+        cabeza,
+        transferPositions=1,
+        transferNormals=0,
+        transferUVs=0,
+        transferColors=0,
+        sampleSpace=0
+    )
+
+    cmds.delete(plano, ch=True)
+
+    print("🐰 Cara deformada correctamente")
 
 
 # =====================================================
