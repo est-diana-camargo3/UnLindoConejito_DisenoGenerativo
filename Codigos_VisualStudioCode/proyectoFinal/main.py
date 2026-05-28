@@ -293,7 +293,7 @@ def crear_ui(*args):
     
     #cmds.separator(h=20, style="none") #espacio vacio
     cmds.rowLayout(numberOfColumns=3,columnWidth3=(20, anchoimagen, 20),bgc=fondorosado)
-    ruta_imagen = "C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Imagenes/ImagenMenu.png"
+    ruta_imagen = "c:/Users/Estudiante/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode/proyectoFinal/ImagenMenu.png"
     cmds.image(image=ruta_imagen,width=anchoimagen,height=altoimagen)
     cmds.setParent('..') # cerrar rowLayout de la imagen para que el siguiente elemento no quede dentro de este
 
