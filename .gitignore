@@ -1,0 +1,35 @@
+# =========================
+# PYTHON
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+
+# =========================
+# MAYA TEMP / CACHE
+# =========================
+*.log
+*.tmp
+*.swp
+
+# Maya cache folders
+cache/
+autosave/
+
+# =========================
+# SISTEMA
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# VS CODE
+# =========================
+.vscode/
+
+# =========================
+# ARCHIVOS PESADOS OPCIONAL
+# =========================
+# (descomenta si quieres evitar subirlos)
+# *.mb
+# *.ma
