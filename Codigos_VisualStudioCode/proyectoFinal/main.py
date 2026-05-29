@@ -2,6 +2,7 @@
 # region 1. Importaciones
 import importlib
 import os
+import random #aleatoriedad para el conejo sorpresa
 import maya.cmds as cmds
 from proyectoFinal import sistemaIKFKleg, sistemaIKFKspline
 import proyectoFinal.crearConejo as crearConejo
@@ -14,6 +15,7 @@ importlib.reload(funcionesFK)
 importlib.reload(funcionesIniciales)
 importlib.reload(paletas)
 importlib.reload(pintarConejo)
+
 # endregion
 
 # region 2. Colores
@@ -84,6 +86,53 @@ def generar_conejo_ui(*args):
 
     
     #suavizar_conejo_preview()
+
+    # =========================
+    # Cámara cercana conejo sorpresa
+    # =========================
+
+    cmds.setAttr("persp.rotateX", -12)
+    cmds.setAttr("persp.rotateY", 35)
+    cmds.setAttr("persp.rotateZ", 0)
+
+    cmds.setAttr("persp.translateX", 35)
+    cmds.setAttr("persp.translateY", 25)
+    cmds.setAttr("persp.translateZ", 85)
+
+
+    # =========================
+    # Mensaje Popup
+    # =========================
+
+    ancho_cabeza = crearConejo.ancho_cabeza
+
+    if 20 <= ancho_cabeza <= 27:
+        morfologia = "Vertical"
+
+    elif 28 <= ancho_cabeza <= 35:
+        morfologia = "Estandar"
+
+    elif 36 <= ancho_cabeza <= 43:
+        morfologia = "Horizontal"
+
+    emocion = cmds.radioCollection("emociones", q=True, select=True)
+    dato_curioso = pintarConejo.generar_dato_curioso(emocion)
+
+    mensaje = (
+        "\n¡Haz creado una Dulce Fortuna! 🐇 \n\n"        
+        f" 🐰 Morfología: {morfologia} "
+        f" ({ancho_cabeza} cm)\n\n"
+        f" 🐰 Emoción: {emocion}\n\n"
+        f"{dato_curioso}\n"
+    )
+
+    cmds.confirmDialog(
+        title="Mi Dulce Fortuna",
+        message=mensaje,
+        button=["¡ Quiero moverlo ! "],
+        defaultButton="¡ Quiero moverlo ! ",
+        bgc=fondorosado
+    )
 
 # =========================
 # funcion_de_main_crear_conejo_cuadrado
@@ -189,40 +238,6 @@ def cambiar_fk_ik(*args):
 
         print("Modo IK")
 
-# =========================
-# POPUP FINAL CONEJITO
-# =========================
-def mostrar_popup_final(*args):
-
-    ancho_cabeza = crearConejo.ancho_cabeza
-
-    if 20 <= ancho_cabeza <= 27:
-        morfologia = "Vertical"
-
-    elif 28 <= ancho_cabeza <= 35:
-        morfologia = "Estandar"
-
-    elif 36 <= ancho_cabeza <= 43:
-        morfologia = "Horizontal"
-
-    emocion = cmds.radioCollection("emociones", q=True, select=True)
-    dato_curioso = pintarConejo.generar_dato_curioso(emocion)
-
-    mensaje = (
-        "\n¡Haz creado una Dulce Fortuna! 🐇 \n\n"        
-        f" 🐰 Morfología: {morfologia} "
-        f" ({ancho_cabeza} cm)\n\n"
-        f" 🐰 Emoción: {emocion}\n\n"
-        f"{dato_curioso}\n"
-    )
-
-    cmds.confirmDialog(
-        title="Mi Dulce Fortuna",
-        message=mensaje,
-        button=["¡ Quiero girarlo ! "],
-        defaultButton="¡ Quiero girarlo ! ",
-        bgc=fondorosado
-    )
 
 # =========================
 # FUNCIÓN BOTÓN BORRAR
@@ -230,6 +245,55 @@ def mostrar_popup_final(*args):
 def borrar_escena(*args):
     cmds.select(all=True)
     cmds.delete()
+
+
+# =========================
+# FUNCIÓN Boton CONEJO SORPRESA
+# =========================
+def conejo_sorpresa(*args):
+
+    borrar_escena()
+
+    emociones = [
+        "descanso",
+        "feo",
+        "pequeno",
+        "fantasia",
+        "odio",
+        "infiel",
+        "artificial",
+        "verdad"
+    ]
+
+    emocion_random = random.choice(emociones)
+
+    cmds.radioButton(
+        emocion_random,
+        edit=True,
+        select=True
+    )
+
+    crearConejo.crear_conejo(emocion_random)
+
+    funcion_de_main_pintar_conejo()
+
+    suavizar_geometria_de_conejo()
+
+    generar_conejo_ui()
+
+    #cmds.viewFit("persp")
+
+    # =========================
+    # Cámara cercana conejo sorpresa
+    # =========================
+
+    cmds.setAttr("persp.rotateX", -12)
+    cmds.setAttr("persp.rotateY", 35)
+    cmds.setAttr("persp.rotateZ", 0)
+
+    cmds.setAttr("persp.translateX", 35)
+    cmds.setAttr("persp.translateY", 25)
+    cmds.setAttr("persp.translateZ", 85)
 
 #endregion de la seccion borrar escena 
 
@@ -322,7 +386,20 @@ def crear_ui(*args):
 
     #---Texto instruccion
     cmds.separator(h=10, style="none") #espacio vacio
-    cmds.text(label="Selecciona una emoción y luego los botones en orden", bgc=fondorosado)
+    cmds.text(label="Da clic en conejo sorpresa \nó Selecciona una emoción y sigue los botones en orden", bgc=fondorosado)
+
+
+        # =========================
+        # 🔘 BOTÓN CONEJO SORPRESA
+        # =========================
+
+    cmds.separator(h=10, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
+    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
+    cmds.button(label="🎉 Conejo Sorpresa",command=conejo_sorpresa, bgc=lila,height=28 )
+    cmds.text(label="", bgc=fondorosado) # espacio derecho
+    cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
+    
 
 #region 4.1.2.1. Emociones 
   
@@ -382,6 +459,11 @@ def crear_ui(*args):
     cmds.text(label="", bgc=lila,height=5) 
 
 
+
+
+
+
+
         # =========================
         # 🔘 BOTÓN GENERAR CONEJO CUADRADO
         # =========================
@@ -417,21 +499,10 @@ def crear_ui(*args):
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
 
+    
         # =========================
-        # 🔘 BOTÓN crear_sistema fk to ik 
+        # FK / IK RADIO BUTTONS
         # =========================
-        
-    cmds.separator(h=8, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
-    cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🦴 Crear esqueleto ",command=generar_conejo_ui,bgc=gris,height=28)
-    cmds.text(label="", bgc=fondorosado) # espacio derecho
-    cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
-
-
-    # =========================
-    # FK / IK RADIO BUTTONS
-    # =========================
 
     cmds.separator(h=10, style="none")
 
@@ -476,10 +547,10 @@ def crear_ui(*args):
         # 🔘 BOTÓN crear_sistema fk to ik 
         # =========================
         
-    cmds.separator(h=5, style="none")
-    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,75), (2,140),(3,60)]) # izquierda, botón, derecha
+    cmds.separator(h=8, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,65), (2,160),(3,50)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🐇 Terminar mi conejito ",command=mostrar_popup_final,bgc=lila,height=28)
+    cmds.button(label="🦴 Esqueletizar mi conejito 🐇",command=generar_conejo_ui,bgc=lila,height=28)
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
