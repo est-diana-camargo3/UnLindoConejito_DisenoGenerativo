@@ -10,6 +10,21 @@ import proyectoFinal.crearConejo as crearConejo
 
 from proyectoFinal.paletas import PALETAS
 
+# =========================
+# HEX → RGB NORMALIZADO MAYA, porque los botones solo reciben rgb pero en hex puedo ver el cuadrito de color aqui en codigo 
+# =========================
+def hex_a_rgb(hex_color):
+
+    hex_color = hex_color.lstrip("#")
+
+    r = int(hex_color[0:2], 16) / 255.0
+    g = int(hex_color[2:4], 16) / 255.0
+    b = int(hex_color[4:6], 16) / 255.0
+
+    return (r, g, b)
+
+lila = hex_a_rgb("#CC99FF")
+fondorosado = hex_a_rgb("#ECBCFB")
 
 # =========================================================
 # DATOS CURIOSOS
@@ -24,7 +39,7 @@ def generar_dato_curioso(emocion="calma"):
         return "Dato Curioso:\nEl color mostaza ocre es el color de la cobardía; por eso Judas viste ese color en las películas."
 
     elif emocion == "pequeno":
-        return "Dato Curioso:\nEl rosado pastel es pequeño, pero el rosado saturado es extravagante y se asocia a lo ordinario."
+        return "Dato Curioso:\nEl rosado puese ser delicado si es apastelado, o puede ser extravagante y ordinario con alta saturación"
 
     elif emocion == "fantasia":
         return "Dato Curioso:\nEn la religión católica solo los obispos pueden vestirse de morado, los cardenales de rojo y los párrocos de negro."
@@ -33,7 +48,7 @@ def generar_dato_curioso(emocion="calma"):
         return "Dato Curioso:\nEl color negro transforma la cualidad positiva de un color en negativa; por ejemplo, el rojo es amor, pero con negro es odio."
 
     elif emocion == "infiel":
-        return "Dato Curioso:\nDicen que si un hombre regala rosas amarillas a su pareja es porque fue infiel."
+        return "Dato Curioso:\nEn Europa, si un hombre regala rosas amarillas a su pareja es porque fue infiel y se siente culpable"
 
     elif emocion == "artificial":
         return "Dato Curioso:\nEl color lila o morado claro representa la soltería femenina y la frivolidad."
@@ -82,7 +97,8 @@ def pintar_cilindro_base():
     # =====================================================
     # Color y BRILLO
     # =====================================================
-    cmds.setAttr( f"{material}.color", 0.05, 0.05, 0.05, type="double3" )     # COLOR NEGRO
+   
+    cmds.setAttr( f"{material}.color", fondorosado[0], fondorosado[1], fondorosado[2], type="double3" )     # COLOR LILA
     
     #brillo
     cmds.setAttr(f"{material}.eccentricity", 0.18)

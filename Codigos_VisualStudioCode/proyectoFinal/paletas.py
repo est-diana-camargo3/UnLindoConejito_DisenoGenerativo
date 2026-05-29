@@ -108,9 +108,9 @@ PALETAS = {
     # =========================================================
     "verdad": [
 
-        (hex_a_rgb("#FFFFFF"), 40),   # blanco
+        (hex_a_rgb("#FFFFFF"), 50),   # blanco
         (hex_a_rgb("#0147C3"), 35),   # gris azulado
-        (hex_a_rgb("#C79F34"), 25)    # dorado frío
+        (hex_a_rgb("#C79F34"), 15)    # dorado frío
     ],
 
 }

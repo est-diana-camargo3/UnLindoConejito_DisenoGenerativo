@@ -147,13 +147,38 @@ def ubicar_camara():
     cmds.setAttr("persp.rotateY", 35)
     cmds.setAttr("persp.rotateZ", 0)
 
-    cmds.setAttr("persp.translateX", 85)
+    cmds.setAttr("persp.translateX", 105)
     cmds.setAttr("persp.translateY", -10)
-    cmds.setAttr("persp.translateZ", 160)
+    cmds.setAttr("persp.translateZ", 180)
 # endregion
 
 
-#region 3.3 F.Conejo Cuadrado
+#region 3.3 F.Ocultar o mostrar malla
+
+# =========================
+# FUNCIÓN MOSTRAR / OCULTAR MALLA
+# =========================
+def ocultar_o_mostrar_malla(estado):
+
+    mostrar = (estado == "mostrar")
+
+    paneles = cmds.getPanel(type='modelPanel')
+
+    for panel in paneles:
+
+        cmds.modelEditor(
+            panel,
+            edit=True,
+            displayTextures=True,
+            displayAppearance='smoothShaded',
+            wireframeOnShaded=mostrar
+        )
+
+    cmds.refresh(force=True)
+# endregion
+
+
+#region 3.4 F.Conejo Cuadrado
 
 # =========================
 # funcion_de_main_crear_conejo_cuadrado
@@ -166,9 +191,10 @@ def funcion_de_main_crear_conejo_cuadrado(*args):
     crearConejo.crear_conejo(seleccion)
     global ancho 
     ancho= crearConejo.m * 10
+    ocultar_o_mostrar_malla("mostrar")
 # endregion
 
-#region 3.4 F.Pintar conejo
+#region 3.5 F.Pintar conejo
 
 # =========================
 # funcion_de_main_pintar_conejo
@@ -190,25 +216,14 @@ def funcion_de_main_pintar_conejo(*args):
 
     cmds.hyperShade(assign=material)
 
-    # activar texturas en viewport
-    paneles = cmds.getPanel(type='modelPanel')
-
-    for panel in paneles:
-
-        cmds.modelEditor(
-            panel,
-            edit=True,
-            displayTextures=True,
-            displayAppearance='smoothShaded'
-        )
-
     cmds.refresh(force=True)
 
     print("✅ Conejo pintado correctamente")
+    ocultar_o_mostrar_malla("mostrar")
 
 # endregion
 
-#region 3.5 F.Suavizar geometria
+#region 3.6 F.Suavizar geometria
 
 # =========================
 # funcion Suavizar geometria
@@ -219,10 +234,28 @@ def suavizar_geometria_de_conejo(*args):
     crearConejo.suavizar_conejo()
     crearConejo.deformar_cara_con_plano()
 
+    # =========================
+    # OCULTAR LÍNEAS DEL SMOOTH
+    # =========================
+
+    for obj in crearConejo.piezas_deformables:
+
+        if cmds.objExists(obj):
+
+            # mantener smooth preview
+            cmds.setAttr(obj + ".displaySmoothMesh", 2)
+
+            # ocultar líneas blancas
+            cmds.setAttr(obj + ".smoothDrawType", 0)
+
+    ocultar_o_mostrar_malla("ocultar")
+
+    cmds.refresh(force=True)
+
 # endregion
 
 
-#region 3.6 F.def cambiar_fk_ik:
+#region 3.7 F.def cambiar_fk_ik:
 # =========================
 # funcion cambiar_fk_ik
 # =========================
@@ -263,7 +296,7 @@ def cambiar_fk_ik(*args):
 # endregion
 
 
-#region 3.7 F.Borrar
+#region 3.8 F.Borrar
 # =========================
 # FUNCIÓN BOTÓN BORRAR
 # =========================
@@ -273,7 +306,7 @@ def borrar_escena(*args):
 # endregion
 
 
-#region 3.8 F.Conejo sorpresa
+#region 3.9 F.Conejo sorpresa
 
 # =========================
 # FUNCIÓN Boton CONEJO SORPRESA
@@ -391,7 +424,7 @@ def crear_ui(*args):
     
     #cmds.separator(h=20, style="none") #espacio vacio
     cmds.rowLayout(numberOfColumns=3,columnWidth3=(20, anchoimagen, 20),bgc=fondorosado)
-    ruta_imagen = "C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Imagenes/ImagenMenu.png"
+    ruta_imagen = "C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode/proyectoFinal/ImagenMenu.jpg"
     cmds.image(image=ruta_imagen,width=anchoimagen,height=altoimagen)
     cmds.setParent('..') # cerrar rowLayout de la imagen para que el siguiente elemento no quede dentro de este
 
