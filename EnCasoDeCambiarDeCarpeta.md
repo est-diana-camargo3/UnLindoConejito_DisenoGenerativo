@@ -40,7 +40,7 @@ from proyectoFinal import main
 
 importlib.reload(main)
 
-main.crear\_ui()
+main.crear_ui()
 
 
 

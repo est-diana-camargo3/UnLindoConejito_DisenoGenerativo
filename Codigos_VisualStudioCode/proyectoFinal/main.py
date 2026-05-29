@@ -49,11 +49,20 @@ blanco = hex_a_rgb("#FFFFFF")
 
 #region 3. Funciones UI
 
+
+
+
+
+
+
+#region 3.1 F.Generar conejo 
+
 # =========================
 # FUNCIÓN DEL BOTÓN GENERAR
 # =========================
 def generar_conejo_ui(*args):
     
+    ubicar_camara()
     funcionesIniciales.crear_jerarquia_general()
     lista_fk = funcionesFK.crear_joints_coplanares(crearConejo.m)
     funcionesFK.orientar_joints_de_toda_la_cadena_FK(lista_fk)
@@ -86,18 +95,6 @@ def generar_conejo_ui(*args):
 
     
     #suavizar_conejo_preview()
-
-    # =========================
-    # Cámara cercana conejo sorpresa
-    # =========================
-
-    cmds.setAttr("persp.rotateX", -12)
-    cmds.setAttr("persp.rotateY", 35)
-    cmds.setAttr("persp.rotateZ", 0)
-
-    cmds.setAttr("persp.translateX", 35)
-    cmds.setAttr("persp.translateY", 25)
-    cmds.setAttr("persp.translateZ", 85)
 
 
     # =========================
@@ -134,31 +131,44 @@ def generar_conejo_ui(*args):
         bgc=fondorosado
     )
 
+# endregion
+
+
+
+
+#region 3.2 F.Ubicar camara
+# =========================
+# FUNCIÓN UBICAR CÁMARA
+# =========================
+def ubicar_camara():
+
+    # Vista 3/4 cercana bonita
+    cmds.setAttr("persp.rotateX", -12)
+    cmds.setAttr("persp.rotateY", 35)
+    cmds.setAttr("persp.rotateZ", 0)
+
+    cmds.setAttr("persp.translateX", 85)
+    cmds.setAttr("persp.translateY", -10)
+    cmds.setAttr("persp.translateZ", 160)
+# endregion
+
+
+#region 3.3 F.Conejo Cuadrado
+
 # =========================
 # funcion_de_main_crear_conejo_cuadrado
 # =========================
 def funcion_de_main_crear_conejo_cuadrado(*args):
 
+    ubicar_camara()
     borrar_escena()
     seleccion = cmds.radioCollection("emociones",q=True, select=True )
     crearConejo.crear_conejo(seleccion)
     global ancho 
     ancho= crearConejo.m * 10
+# endregion
 
-    # =====================================================
-    # ACTIVAR SIEMPRE VISTA PERSPECTIVA  3/4
-    # =====================================================
-
-    cmds.setAttr("persp.rotateX", -15)
-    cmds.setAttr("persp.rotateY", 45)
-    cmds.setAttr("persp.rotateZ", 0)
-
-    cmds.setAttr("persp.translateX", 80)
-    cmds.setAttr("persp.translateY", 60)
-    cmds.setAttr("persp.translateZ", 80)
-
-    # centrar cámara al conejo
-    cmds.viewFit("persp")
+#region 3.4 F.Pintar conejo
 
 # =========================
 # funcion_de_main_pintar_conejo
@@ -196,14 +206,26 @@ def funcion_de_main_pintar_conejo(*args):
 
     print("✅ Conejo pintado correctamente")
 
+# endregion
+
+#region 3.5 F.Suavizar geometria
+
+# =========================
+# funcion Suavizar geometria
+# =========================
 
 def suavizar_geometria_de_conejo(*args):
 
     crearConejo.suavizar_conejo()
     crearConejo.deformar_cara_con_plano()
 
+# endregion
 
 
+#region 3.6 F.def cambiar_fk_ik:
+# =========================
+# funcion cambiar_fk_ik
+# =========================
 def cambiar_fk_ik(*args):
 
     global IK_CTRL_COLUMNA
@@ -238,20 +260,27 @@ def cambiar_fk_ik(*args):
 
         print("Modo IK")
 
+# endregion
 
+
+#region 3.7 F.Borrar
 # =========================
 # FUNCIÓN BOTÓN BORRAR
 # =========================
 def borrar_escena(*args):
     cmds.select(all=True)
     cmds.delete()
+# endregion
 
+
+#region 3.8 F.Conejo sorpresa
 
 # =========================
 # FUNCIÓN Boton CONEJO SORPRESA
 # =========================
 def conejo_sorpresa(*args):
 
+    ubicar_camara()
     borrar_escena()
 
     emociones = [
@@ -295,7 +324,12 @@ def conejo_sorpresa(*args):
     cmds.setAttr("persp.translateY", 25)
     cmds.setAttr("persp.translateZ", 85)
 
-#endregion de la seccion borrar escena 
+# endregion
+
+
+
+
+
 
 #region 4. Interfaz UI
 
