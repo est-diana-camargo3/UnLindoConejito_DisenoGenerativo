@@ -1,5 +1,9 @@
 import maya.cmds as cmds
 import random
+import os
+import proyectoFinal
+
+ruta_base = os.path.dirname(proyectoFinal.__file__)
 
 
 
@@ -110,6 +114,7 @@ def crear_cubo(nombre, escala, posicion, tipo="default"):
 #                         ║  Crear Conejo Estandar                                          ║
 #                         ╚═════════════════════════════════════════════════════════════════╝
 
+
 def crear_conejo(emocion="calma"):
     """
     MiCubitoDePrueba = crear_cubo("MiCubitoDePrueba", (1, 2, 3), (0, 0, 0)) 
@@ -141,7 +146,7 @@ def crear_conejo(emocion="calma"):
     # Establecer morfología del conejo según el ancho de la cabeza
     # =========================
 
-    morfologia = "vertical"
+    morfologia = "estandar"
 
     if 20 <= ancho_cabeza <= 27:
         morfologia = "vertical"
@@ -158,53 +163,53 @@ def crear_conejo(emocion="calma"):
         
         
         #                            nombre                            escala                            posicion 
-        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    m*9,   m*2      ),    ((-m*1)+(-m*3), (m*9)-m, m         ),  tipo="orejas")
-        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    m*9,   m*2      ),    ((m*1), (m*9)-m, m         ),  tipo="orejas")
-        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,  m*10     ),    ((-m*5),      0,               (m*5)      ),  tipo="cabeza") 
-        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m)  ), ((-m*1.25)+(-m*1.5), (-(m*10)/3.7),       (m*5.5)),  tipo="ojos")#CAMBIÓ
-        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m)  ), ((m*1.25), (-(m*10)/3.7),      (m*5.5) ),  tipo="ojos")#CAMBIÓ
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,     (m)    ),    ((-m/2),      (-(m*10)/2),     (m*5.5)   ),  tipo="nariz")#CAMBIÓ
+        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*4,    m*9,   m*2    ),  ((-m*2)-(m*3),    (-m*4)+(m*8.5),  m             ),  tipo="orejas")
+        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*4,    m*9,   m*2    ),  ((-m*2)+(m*3),    (-m*4)+(m*8.5),  m             ),  tipo="orejas")
+        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,  m*10   ),  ((-m*5),          m-8,          (m*5)          ),  tipo="cabeza") 
+        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5, (m/2)  ),  ((-m*0.75)-(m*2), (-m*6),       (m/4)+(m*5)    ),  tipo="ojos")#CAMBIÓ
+        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5, (m/2)  ),  ((-m*0.75)+(m*2), (-m*6),       (m/4)+(m*5)    ),  tipo="ojos")#CAMBIÓ
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,     (m/2)  ),  ((-m/2),          (-m*7),       (m/4)+(m*4.8)  ),  tipo="nariz")#CAMBIÓ
         
-        tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*20,  (m*16)/2 ),    ((-m*6.5),    (-m*8.5),          (m*8)/2    ),  tipo="tronco") #CAMBIÓ
-        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*6,    m*4,          m*4      ),    ((-m*6.5)+(-m*4.5), (-m*11.5),         (m*2)      ),  tipo="manos")
-        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*6,    m*4,          m*4      ),    ((m*5), (-m*11.5),         (m*2)      ),  tipo="manos")
-        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*4,    m*12,   m*4      ),    ((-m*2)-10,   (-m*27.3),       (m*2)      ),  tipo="piernas") #CAMBIÓ
-        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*4,    m*12,   m*4      ),    ((-m*2)+10,   (-m*27.3),       (m*2)      ),  tipo="piernas") #CAMBIÓ
-        cola = crear_cubo("Cola_Primitiva_013",              (m*3,    m*3,          m*4      ),    ((-m*1.5),    (-m*9)+(-m*12), (-m*3.5 )),  tipo="cola") #CAMBIÓ
+        tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*20,  (m*8)  ),  ((-m*6.5),      (-m*8.5),       (m*4)       ),  tipo="tronco") #CAMBIÓ
+        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*10,   m*5,    m*5   ),  ((-m*5)-(m*9),  (-m*11.5),      (m*2.5)     ),  tipo="manos")
+        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*10,   m*5,    m*5   ),  ((-m*5)+(m*9),  (-m*11.5),      (m*2.5)     ),  tipo="manos")
+        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*6,    m*12,   m*6   ),  ((-m*3)-(m*3),  (-m*6)-(m*18),  (m*3)       ),  tipo="piernas") #CAMBIÓ
+        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*6,    m*12,   m*6   ),  ((-m*3)+(m*3),  (-m*6)-(m*18),  (m*3)       ),  tipo="piernas") #CAMBIÓ
+        cola = crear_cubo("Cola_Primitiva_013",              (m*6,    m*6,    m*7   ),  ((-m*3),        (-m*9)+(-m*12), (-m*3)      ),  tipo="cola") #CAMBIÓ
 
     
     elif morfologia == "estandar":
         #                            nombre                            escala                            posicion 
 
-        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)-10, (((m*10)/3)*2)-m,   m        ),  tipo="orejas")
-        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)+10, (((m*10)/3)*2)-m,   m        ),  tipo="orejas")
-        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,         m*10   ),    ((-m*5),       0,                 (m*5)    ),  tipo="cabeza") 
-        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)-7, (-(m*10)/3.7),      (m/4)+15 ),  tipo="ojos")
-        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)+7, (-(m*10)/3.7),      (m/4)+15 ),  tipo="ojos")
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m/2)  ),    ((-m/2),      (-(m*10)/2),        (m/4)+15 ),  tipo="nariz")
+        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*4,    m*9,   m*2    ),   ((-m*2)-(m*3),    (-m*4)+(m*8.5),  m             ),  tipo="orejas")
+        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*4,    m*9,   m*2    ),   ((-m*2)+(m*3),    (-m*4)+(m*8.5),  m             ),  tipo="orejas")
+        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,  m*10   ),   ((-m*5),          m-8,            (m*5)         ),  tipo="cabeza") 
+        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5, (m/2)  ),   ((-m*0.75)-(m*2), (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
+        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5, (m/2)  ),   ((-m*0.75)+(m*2), (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,     (m/2)  ),   ((-m/2),          (-m*7),         (m/4)+(m*4.8) ),  tipo="nariz")
       
-        tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*13,         (m*16)/2 ),    ((-m*6.5),  (-m*9),          (m*8)/2    ),  tipo="tronco")
-        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*6,    m*4,          m*4      ),    ((-m*3)-30, (-m*12),         (m*2)      ),  tipo="manos")
-        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*6,    m*4,          m*4      ),    ((-m*3)+30, (-m*12),         (m*2)      ),  tipo="manos")
-        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*4,    m*6,          m*4      ),    ((-m*2)-10, (-m*21),         (m*2)      ),  tipo="piernas")
-        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*4,    m*6,          m*4      ),    ((-m*2)+10, (-m*21),         (m*2)      ),  tipo="piernas")
-        cola = crear_cubo("Cola_Primitiva_013",              (m*3,    m*3,          m*3      ),    ((-m*3),    (-m*9)+(-m*7.2), (m*1.5)-20 ),  tipo="cola") #CAMBIÓ
+        tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*13,  (m*8)  ),    ((-m*6.5),       (-m*8.5),        (m*4)      ),  tipo="tronco")
+        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*8,    m*4,   m*4    ),    ((-m*4)-(m*8),   (-m*11.5),       (m*2)      ),  tipo="manos")
+        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*8,    m*4,   m*4    ),    ((-m*4)+(m*8),   (-m*11.5),       (m*2)      ),  tipo="manos")
+        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*5,    m*8,   m*5    ),    ((-m*2.5)-(m*3), (-m*4)-(m*15),   (m*2)      ),  tipo="piernas")
+        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*5,    m*8,   m*5    ),    ((-m*2.5)+(m*3), (-m*4)-(m*15),   (m*2)      ),  tipo="piernas")
+        cola = crear_cubo("Cola_Primitiva_013",              (m*5,    m*5,   m*6    ),    ((-m*2.5),       (-m*8)+(-m*8),   (-m*2)     ),  tipo="cola") #CAMBIÓ
 
     elif morfologia == "horizontal":
         #                            nombre                            escala                            posicion 
-        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)-10, (((m*10)/3)*2)-m, m        ),  tipo="orejas")
-        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*3,    ((m*10)/3)*2, m*2    ),    ((-m*1.5)+10, (((m*10)/3)*2)-m, m        ),  tipo="orejas")
-        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*12,   m*10,         m*10   ),    ((-m*6),      0,                (m*5)    ),  tipo="cabeza")
-        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)-7, (-(m*10)/3.7),    (m/4)+15 ),  tipo="ojos")
-        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,        (m/2)  ),    ((-m*0.75)+7, (-(m*10)/3.7),    (m/4)+15 ),  tipo="ojos")
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,            (m/2)  ),    ((-m/2),      (-(m*10)/2),      (m/4)+15 ),  tipo="nariz")
+        oreja_izq = crear_cubo("Oreja_Izquierda_006",        (m*4,    m*9,    m*2    ),    ((-m*2)-(m*3),     (-m*4)+(m*8.5),  m            ),  tipo="orejas")
+        oreja_der = crear_cubo("Oreja_Derecha_007",          (m*4,    m*9,    m*2    ),    ((-m*2)+(m*3),     (-m*4)+(m*8.5),  m            ),  tipo="orejas")
+        cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*12,   m*10,   m*10   ),    ((-m*6),           m-8,             (m*5)        ),  tipo="cabeza")
+        ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,  (m/2)  ),    ((-m*0.75)-(m*2),  (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
+        ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,  (m/2)  ),    ((-m*0.75)+(m*2),  (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,      (m/2)  ),    ((-m/2),           (-m*7),         (m/4)+(m*4.8) ),  tipo="nariz")
 
-        tronco = crear_cubo("Tronco_Primitiva_010",          (m*19,   m*13,         (m*16)/2 ),    ((-m*9.5),    (-m*9),          (m*8)/2 ),  tipo="tronco")
-        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*7,    m*5,          m*5      ),    ((-m*3.5)-30, (-m*12),         (m*2.5) ),  tipo="manos")
-        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*7,    m*5,          m*5      ),    ((-m*3.5)+30, (-m*12),         (m*2.5) ),  tipo="manos")
-        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*5,    m*7,          m*5      ),    ((-m*2.5)-10, (-m*21),         (m*2.5) ),  tipo="piernas")
-        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*5,    m*7,          m*5      ),    ((-m*2.5)+10, (-m*21),         (m*2.5) ),  tipo="piernas")
-        cola = crear_cubo("Cola_Primitiva_013",              (m*4,    m*4,          m*4      ),    ((-m*4),     (-m*9)+(-m*7.2), (m*2)-20 ),  tipo="cola")
+        tronco = crear_cubo("Tronco_Primitiva_010",          (m*18,   m*13,   (m*15)   ),    ((-m*9),          (-m*8.5),        (m*7.5)   ),  tipo="tronco")
+        mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*7,    m*6,    m*6      ),    ((-m*3.5)-(m*10), (-m*12),         (m*3)     ),  tipo="manos")
+        mano_der = crear_cubo("ManoDerecha_Primitiva_012",   (m*7,    m*6,    m*6      ),    ((-m*3.5)+(m*10), (-m*12),         (m*3)     ),  tipo="manos")
+        pie_izq = crear_cubo("PieIzquierdo_Primitiva_008",   (m*7,    m*8,    m*7      ),    ((-m*3.5)-(m*4),  (-m*4)-(m*15),   (m*3)     ),  tipo="piernas")
+        pie_der = crear_cubo("PieDerecho_Primitiva_009",     (m*7,    m*8,    m*7      ),    ((-m*3.5)+(m*4),  (-m*4)-(m*15),   (m*3)     ),  tipo="piernas")
+        cola = crear_cubo("Cola_Primitiva_013",              (m*5,    m*5,    m*6      ),    ((-m*2.5),        (-m*8)+(-m*6.5), (-m*5)    ),  tipo="cola")
 
         
     parte_superior = cmds.group(cabeza, ojo_izq, ojo_der, nariz, oreja_izq, oreja_der, name="ParteSuperior_Grupo")
@@ -212,7 +217,9 @@ def crear_conejo(emocion="calma"):
     conejo = cmds.group(parte_superior, parte_inferior, name="Conejo_Grupo_001")
 
     base = base_giratoria("Base_Conejo", morfologia, emocion, conejo)
-    plano = plano_fondo("Plano_Fondo", morfologia, emocion, conejo)
+    crear_hdri(ruta_base + "/textures/MorningSkyHDRI011B_4K_HDR.exr")
+    crear_luz_direccional(intensidad=3,rotacion=(-4, 29, 2)
+)
     piezas_deformables = [
         cabeza,
         tronco,
@@ -270,21 +277,31 @@ def suavizar_conejo():
 #                         ║  Construccion cara                                              ║                                                               ║
 #                         ╚═════════════════════════════════════════════════════════════════╝
 
-def deformar_cara_con_plano(cabeza, ojo_der, ojo_izq, nariz):
+def deformar_cara_con_plano(cara):
+    global m
+
+    if not cara:
+        cmds.warning("La lista 'cara' está vacía")
+        return
 
     # =====================================================
     # CREAR PLANO
     # =====================================================
-
     plano = cmds.polyPlane(
         name="Plano_Deformador_Cara",
-        w=m * 12,
-        h=m * 12,
+        w=m * 6,
+        h=m * 5,
         sx=16,
         sy=16
     )[0]
 
     cmds.rotate(90, 0, 0, plano)
+    
+
+    # =====================================================
+    # POSICIONAR PLANO JUSTO FRENTE A LA CARA
+    # =====================================================
+    cabeza = cara[0]
 
     bbox = cmds.exactWorldBoundingBox(cabeza)
 
@@ -296,55 +313,64 @@ def deformar_cara_con_plano(cabeza, ojo_der, ojo_izq, nariz):
     cmds.move(
         centro_x,
         centro_y,
-        zmax + (m * 2),
+        zmax + 0.4,   # ligeramente delante de la cara
         plano
     )
-
+    
     # =====================================================
-    # COMBINAR OJOS + NARIZ
+    # COMBINAR ELEMENTOS DE LA CARA
     # =====================================================
-
     combinado = cmds.polyUnite(
-        ojo_der,
-        ojo_izq,
-        nariz,
+        cara[1], cara[2], cara[3],
         ch=False,
         name="Cara_Combinada"
     )[0]
 
+    cmds.xform(combinado, centerPivots=True)
+    
     # =====================================================
     # WRAP
     # =====================================================
-
-    cmds.select(plano, combinado)
-
-    cmds.deformer(type="wrap")
-
+    # objeto que será deformado
+    cmds.select(combinado, r=True)
+    cmds.select(plano, add=True)
+    cmds.CreateWrap()
+    
     # =====================================================
-    # DEFORMAR PLANO
+    # TRANSFERENCIA A LA CABEZA (primer elemento de la lista)
     # =====================================================
-
-    cmds.move(0, 0, m * 3, f"{plano}.f[123]", r=True)
-
-    cmds.move(0, 0, -m * 1.5, f"{plano}.f[56]", r=True)
-
-    # =====================================================
-    # TRANSFERIR A CABEZA
-    # =====================================================
+    cabeza = cara[0]
 
     cmds.transferAttributes(
-        plano,
-        cabeza,
+        cabeza,          # source
+        plano,         # target
         transferPositions=1,
         transferNormals=0,
         transferUVs=0,
         transferColors=0,
-        sampleSpace=0
+        sampleSpace=0,
+        searchMethod=3
     )
 
-    cmds.delete(plano, ch=True)
+    # Eliminar historial del combinado
+    cmds.delete(combinado, ch=True)
+    # Borrar plano deformador
+    cmds.delete(plano)
+    
+    padre = cmds.listRelatives(cabeza, parent=True)[0]
 
-    print("🐰 Cara deformada correctamente")
+    cabeza_final = cmds.polyUnite(
+        cabeza,
+        combinado,
+        ch=False,
+        name="Cabeza_Primitiva_001"
+    )[0]
+    cmds.xform(cabeza_final, centerPivots=True)
+    cmds.parent(cabeza_final, padre)
+
+    print("🐰 Cara deformada correctamente con vector 'cara'")
+  
+
 
 
 # =====================================================
@@ -389,56 +415,72 @@ def base_giratoria(nombre, morfologia, emocion, conejo):
 # =====================================================
 # CREAR plano fondo
 # =====================================================
-def plano_fondo(nombre, morfologia, emocion, conejo):
 
-    bbox = cmds.exactWorldBoundingBox(conejo)
-    xmin, ymin, zmin, xmax, ymax, zmax = bbox
-    ancho_conejo = (xmax - xmin)
-    centro_x = (xmin + xmax) / 2
-    centro_y = (ymin + ymax) / 2
-    centro_z = (zmin + zmax) / 2
-    r=(ancho_conejo / 2) + (m * 4)
+def crear_hdri(ruta_hdri):
 
-    # ALTURA BASE SEGÚN MORFOLOGÍA
+    skydome = cmds.createNode(
+        "aiSkyDomeLight",
+        name="hdriLightShape"
+    )
 
-    if morfologia == "vertical":
-        posicion_y = (-m*39.6)
-        altura_base = m * 3
-    else: # estándar y horizontal        
-        posicion_y = (-m*27.6)
-        altura_base = m * 3
-        
-    # =====================================================
-    # PLANO DE FONDO (tamaño)
-    # =====================================================
-
-    plano = cmds.polyPlane(
-        name="Plano_Fondo",
-        w=ancho_conejo * 25,
-        h=ancho_conejo * 25,
-        sx=1,
-        sy=1
+    transform = cmds.listRelatives(
+        skydome,
+        parent=True
     )[0]
 
-    cmds.delete(plano, ch=True)# eliminar history para que no se deforme con el escalado
+    file_node = cmds.shadingNode(
+        "file",
+        asTexture=True
+    )
 
-    # rotar para que quede como pared
+    cmds.setAttr(
+        file_node + ".fileTextureName",
+        ruta_hdri,
+        type="string"
+    )
+
+    cmds.connectAttr(
+        file_node + ".outColor",
+        skydome + ".color",
+        force=True
+    )
+
+    return transform
+
+
+def crear_luz_direccional(
+        intensidad=3,
+        rotacion=(25, 25, 16)):
+
+    luz = cmds.directionalLight()
+
+    transform = cmds.listRelatives(
+        luz,
+        parent=True
+    )[0]
+
+    cmds.setAttr(
+        luz + ".intensity",
+        intensidad
+    )
+
     cmds.rotate(
-        90,
-        0,
-        0,
-        plano
+        rotacion[0],
+        rotacion[1],
+        rotacion[2],
+        transform
     )
 
-    # mover debajo del conejo
-    cmds.move(
-        centro_x,
-        centro_y ,
-        centro_z-r-m,
-        plano
-    )
+    panel = cmds.getPanel(withFocus=True)
+
+    if cmds.getPanel(typeOf=panel) == "modelPanel":
+        cmds.modelEditor(
+            panel,
+            edit=True,
+            displayLights="all",
+            shadows=True
+        )
 
 
 
-
-
+    return transform

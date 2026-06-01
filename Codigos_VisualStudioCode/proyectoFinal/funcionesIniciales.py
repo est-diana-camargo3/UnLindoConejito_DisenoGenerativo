@@ -64,6 +64,65 @@ def crear_jerarquia_general():
 
     return grupos
 
+def crear_jerarquia_controles_fk_anatomica():
+
+    jerarquia = {
+        # Brazos siguen pecho/cuello
+        "BrazoL_FK_CTRL_001_OFFSET": "Columna_FK_CTRL_002",
+        "BrazoR_FK_CTRL_001_OFFSET": "Columna_FK_CTRL_002",
+
+        # Orejas siguen cabeza/cuello
+        "OrejaL_FK_CTRL_001_OFFSET": "Columna_FK_CTRL_003",
+        "OrejaR_FK_CTRL_001_OFFSET": "Columna_FK_CTRL_003",
+
+        # Piernas y cola siguen cadera
+        "PiernaL_FK_CTRL_001_OFFSET": "Columna_FK_CTRL_001",
+        "PiernaR_FK_CTRL_001_OFFSET": "Columna_FK_CTRL_001",
+        "Cola_FK_CTRL_001_OFFSET": "Columna_FK_CTRL_001",
+    }
+
+    for hijo, padre in jerarquia.items():
+
+        if not cmds.objExists(hijo):
+            cmds.warning(f"No existe hijo: {hijo}")
+            continue
+
+        if not cmds.objExists(padre):
+            cmds.warning(f"No existe padre: {padre}")
+            continue
+
+        try:
+            cmds.parent(hijo, padre)
+            print(f"Jerarquia FK: {hijo} -> {padre}")
+        except Exception as e:
+            cmds.warning(f"No se pudo parentar {hijo} a {padre}: {e}")
+
+def controles_en_ctrl_grp():
+
+    if not cmds.objExists("CTRL_GRP"):
+        cmds.group(em=True, n="CTRL_GRP")
+
+    grupos_control = cmds.ls("*_OFFSET", "*_AUTO", type="transform") or []
+
+    for grupo in grupos_control:
+
+        padre = cmds.listRelatives(grupo, parent=True)
+
+        # Solo meter en CTRL_GRP los grupos que estan sueltos en mundo.
+        # Si ya tienen padre, no tocarlos porque puede ser jerarquia FK.
+        if padre:
+            continue
+
+        try:
+            cmds.parent(grupo, "CTRL_GRP")
+            print(f"Control organizado: {grupo} -> CTRL_GRP")
+        except Exception as e:
+            cmds.warning(f"No se pudo organizar {grupo}: {e}")
+
+    print("Controles raiz organizados dentro de CTRL_GRP")
+
+
+
 def organizar_cadenas_principales():
 
     joints = cmds.ls(type="joint")
@@ -147,68 +206,6 @@ def organizar_chain_system(
 
 
 
-
-def conectar_extremidades():
-
-    # =========================
-    # BRAZOS
-    # =========================
-
-    cmds.parent(
-        "BrazoL_IK_CTRL_001_OFFSET",
-        "CHEST_CTRL"
-    )
-
-    cmds.parent(
-        "BrazoR_IK_CTRL_001_OFFSET",
-        "CHEST_CTRL"
-    )
-
-    # =========================
-    # PIERNAS
-    # =========================
-
-    cmds.parent(
-        "PiernaL_IK_CTRL_001_OFFSET",
-        "COG_CTRL"
-    )
-
-    cmds.parent(
-        "PiernaR_IK_CTRL_001_OFFSET",
-        "COG_CTRL"
-    )
-
-    print("✅ Extremidades conectadas")
-
-
-def conectar_partes_secundarias():
-
-    # =========================
-    # OREJAS
-    # =========================
-
-    cmds.parent(
-        "EarL_SYSTEM_GRP",
-        "HEAD_CTRL"
-    )
-
-    cmds.parent(
-        "EarR_SYSTEM_GRP",
-        "HEAD_CTRL"
-    )
-
-    # =========================
-    # COLA
-    # =========================
-
-    cmds.parent(
-        "Tail_SYSTEM_GRP",
-        "COG_CTRL"
-    )
-
-    print("✅ Orejas y cola conectadas")
-
-
 #region fkik
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  generar sistema FKIK general                                   ║                                                               ║
@@ -260,7 +257,8 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
             "ik": rename_chain(lista_fk["orejaR_FK"], "IK"),
             "main": rename_chain(lista_fk["orejaR_FK"], "MAIN"),
             "meshes": ["Oreja_Derecha_007"],
-            "prefix": "OrejaR"
+            "prefix": "OrejaR",
+            "pv_offset": 10
         },
         {
             "module": sistemaIKFKleg,
@@ -268,7 +266,8 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
             "ik": rename_chain(lista_fk["orejaL_FK"], "IK"),
             "main": rename_chain(lista_fk["orejaL_FK"], "MAIN"),
             "meshes": ["Oreja_Izquierda_006"],
-            "prefix": "OrejaL"
+            "prefix": "OrejaL",
+            "pv_offset": 10
         },
         {
             "module": sistemaIKFKleg,
@@ -304,7 +303,8 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
             main_chain=s["main"],
             meshes=meshes_sistema,
             prefix=s["prefix"],
-            joint_attr=s["main"][0]
+            joint_attr=s["main"][0],
+            pv_offset=s.get("pv_offset", 10)
         )
        
 
