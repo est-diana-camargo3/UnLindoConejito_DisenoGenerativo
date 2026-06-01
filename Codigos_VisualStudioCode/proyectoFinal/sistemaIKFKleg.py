@@ -74,7 +74,8 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         f"{prefix}_PV_CTRL_001",
         ik_chain[1],
         ik_handle,
-        size=tamano * 0.7
+        size=tamano * 0.7,
+        pv_offset=pv_offset
     )
 
     # =========================
@@ -272,6 +273,11 @@ def crear_control(nombre, target, size=1, color=17):
 
     return ctrl, offset
 
+#
+# =========================
+# CREAR IK CTRL
+# =========================
+
 def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13):
 
     ctrl = cmds.circle(
@@ -299,11 +305,11 @@ def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13):
 
     return ctrl, root, auto
 
-def crear_pv_control(nombre, pv_target, ik_handle, size=1, color=6):
+def crear_pv_control(nombre, pv_target, ik_handle, size=1, color=6, pv_offset=5):
 
     ctrl = cmds.circle(
         n=nombre,
-        normal=[0,1,0],
+        normal=[1,0,0],
         radius=size
     )[0]
 
@@ -317,12 +323,8 @@ def crear_pv_control(nombre, pv_target, ik_handle, size=1, color=6):
 
     cmds.select(cvs)
 
-    cmds.scale(
-        0.2,
-        0.2,
-        0.2,
-        r=True
-    )
+    cmds.scale(0.2,0.2,0.2,r=True)
+    cmds.rotate(0, 90, 0, f"{ctrl}.cv[*]", relative=True, objectSpace=True)
 
     cmds.select(clear=True)
 
@@ -332,6 +334,8 @@ def crear_pv_control(nombre, pv_target, ik_handle, size=1, color=6):
 
     # alinear
     cmds.delete(cmds.pointConstraint(pv_target, root))
+
+    cmds.move(0, 0, pv_offset, root, relative=True, objectSpace=True)
 
     # constraint
     cmds.poleVectorConstraint(ctrl, ik_handle)

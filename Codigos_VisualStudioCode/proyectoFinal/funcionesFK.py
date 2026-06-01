@@ -202,7 +202,7 @@ def crear_joints_coplanares(m):
 
     x_interno_R, x_externo_R = extremos_interno_externo_x(brazoR)
 
-    cmds.select(cuello)
+    cmds.select(espina)
 
     hombroD = cmds.joint(n="FK_Joint_15_Interno_ManoDerecha",
         p=(x_interno_R, brazoR["centro"][1], brazoR["centro"][2])
@@ -220,7 +220,7 @@ def crear_joints_coplanares(m):
 
     x_interno_I, x_externo_I = extremos_interno_externo_x(brazoL)
 
-    cmds.select(cuello)
+    cmds.select(espina)
 
     hombroI = cmds.joint(n="FK_Joint_12_Interno_ManoIzquierda",
         p=(x_interno_I, brazoL["centro"][1], brazoL["centro"][2])

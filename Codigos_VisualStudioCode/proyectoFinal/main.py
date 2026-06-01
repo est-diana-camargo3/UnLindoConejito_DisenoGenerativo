@@ -15,6 +15,13 @@ importlib.reload(funcionesFK)
 importlib.reload(funcionesIniciales)
 importlib.reload(paletas)
 importlib.reload(pintarConejo)
+
+import os
+import proyectoFinal
+
+ruta_base = os.path.dirname(proyectoFinal.__file__)
+
+
 # endregion
 
 # region 2. Colores
@@ -81,16 +88,10 @@ def generar_conejo_ui(*args):
     IK_CTRL_COLUMNA = resultado_ikfk["Columna"]["ikControl"]
 
     print(IK_CTRL_COLUMNA)
-    
-    funcionesIniciales.crear_controles_anatomicos()
 
-    funcionesIniciales.crear_jerarquia_anatomica()
+    funcionesIniciales.crear_jerarquia_controles_fk_anatomica()
 
-    funcionesIniciales.conectar_columna_a_controles()
-
-    funcionesIniciales.conectar_extremidades()
-
-    funcionesIniciales.conectar_partes_secundarias()
+    funcionesIniciales.controles_en_ctrl_grp()
 
     
     #suavizar_conejo_preview()
@@ -231,7 +232,7 @@ def funcion_de_main_pintar_conejo(*args):
 def suavizar_geometria_de_conejo(*args):
 
     crearConejo.suavizar_conejo()
-    crearConejo.deformar_cara_con_plano()
+    crearConejo.deformar_cara_con_plano(crearConejo.cara)
 
     # =========================
     # OCULTAR LÍNEAS DEL SMOOTH
@@ -300,8 +301,24 @@ def cambiar_fk_ik(*args):
 # FUNCIÓN BOTÓN BORRAR
 # =========================
 def borrar_escena(*args):
-    cmds.select(all=True)
-    cmds.delete()
+
+    objetos = cmds.ls(assemblies=True)
+
+    protegidos = ["persp", "top", "front", "side"]
+
+    for obj in objetos:
+
+        if obj not in protegidos and cmds.objExists(obj):
+            cmds.delete(obj)
+
+    # limpiar variables globales
+    crearConejo.piezas_deformables = []
+    crearConejo.cara = []
+
+    global IK_CTRL_COLUMNA
+    IK_CTRL_COLUMNA = None
+
+    print("🧹 Escena limpiada")
 # endregion
 
 
@@ -423,7 +440,7 @@ def crear_ui(*args):
     
     #cmds.separator(h=20, style="none") #espacio vacio
     cmds.rowLayout(numberOfColumns=3,columnWidth3=(20, anchoimagen, 20),bgc=fondorosado)
-    ruta_imagen = "C:/Users/USUARIO/Documents/GitHub/UnLindoConejito_DisenoGenerativo/Codigos_VisualStudioCode/proyectoFinal/ImagenMenu.jpg"
+    ruta_imagen = os.path.join(ruta_base, "ImagenMenu.png")
     cmds.image(image=ruta_imagen,width=anchoimagen,height=altoimagen)
     cmds.setParent('..') # cerrar rowLayout de la imagen para que el siguiente elemento no quede dentro de este
 
@@ -438,7 +455,6 @@ def crear_ui(*args):
     cmds.separator(h=4, style="none") #espacio vacio    
     # Raya division
     cmds.text(label="", bgc=lila,height=4) 
-
 
     #---titulo
     cmds.separator(h=4, style="none") #espacio vacio
@@ -462,7 +478,12 @@ def crear_ui(*args):
     cmds.separator(h=10, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🎉 Conejo Sorpresa",command=conejo_sorpresa, bgc=lila,height=28 )
+
+    cmds.rowLayout(numberOfColumns=2, adjustableColumn=2)
+    cmds.iconTextButton(style='iconOnly', image1=ruta_base + "/iconosConejo/regalo.png", width=24, height=28)
+    cmds.button(label="Conejo Sorpresa", command=conejo_sorpresa,bgc=lila,height=28)
+    cmds.setParent('..')
+
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
     
@@ -488,24 +509,28 @@ def crear_ui(*args):
     cmds.radioCollection("emociones")
 
     cmds.radioButton( "descanso",  label="Descanso", align="center",  select=True  )
-    cmds.text(label="💚", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/cverde.png",width=10,height=10)
+
     cmds.radioButton(  "feo", label="Feo", align="center"  )
-    cmds.text(label="🤎", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/ccafe.png",width=10,height=10)
 
     cmds.radioButton( "pequeno", label="Pequeño", align="center" )
-    cmds.text(label="🩷", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/crosa.png",width=10,height=10)
+
     cmds.radioButton( "fantasia", label="Fantasía", align="center")
-    cmds.text(label="🧡", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/cnaranja.png",width=10,height=10)
 
     cmds.radioButton( "odio",label="Odio",align="center" )
-    cmds.text(label="🖤", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/cnegro.png",width=10,height=10)
+
     cmds.radioButton("infiel",label="Infiel",align="center" )
-    cmds.text(label="💛", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/camarillo.png",width=10,height=10)
 
     cmds.radioButton("artificial",label="Artificial",align="center" )
-    cmds.text(label="💜", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/cmora.png",width=10,height=10)
+
     cmds.radioButton("verdad",label="Verdad",align="center"  )
-    cmds.text(label="🤍", align="center")
+    cmds.image(image=ruta_base + "/iconosConejo/cblanco.png",width=10,height=10)
 
     cmds.setParent('..')  # cerrar rowColumnLayout
     cmds.text(label="")  # espacio derecho
@@ -537,7 +562,12 @@ def crear_ui(*args):
     cmds.separator(h=10, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🧊 Crear conejo",command=funcion_de_main_crear_conejo_cuadrado, bgc=gris,height=28 )
+
+    cmds.rowLayout(numberOfColumns=2, adjustableColumn=2)
+    cmds.iconTextButton(style='iconOnly', image1=ruta_base + "/iconosConejo/crear.png", width=24, height=24)
+    cmds.button(label="Crear", command=funcion_de_main_crear_conejo_cuadrado,bgc=gris,height=28)
+    cmds.setParent('..')
+
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
 
@@ -548,7 +578,12 @@ def crear_ui(*args):
     cmds.separator(h=8, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🎨 Pintar ",command=funcion_de_main_pintar_conejo, bgc=gris,height=28 )
+    
+    cmds.rowLayout(numberOfColumns=2, adjustableColumn=2)
+    cmds.iconTextButton(style='iconOnly', image1=ruta_base + "/iconosConejo/colorear.png", width=24, height=24)
+    cmds.button(label="Pintar", command=funcion_de_main_pintar_conejo,bgc=gris,height=28)
+    cmds.setParent('..')
+
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
 
@@ -560,7 +595,12 @@ def crear_ui(*args):
     cmds.separator(h=8, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,85), (2,120),(3,60)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🛞 Redondear ",command=suavizar_geometria_de_conejo,bgc=gris,height=28)
+
+    cmds.rowLayout(numberOfColumns=2, adjustableColumn=2)
+    cmds.iconTextButton(style='iconOnly', image1=ruta_base + "/iconosConejo/redondear.png", width=24, height=24)
+    cmds.button(label="Redondear", command=suavizar_geometria_de_conejo,bgc=gris,height=28)
+    cmds.setParent('..')
+
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
@@ -616,7 +656,12 @@ def crear_ui(*args):
     cmds.separator(h=8, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,65), (2,160),(3,50)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🦴 Esqueletizar mi conejito 🐇",command=generar_conejo_ui,bgc=lila,height=28)
+
+    cmds.rowLayout(numberOfColumns=2, adjustableColumn=2)
+    cmds.iconTextButton(style='iconOnly', image1=ruta_base + "/iconosConejo/esqueleto.png", width=24, height=28)
+    cmds.button(label="Articular mi conejito", command=generar_conejo_ui,bgc=lila,height=28)
+    cmds.setParent('..')
+
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
@@ -628,7 +673,12 @@ def crear_ui(*args):
     cmds.separator(h=5, style="none")
     cmds.rowColumnLayout(numberOfColumns=3,columnWidth= [(1,205), (2,80),(3,20)]) # izquierda, botón, derecha
     cmds.text(label="", bgc=fondorosado) # espacio izquierdo
-    cmds.button(label="🧹Borrar todo ",command=borrar_escena,bgc=grisoscuro,height=28)
+
+    cmds.rowLayout(numberOfColumns=2, adjustableColumn=2)
+    cmds.iconTextButton(style='iconOnly', image1=ruta_base + "/iconosConejo/borrar.png", width=28, height=28)
+    cmds.button(label="Borrar", command=borrar_escena,bgc=gris,height=28)
+    cmds.setParent('..')
+
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout para que el siguiente elemento no quede dentro de este
     cmds.separator(h=8, style="none") #espacio vacio

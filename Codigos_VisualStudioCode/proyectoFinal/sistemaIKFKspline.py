@@ -181,12 +181,12 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
             force=True
         )
 
-    # IK visibles cuando FKIK = 1
-    cmds.connectAttr(
-        f"{shape}.FKIK",
-        f"{ik_ctrl}.visibility",
-        force=True
-    )
+    # Este control es tecnico: guarda FKIK y el ikHandle, pero no se anima.
+    cmds.setAttr(f"{ik_ctrl}.visibility", 0)
+
+    shapes_ik = cmds.listRelatives(ik_ctrl, shapes=True) or []
+    for shape_ik in shapes_ik:
+        cmds.setAttr(f"{shape_ik}.visibility", 0)
 
     # spine controls visibles en IK
     for ctrl in spine_controls:
