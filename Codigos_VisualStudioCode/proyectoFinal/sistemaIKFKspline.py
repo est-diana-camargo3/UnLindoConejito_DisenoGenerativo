@@ -134,7 +134,6 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
 
     print(f"✅ Sistema IKFK creado -> {prefix}")
 
-   
     # =========================
     # CONTROLES DE CURVA SPLINE
     # =========================
@@ -161,6 +160,23 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
         cmds.parentConstraint(ctrl, cluster, mo=True)
 
         spine_controls.append(ctrl)
+
+    # Jerarquia IK spline: pelvis -> pecho -> cabeza.
+    for i in range(1, len(spine_controls)):
+        cmds.parent(
+            f"{spine_controls[i]}_OFFSET",
+            spine_controls[i - 1]
+        )
+
+    if spine_controls:
+        try:
+            cmds.pointConstraint(spine_controls[0], ik_chain[0], mo=True)
+            raiz_point = cmds.pointConstraint(fk_chain[0], ik_chain[0], main_chain[0], mo=False)[0]
+            raiz_weights = cmds.pointConstraint(raiz_point, q=True, weightAliasList=True)
+            cmds.connectAttr(f"{reverse}.outputX", f"{raiz_point}.{raiz_weights[0]}", force=True)
+            cmds.connectAttr(f"{shape}.FKIK", f"{raiz_point}.{raiz_weights[1]}", force=True)
+        except Exception as e:
+            cmds.warning(f"No se pudo conectar {spine_controls[0]} a la raiz de columna: {e}")
 
     if spine_controls:
         chest_ctrl = spine_controls[-1]
@@ -199,6 +215,7 @@ def crear_sistema_ikfk(fk_chain,ik_chain,main_chain,meshes,prefix,joint_attr,pv_
     return {
         "ikHandle": ik_handle,
         "ikControl": ik_ctrl,
+        "spineControls": spine_controls,
         "attrShape": shape,
         "constraints": constraints
         
@@ -311,6 +328,415 @@ def distancia_entre(a, b):
     )
 
 
+def crear_squash_spine(prefix, driver_ctrl, meshes, ik_chain):
+    if not driver_ctrl or not cmds.objExists(driver_ctrl):
+        cmds.warning(f"No existe control para squash spine: {driver_ctrl}")
+        return None
+
+    if not meshes:
+        cmds.warning(f"No hay meshes para squash spine: {prefix}")
+        return None
+
+    mesh = None
+
+    for candidato in meshes:
+        if cmds.objExists(candidato) and "Tronco" in candidato:
+            mesh = candidato
+            break
+
+    if not mesh:
+        for candidato in meshes:
+            if cmds.objExists(candidato):
+                mesh = candidato
+                break
+
+    if not mesh:
+        cmds.warning(f"No existe mesh para squash spine: {meshes}")
+        return None
+
+    for obj in cmds.ls(f"{prefix}_spine_squash*") or []:
+        if cmds.objExists(obj):
+            try:
+                cmds.delete(obj)
+            except Exception:
+                pass
+
+    cmds.select(f"{mesh}.vtx[*]", replace=True)
+
+    squash_def, squash_handle = cmds.nonLinear(
+        type="squash",
+        n=f"{prefix}_spine_squash"
+    )
+
+    bbox = cmds.exactWorldBoundingBox(mesh)
+
+    centro_x = (bbox[0] + bbox[3]) / 2
+    centro_y = (bbox[1] + bbox[4]) / 2
+    centro_z = (bbox[2] + bbox[5]) / 2
+    alto = max(bbox[4] - bbox[1], 0.001)
+
+    cmds.xform(
+        squash_handle,
+        ws=True,
+        t=(centro_x, centro_y, centro_z)
+    )
+
+    cmds.setAttr(f"{squash_handle}.scaleX", 1)
+    cmds.setAttr(f"{squash_handle}.scaleY", alto)
+    cmds.setAttr(f"{squash_handle}.scaleZ", 1)
+
+    cmds.setAttr(f"{squash_def}.lowBound", -0.75)
+    cmds.setAttr(f"{squash_def}.highBound", 0.85)
+    cmds.setAttr(f"{squash_def}.factor", 0)
+
+    attr_name = "SpineSquash"
+    if not cmds.attributeQuery(attr_name, node=driver_ctrl, exists=True):
+        cmds.addAttr(
+            driver_ctrl,
+            longName=attr_name,
+            attributeType="double",
+            min=-2,
+            max=2,
+            defaultValue=0,
+            keyable=True
+        )
+
+    cmds.connectAttr(
+        f"{driver_ctrl}.{attr_name}",
+        f"{squash_def}.factor",
+        force=True
+    )
+
+    if ik_chain and len(ik_chain) >= 2:
+        start_loc = cmds.spaceLocator(n=f"{prefix}_spine_squash_start_LOC")[0]
+        end_loc = cmds.spaceLocator(n=f"{prefix}_spine_squash_end_LOC")[0]
+
+        cmds.delete(cmds.pointConstraint(ik_chain[0], start_loc))
+        cmds.delete(cmds.pointConstraint(driver_ctrl, end_loc))
+
+        cmds.pointConstraint(ik_chain[0], start_loc, mo=False)
+        cmds.pointConstraint(driver_ctrl, end_loc, mo=False)
+
+        start_dcm = cmds.shadingNode(
+            "decomposeMatrix",
+            asUtility=True,
+            n=f"{prefix}_spine_squash_start_DCM"
+        )
+
+        end_dcm = cmds.shadingNode(
+            "decomposeMatrix",
+            asUtility=True,
+            n=f"{prefix}_spine_squash_end_DCM"
+        )
+
+        delta_pma = cmds.shadingNode(
+            "plusMinusAverage",
+            asUtility=True,
+            n=f"{prefix}_spine_squash_delta_PMA"
+        )
+
+        cmds.connectAttr(f"{start_loc}.worldMatrix[0]", f"{start_dcm}.inputMatrix")
+        cmds.connectAttr(f"{end_loc}.worldMatrix[0]", f"{end_dcm}.inputMatrix")
+
+        cmds.setAttr(f"{delta_pma}.operation", 2)
+        cmds.connectAttr(f"{end_dcm}.outputTranslateY", f"{delta_pma}.input1D[0]")
+        cmds.connectAttr(f"{start_dcm}.outputTranslateY", f"{delta_pma}.input1D[1]")
+
+        cmds.dgdirty(delta_pma)
+        cmds.refresh()
+
+        delta_inicial = cmds.getAttr(f"{delta_pma}.output1D")
+
+        neutral_pma = cmds.shadingNode(
+            "plusMinusAverage",
+            asUtility=True,
+            n=f"{prefix}_spine_squash_neutral_PMA"
+        )
+
+        move_md = cmds.shadingNode(
+            "multiplyDivide",
+            asUtility=True,
+            n=f"{prefix}_spine_squash_move_MD"
+        )
+
+        cmds.setAttr(f"{neutral_pma}.operation", 2)
+        cmds.connectAttr(f"{delta_pma}.output1D", f"{neutral_pma}.input1D[0]")
+        cmds.setAttr(f"{neutral_pma}.input1D[1]", delta_inicial)
+
+        cmds.setAttr(f"{move_md}.input2X", -0.04)
+        cmds.connectAttr(f"{neutral_pma}.output1D", f"{move_md}.input1X", force=True)
+        cmds.connectAttr(f"{move_md}.outputX", f"{driver_ctrl}.{attr_name}", force=True)
+
+        if cmds.objExists("LOCATORS_GRP"):
+            cmds.parent(start_loc, end_loc, "LOCATORS_GRP")
+
+    if cmds.objExists("SYSTEMS_GRP"):
+        cmds.parent(squash_handle, "SYSTEMS_GRP")
+
+    cmds.select(clear=True)
+
+    print(f"Squash spine creado: {prefix} -> {mesh}")
+
+    return {
+        "deformer": squash_def,
+        "handle": squash_handle,
+        "attr": f"{driver_ctrl}.{attr_name}"
+    }
+
+
+def crear_squash_cabeza(prefix, driver_ctrl, meshes, base_ctrl=None):
+    if not driver_ctrl or not cmds.objExists(driver_ctrl):
+        cmds.warning(f"No existe control para squash cabeza: {driver_ctrl}")
+        return None
+
+    mesh = None
+
+    for candidato in meshes or []:
+        if cmds.objExists(candidato) and "Cabeza" in candidato:
+            mesh = candidato
+            break
+
+    if not mesh:
+        cmds.warning(f"No existe mesh de cabeza para squash: {meshes}")
+        return None
+
+    shapes_mesh = cmds.listRelatives(mesh, shapes=True, noIntermediate=True, type="mesh") or []
+
+    if not shapes_mesh:
+        cmds.warning(f"Squash cabeza omitido: {mesh} no tiene forma mesh")
+        return None
+
+    for obj in cmds.ls(f"{prefix}_head_squash*") or []:
+        if cmds.objExists(obj):
+            try:
+                cmds.delete(obj)
+            except Exception:
+                pass
+
+    cmds.select(f"{mesh}.vtx[*]", replace=True)
+
+    squash_def, squash_handle = cmds.nonLinear(
+        type="squash",
+        n=f"{prefix}_head_squash"
+    )
+
+    bbox = cmds.exactWorldBoundingBox(mesh)
+    centro_x = (bbox[0] + bbox[3]) / 2
+    centro_y = (bbox[1] + bbox[4]) / 2
+    centro_z = (bbox[2] + bbox[5]) / 2
+    alto = max(bbox[4] - bbox[1], 0.001)
+
+    cmds.xform(
+        squash_handle,
+        ws=True,
+        t=(centro_x, centro_y, centro_z)
+    )
+
+    cmds.setAttr(f"{squash_handle}.scaleX", 1)
+    cmds.setAttr(f"{squash_handle}.scaleY", alto)
+    cmds.setAttr(f"{squash_handle}.scaleZ", 1)
+
+    cmds.setAttr(f"{squash_def}.lowBound", -0.9)
+    cmds.setAttr(f"{squash_def}.highBound", 0.9)
+    cmds.setAttr(f"{squash_def}.factor", 0)
+
+    attr_name = "HeadSquash"
+    if not cmds.attributeQuery(attr_name, node=driver_ctrl, exists=True):
+        cmds.addAttr(
+            driver_ctrl,
+            longName=attr_name,
+            attributeType="double",
+            min=-2,
+            max=2,
+            defaultValue=0,
+            keyable=True
+        )
+
+    if base_ctrl and cmds.objExists(base_ctrl) and not cmds.attributeQuery(attr_name, node=base_ctrl, exists=True):
+        cmds.addAttr(
+            base_ctrl,
+            longName=attr_name,
+            attributeType="double",
+            min=-2,
+            max=2,
+            defaultValue=0,
+            keyable=True
+        )
+
+    squash_sum = cmds.shadingNode(
+        "plusMinusAverage",
+        asUtility=True,
+        n=f"{prefix}_head_squash_sum_PMA"
+    )
+
+    cmds.connectAttr(
+        f"{driver_ctrl}.{attr_name}",
+        f"{squash_sum}.input1D[0]",
+        force=True
+    )
+
+    if base_ctrl and cmds.objExists(base_ctrl):
+        cmds.connectAttr(
+            f"{base_ctrl}.{attr_name}",
+            f"{squash_sum}.input1D[1]",
+            force=True
+        )
+
+    cmds.connectAttr(
+        f"{squash_sum}.output1D",
+        f"{squash_def}.factor",
+        force=True
+    )
+
+    if base_ctrl and cmds.objExists(base_ctrl):
+        start_loc = cmds.spaceLocator(n=f"{prefix}_head_squash_start_LOC")[0]
+        end_loc = cmds.spaceLocator(n=f"{prefix}_head_squash_end_LOC")[0]
+
+        cmds.delete(cmds.pointConstraint(base_ctrl, start_loc))
+        cmds.delete(cmds.pointConstraint(driver_ctrl, end_loc))
+
+        cmds.pointConstraint(base_ctrl, start_loc, mo=False)
+        cmds.pointConstraint(driver_ctrl, end_loc, mo=False)
+
+        start_dcm = cmds.shadingNode(
+            "decomposeMatrix",
+            asUtility=True,
+            n=f"{prefix}_head_squash_start_DCM"
+        )
+
+        end_dcm = cmds.shadingNode(
+            "decomposeMatrix",
+            asUtility=True,
+            n=f"{prefix}_head_squash_end_DCM"
+        )
+
+        delta_pma = cmds.shadingNode(
+            "plusMinusAverage",
+            asUtility=True,
+            n=f"{prefix}_head_squash_delta_PMA"
+        )
+
+        neutral_pma = cmds.shadingNode(
+            "plusMinusAverage",
+            asUtility=True,
+            n=f"{prefix}_head_squash_neutral_PMA"
+        )
+
+        move_md = cmds.shadingNode(
+            "multiplyDivide",
+            asUtility=True,
+            n=f"{prefix}_head_squash_move_MD"
+        )
+
+        cmds.connectAttr(f"{start_loc}.worldMatrix[0]", f"{start_dcm}.inputMatrix")
+        cmds.connectAttr(f"{end_loc}.worldMatrix[0]", f"{end_dcm}.inputMatrix")
+
+        cmds.setAttr(f"{delta_pma}.operation", 2)
+        cmds.connectAttr(f"{end_dcm}.outputTranslateY", f"{delta_pma}.input1D[0]")
+        cmds.connectAttr(f"{start_dcm}.outputTranslateY", f"{delta_pma}.input1D[1]")
+
+        cmds.dgdirty(delta_pma)
+        cmds.refresh()
+
+        delta_inicial = cmds.getAttr(f"{delta_pma}.output1D")
+
+        cmds.setAttr(f"{neutral_pma}.operation", 2)
+        cmds.connectAttr(f"{delta_pma}.output1D", f"{neutral_pma}.input1D[0]")
+        cmds.setAttr(f"{neutral_pma}.input1D[1]", delta_inicial)
+
+        cmds.setAttr(f"{move_md}.input2X", -0.05)
+        cmds.connectAttr(f"{neutral_pma}.output1D", f"{move_md}.input1X", force=True)
+        cmds.connectAttr(f"{move_md}.outputX", f"{driver_ctrl}.{attr_name}", force=True)
+
+        base_start_loc = None
+        base_end_loc = None
+        base_offset = f"{base_ctrl}_OFFSET"
+        base_padre = None
+
+        if cmds.objExists(base_offset):
+            padres = cmds.listRelatives(base_offset, parent=True) or []
+            if padres:
+                base_padre = padres[0]
+
+        if base_padre and cmds.objExists(base_padre):
+            base_start_loc = cmds.spaceLocator(n=f"{prefix}_head_base_squash_start_LOC")[0]
+            base_end_loc = cmds.spaceLocator(n=f"{prefix}_head_base_squash_end_LOC")[0]
+
+            cmds.delete(cmds.pointConstraint(base_padre, base_start_loc))
+            cmds.delete(cmds.pointConstraint(base_ctrl, base_end_loc))
+
+            cmds.pointConstraint(base_padre, base_start_loc, mo=False)
+            cmds.pointConstraint(base_ctrl, base_end_loc, mo=False)
+
+            base_start_dcm = cmds.shadingNode(
+                "decomposeMatrix",
+                asUtility=True,
+                n=f"{prefix}_head_base_squash_start_DCM"
+            )
+
+            base_end_dcm = cmds.shadingNode(
+                "decomposeMatrix",
+                asUtility=True,
+                n=f"{prefix}_head_base_squash_end_DCM"
+            )
+
+            base_delta_pma = cmds.shadingNode(
+                "plusMinusAverage",
+                asUtility=True,
+                n=f"{prefix}_head_base_squash_delta_PMA"
+            )
+
+            base_neutral_pma = cmds.shadingNode(
+                "plusMinusAverage",
+                asUtility=True,
+                n=f"{prefix}_head_base_squash_neutral_PMA"
+            )
+
+            base_move_md = cmds.shadingNode(
+                "multiplyDivide",
+                asUtility=True,
+                n=f"{prefix}_head_base_squash_move_MD"
+            )
+
+            cmds.connectAttr(f"{base_start_loc}.worldMatrix[0]", f"{base_start_dcm}.inputMatrix")
+            cmds.connectAttr(f"{base_end_loc}.worldMatrix[0]", f"{base_end_dcm}.inputMatrix")
+
+            cmds.setAttr(f"{base_delta_pma}.operation", 2)
+            cmds.connectAttr(f"{base_end_dcm}.outputTranslateY", f"{base_delta_pma}.input1D[0]")
+            cmds.connectAttr(f"{base_start_dcm}.outputTranslateY", f"{base_delta_pma}.input1D[1]")
+
+            cmds.dgdirty(base_delta_pma)
+            cmds.refresh()
+
+            base_delta_inicial = cmds.getAttr(f"{base_delta_pma}.output1D")
+
+            cmds.setAttr(f"{base_neutral_pma}.operation", 2)
+            cmds.connectAttr(f"{base_delta_pma}.output1D", f"{base_neutral_pma}.input1D[0]")
+            cmds.setAttr(f"{base_neutral_pma}.input1D[1]", base_delta_inicial)
+
+            cmds.setAttr(f"{base_move_md}.input2X", -0.04)
+            cmds.connectAttr(f"{base_neutral_pma}.output1D", f"{base_move_md}.input1X", force=True)
+            cmds.connectAttr(f"{base_move_md}.outputX", f"{base_ctrl}.{attr_name}", force=True)
+
+        if cmds.objExists("LOCATORS_GRP"):
+            cmds.parent(start_loc, end_loc, "LOCATORS_GRP")
+            if base_start_loc and base_end_loc:
+                cmds.parent(base_start_loc, base_end_loc, "LOCATORS_GRP")
+
+    if cmds.objExists("SYSTEMS_GRP"):
+        cmds.parent(squash_handle, "SYSTEMS_GRP")
+
+    cmds.select(clear=True)
+
+    print(f"Squash cabeza creado: {prefix} -> {mesh}")
+
+    return {
+        "deformer": squash_def,
+        "handle": squash_handle,
+        "attr": f"{driver_ctrl}.{attr_name}"
+    }
+
+
 def crear_control(nombre, target, size=1, color=17, fk=True):
 
     # círculo controlador
@@ -378,5 +804,10 @@ def crear_ik_control(nombre, ik_handle, target, size=1.5, color=13, align_to_tar
 
     # mover handle con ctrl
     cmds.parent(ik_handle, ctrl)
+
+    # IK controls: solo traslacion.
+    for a in ["rx", "ry", "rz", "sx", "sy", "sz"]:
+        cmds.setAttr(f"{ctrl}.{a}", lock=True, keyable=False, channelBox=False)
+    cmds.setAttr(f"{ctrl}.visibility", keyable=False, channelBox=False)
 
     return ctrl, root, auto

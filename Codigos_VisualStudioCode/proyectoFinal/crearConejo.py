@@ -13,7 +13,7 @@ global morfologia
 morfologia= "estandar"
 piezas_deformables = []
 cara = []
-
+base_conejo = None
 
 
 #  region Funcion crear_cubo
@@ -168,7 +168,7 @@ def crear_conejo(emocion="calma"):
         cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,  m*10   ),  ((-m*5),          m-8,          (m*5)          ),  tipo="cabeza") 
         ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5, (m/2)  ),  ((-m*0.75)-(m*2), (-m*6),       (m/4)+(m*5)    ),  tipo="ojos")#CAMBIÓ
         ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5, (m/2)  ),  ((-m*0.75)+(m*2), (-m*6),       (m/4)+(m*5)    ),  tipo="ojos")#CAMBIÓ
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,     (m/2)  ),  ((-m/2),          (-m*7),       (m/4)+(m*4.8)  ),  tipo="nariz")#CAMBIÓ
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,     (m/2)  ),  ((-m/2),          (-m*7),       (m/4)+(m*5)  ),  tipo="nariz")#CAMBIÓ
         
         tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*20,  (m*8)  ),  ((-m*6.5),      (-m*8.5),       (m*4)       ),  tipo="tronco") #CAMBIÓ
         mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*10,   m*5,    m*5   ),  ((-m*5)-(m*9),  (-m*11.5),      (m*2.5)     ),  tipo="manos")
@@ -186,7 +186,7 @@ def crear_conejo(emocion="calma"):
         cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*10,   m*10,  m*10   ),   ((-m*5),          m-8,            (m*5)         ),  tipo="cabeza") 
         ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5, (m/2)  ),   ((-m*0.75)-(m*2), (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
         ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5, (m/2)  ),   ((-m*0.75)+(m*2), (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,     (m/2)  ),   ((-m/2),          (-m*7),         (m/4)+(m*4.8) ),  tipo="nariz")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,     (m/2)  ),   ((-m/2),          (-m*7),         (m/4)+(m*5) ),  tipo="nariz")
       
         tronco = crear_cubo("Tronco_Primitiva_010",          (m*13,   m*13,  (m*8)  ),    ((-m*6.5),       (-m*8.5),        (m*4)      ),  tipo="tronco")
         mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*8,    m*4,   m*4    ),    ((-m*4)-(m*8),   (-m*11.5),       (m*2)      ),  tipo="manos")
@@ -202,7 +202,7 @@ def crear_conejo(emocion="calma"):
         cabeza = crear_cubo("Cabeza_Primitiva_001",          (m*12,   m*10,   m*10   ),    ((-m*6),           m-8,             (m*5)        ),  tipo="cabeza")
         ojo_izq = crear_cubo("OjoIzquierdo_Primitiva_002",   (m*1.5,  m*1.5,  (m/2)  ),    ((-m*0.75)-(m*2),  (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
         ojo_der = crear_cubo("OjoDerecho_Primitiva_003",     (m*1.5,  m*1.5,  (m/2)  ),    ((-m*0.75)+(m*2),  (-m*6),         (m/4)+(m*5)   ),  tipo="ojos")
-        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,      (m/2)  ),    ((-m/2),           (-m*7),         (m/4)+(m*4.8) ),  tipo="nariz")
+        nariz = crear_cubo("Nariz_Primitiva_004",            (m,      m,      (m/2)  ),    ((-m/2),           (-m*7),         (m/4)+(m*5) ),  tipo="nariz")
 
         tronco = crear_cubo("Tronco_Primitiva_010",          (m*18,   m*13,   (m*15)   ),    ((-m*9),          (-m*8.5),        (m*7.5)   ),  tipo="tronco")
         mano_izq = crear_cubo("ManoIzquierda_Primitiva_011", (m*7,    m*6,    m*6      ),    ((-m*3.5)-(m*10), (-m*12),         (m*3)     ),  tipo="manos")
@@ -216,10 +216,16 @@ def crear_conejo(emocion="calma"):
     parte_inferior = cmds.group(tronco, mano_izq, mano_der, pie_izq, pie_der, cola, name="ParteInferior_Grupo")
     conejo = cmds.group(parte_superior, parte_inferior, name="Conejo_Grupo_001")
 
-    base = base_giratoria("Base_Conejo", morfologia, emocion, conejo)
+
+    global base_conejo
+    base_conejo = base_giratoria("Base_Conejo", morfologia, emocion, conejo)
+  
     crear_hdri(ruta_base + "/textures/MorningSkyHDRI011B_4K_HDR.exr")
-    crear_luz_direccional(intensidad=3,rotacion=(-4, 29, 2)
-)
+    crear_luz_direccional(intensidad=7,rotacion=(-110, 0, 0),color=(1, 0.4, 1))
+    crear_luz_puntual_por_emocion(emocion)
+    deformar_ojos_por_emocion(emocion, ojo_izq, ojo_der)
+    
+
     piezas_deformables = [
         cabeza,
         tronco,
@@ -372,6 +378,130 @@ def deformar_cara_con_plano(cara):
   
 
 
+# =========================================================
+# DEFORMAR OJOS POR EMOCION
+# =========================================================
+
+def obtener_vertices_lado(objeto, lado="izquierdo", tolerancia=0.12):
+    bbox = cmds.exactWorldBoundingBox(objeto)
+    xmin, ymin, zmin, xmax, ymax, zmax = bbox
+
+    ancho = xmax - xmin
+
+    if lado == "izquierdo":
+        limite = xmin + (ancho * tolerancia)
+        comparacion = lambda x: x <= limite
+    else:
+        limite = xmax - (ancho * tolerancia)
+        comparacion = lambda x: x >= limite
+
+    cantidad_vertices = cmds.polyEvaluate(objeto, vertex=True)
+    vertices = []
+
+    for i in range(cantidad_vertices):
+        vertice = f"{objeto}.vtx[{i}]"
+        posicion = cmds.pointPosition(vertice, world=True)
+
+        if comparacion(posicion[0]):
+            vertices.append(vertice)
+
+    return vertices
+
+
+def deformar_ojo_lados(ojo, subir_izquierda=0, subir_derecha=0):
+    if not ojo or not cmds.objExists(ojo):
+        return
+
+    vertices_izquierda = obtener_vertices_lado(
+        ojo,
+        lado="izquierdo"
+    )
+
+    vertices_derecha = obtener_vertices_lado(
+        ojo,
+        lado="derecho"
+    )
+
+    if vertices_izquierda:
+        cmds.move(
+            0,
+            subir_izquierda,
+            0,
+            vertices_izquierda,
+            relative=True,
+            worldSpace=True
+        )
+
+    if vertices_derecha:
+        cmds.move(
+            0,
+            subir_derecha,
+            0,
+            vertices_derecha,
+            relative=True,
+            worldSpace=True
+        )
+
+
+def deformar_ojos_por_emocion(emocion, ojo_izq, ojo_der):
+    intensidad = m * 0.35
+
+    if emocion == "odio":
+        # Ojos inclinados hacia el centro, como mirada enojada
+        deformar_ojo_lados(
+            ojo_izq,
+            subir_izquierda=intensidad,
+            subir_derecha=-intensidad
+        )
+
+        deformar_ojo_lados(
+            ojo_der,
+            subir_izquierda=-intensidad,
+            subir_derecha=intensidad
+        )
+
+    elif emocion == "triste" or emocion == "descanso":
+        # Ojos caidos hacia afuera
+        deformar_ojo_lados(
+            ojo_izq,
+            subir_izquierda=-intensidad,
+            subir_derecha=intensidad * 0.3
+        )
+
+        deformar_ojo_lados(
+            ojo_der,
+            subir_izquierda=intensidad * 0.3,
+            subir_derecha=-intensidad
+        )
+
+    elif emocion == "fantasia":
+        # Forma mas expresiva y rara
+        deformar_ojo_lados(
+            ojo_izq,
+            subir_izquierda=intensidad,
+            subir_derecha=intensidad * 0.4
+        )
+
+        deformar_ojo_lados(
+            ojo_der,
+            subir_izquierda=intensidad * 0.4,
+            subir_derecha=intensidad
+        )
+
+    elif emocion == "feo":
+        # Asimetria
+        deformar_ojo_lados(
+            ojo_izq,
+            subir_izquierda=-intensidad,
+            subir_derecha=intensidad
+        )
+
+        deformar_ojo_lados(
+            ojo_der,
+            subir_izquierda=intensidad * 0.5,
+            subir_derecha=-intensidad * 0.5
+        )
+
 
 # =====================================================
 # CREAR BASE DEL CONEJO
@@ -380,87 +510,182 @@ def base_giratoria(nombre, morfologia, emocion, conejo):
 
     bbox = cmds.exactWorldBoundingBox(conejo)
     xmin, ymin, zmin, xmax, ymax, zmax = bbox
-    ancho_conejo = (xmax - xmin)
+
+    ancho_conejo = xmax - xmin
     centro_x = (xmin + xmax) / 2
     centro_z = (zmin + zmax) / 2
 
-    # ALTURA BASE SEGÚN MORFOLOGÍA
+    altura_base = m * 3
 
-    if morfologia == "vertical":
-        posicion_y = (-m*39.6)
-        altura_base = m * 3
-    else: # estándar y horizontal        
-        posicion_y = (-m*27.6)
-        altura_base = m * 3
+    pies = [
+        pie for pie in [
+            "PieIzquierdo_Primitiva_008",
+            "PieDerecho_Primitiva_009"
+        ]
+        if cmds.objExists(pie)
+    ]
 
-    base = cmds.polyCylinder(   name="Base_Conejo",  r=(ancho_conejo / 2) + (m * 4),   h=altura_base,   sx=30 )[0]     # CREAR CILINDRO
-    cmds.delete(base, ch=True)# eliminar history para que no se deforme con el escalado
-    cmds.move(   centro_x, posicion_y, centro_z,   base) # POSICIONAR BASE
+    if pies:
+        bbox_pies = cmds.exactWorldBoundingBox(pies)
+        limite_y_pies = bbox_pies[1]
+    else:
+        limite_y_pies = ymin
+
+    # El cilindro se posiciona por su centro.
+    # Para que la cara superior quede al ras de los pies:
+    posicion_y = limite_y_pies - (altura_base / 2)
+
+    base = cmds.polyCylinder(
+        name=nombre,
+        r=(ancho_conejo / 2) + (m * 4),
+        h=altura_base,
+        sx=30
+    )[0]
+
+    cmds.delete(base, ch=True)
+    cmds.move(centro_x, posicion_y, centro_z, base)
 
     return base
 
-     
-    # =====================================================
-    # SUAVIZAR BASE
-    # =====================================================
 
-    #cmds.polySmooth(
-        #base,
-        #dv=1      
-    #) 
+def ajustar_base_a_pies():
+    if not base_conejo or not cmds.objExists(base_conejo):
+        return
 
+    pies = [
+        pie for pie in [
+            "PieIzquierdo_Primitiva_008",
+            "PieDerecho_Primitiva_009"
+        ]
+        if cmds.objExists(pie)
+    ]
 
+    if not pies:
+        return
 
+    bbox_pies = cmds.exactWorldBoundingBox(pies)
+    limite_y_pies = bbox_pies[1]
 
+    bbox_base = cmds.exactWorldBoundingBox(base_conejo)
+    altura_base = bbox_base[4] - bbox_base[1]
+
+    margen_articulado = 20
+    posicion_y = limite_y_pies - (altura_base / 2) - margen_articulado
+
+    cmds.setAttr(base_conejo + ".translateY", posicion_y)
 # =====================================================
 # CREAR plano fondo
 # =====================================================
 
 def crear_hdri(ruta_hdri):
 
-    skydome = cmds.createNode(
+    import mtoa.utils as mutils
+
+    # Crear SkyDome igual que Maya/Arnold lo hace manualmente
+    shape, transform = mutils.createLocator(
         "aiSkyDomeLight",
-        name="hdriLightShape"
+        asLight=True
     )
 
-    transform = cmds.listRelatives(
-        skydome,
-        parent=True
-    )[0]
-
+    # Crear file texture color managed, como aparece en tu historial manual
     file_node = cmds.shadingNode(
         "file",
-        asTexture=True
+        asTexture=True,
+        isColorManaged=True,
+        name="hdriFile"
     )
 
+    place2d = cmds.shadingNode(
+        "place2dTexture",
+        asUtility=True,
+        name="hdriPlace2d"
+    )
+
+    # Conexiones normales del place2dTexture al file
+    cmds.connectAttr(place2d + ".coverage", file_node + ".coverage", force=True)
+    cmds.connectAttr(place2d + ".translateFrame", file_node + ".translateFrame", force=True)
+    cmds.connectAttr(place2d + ".rotateFrame", file_node + ".rotateFrame", force=True)
+    cmds.connectAttr(place2d + ".mirrorU", file_node + ".mirrorU", force=True)
+    cmds.connectAttr(place2d + ".mirrorV", file_node + ".mirrorV", force=True)
+    cmds.connectAttr(place2d + ".stagger", file_node + ".stagger", force=True)
+    cmds.connectAttr(place2d + ".wrapU", file_node + ".wrapU", force=True)
+    cmds.connectAttr(place2d + ".wrapV", file_node + ".wrapV", force=True)
+    cmds.connectAttr(place2d + ".repeatUV", file_node + ".repeatUV", force=True)
+    cmds.connectAttr(place2d + ".offset", file_node + ".offset", force=True)
+    cmds.connectAttr(place2d + ".rotateUV", file_node + ".rotateUV", force=True)
+    cmds.connectAttr(place2d + ".noiseUV", file_node + ".noiseUV", force=True)
+    cmds.connectAttr(place2d + ".vertexUvOne", file_node + ".vertexUvOne", force=True)
+    cmds.connectAttr(place2d + ".vertexUvTwo", file_node + ".vertexUvTwo", force=True)
+    cmds.connectAttr(place2d + ".vertexUvThree", file_node + ".vertexUvThree", force=True)
+    cmds.connectAttr(place2d + ".vertexCameraOne", file_node + ".vertexCameraOne", force=True)
+    cmds.connectAttr(place2d + ".outUV", file_node + ".uvCoord", force=True)
+    cmds.connectAttr(place2d + ".outUvFilterSize", file_node + ".uvFilterSize", force=True)
+
+    # Ruta del HDRI
     cmds.setAttr(
         file_node + ".fileTextureName",
         ruta_hdri,
         type="string"
     )
 
+    # Para EXR/HDR normalmente Raw
+    cmds.setAttr(
+        file_node + ".colorSpace",
+        "Raw",
+        type="string"
+    )
+
+    # Conectar al color del SkyDome
     cmds.connectAttr(
         file_node + ".outColor",
-        skydome + ".color",
+        shape + ".color",
         force=True
+    )
+
+    poner_en_layer_no_seleccionable(
+        [transform],
+        "FONDO_HDRI_LAYER"
     )
 
     return transform
 
 
 def crear_luz_direccional(
-        intensidad=3,
-        rotacion=(25, 25, 16)):
+        intensidad=7,
+        rotacion=(0, 206, 0),
+        posicion=(0, 500, 0),
+        color=(0.9, 0.7, 0.9),
+        nombre="luz206"):
 
-    luz = cmds.directionalLight()
+    shape = cmds.directionalLight(
+        name=nombre + "Shape"
+    )
 
     transform = cmds.listRelatives(
-        luz,
+        shape,
         parent=True
     )[0]
 
+    transform = cmds.rename(
+        transform,
+        nombre
+    )
+
+    shape = cmds.listRelatives(
+        transform,
+        shapes=True
+    )[0]
+
     cmds.setAttr(
-        luz + ".intensity",
+        shape + ".color",
+        color[0],
+        color[1],
+        color[2],
+        type="double3"
+    )
+
+    cmds.setAttr(
+        shape + ".intensity",
         intensidad
     )
 
@@ -468,7 +693,105 @@ def crear_luz_direccional(
         rotacion[0],
         rotacion[1],
         rotacion[2],
-        transform
+        transform,
+        absolute=True,
+        worldSpace=True
+    )
+    cmds.move(
+        posicion[0],
+        posicion[1],
+        posicion[2],
+        transform,
+        absolute=True,
+        worldSpace=True
+    )
+  
+
+    panel = cmds.getPanel(withFocus=True)
+
+    if cmds.getPanel(typeOf=panel) == "modelPanel":
+        cmds.modelEditor(
+            panel,
+            edit=True,
+            displayLights="all",
+            shadows=True
+        )
+
+    return transform
+
+
+def color_luz_por_emocion(emocion):
+    colores = {
+        
+        "descanso": (0.4, 0.8, 1.0),
+        "pequeño": (0.4, 0.9, 1.0),
+        "odio": (1.0, 0.8, 0.9),
+        "artificial": (0.8, 0.6, 1.0),
+        "feo": (0.9, 0.8, 1.0),
+        "fantasia": (0.9, 0.8, 1.0),
+        "infiel":  (1.0, 0.8, 0.8),
+        "verdad": (0.4, 1.0, 0.2)
+        
+    }
+
+    return colores.get(emocion, (1.0, 1.0, 1.0))
+
+
+def crear_luz_puntual_por_emocion(
+        emocion,
+        intensidad=1.25,
+        posicion=(0, -84, 43),
+        decay_rate=0,
+        nombre="LuzPuntual_Emocion"):
+
+    color = color_luz_por_emocion(emocion)
+
+    shape = cmds.pointLight(
+        name=nombre + "Shape"
+    )
+
+    transform = cmds.listRelatives(
+        shape,
+        parent=True
+    )[0]
+
+    transform = cmds.rename(
+        transform,
+        nombre
+    )
+
+    shape = cmds.listRelatives(
+        transform,
+        shapes=True
+    )[0]
+
+    cmds.setAttr(shape + ".visibility", 0)
+
+    cmds.setAttr(
+        shape + ".color",
+        color[0],
+        color[1],
+        color[2],
+        type="double3"
+    )
+
+    cmds.setAttr(
+        shape + ".intensity",
+        intensidad
+    )
+
+    cmds.setAttr(
+        shape + ".decayRate",
+        decay_rate
+    )
+
+    cmds.move(
+        posicion[0],
+        posicion[1],
+        posicion[2],
+        transform,
+        absolute=True,
+        worldSpace=True
     )
 
     panel = cmds.getPanel(withFocus=True)
@@ -481,6 +804,25 @@ def crear_luz_direccional(
             shadows=True
         )
 
-
-
     return transform
+
+def poner_en_layer_no_seleccionable(objetos, nombre_layer):
+    objetos = [obj for obj in objetos if obj and cmds.objExists(obj)]
+
+    if not objetos:
+        return None
+
+    if not cmds.objExists(nombre_layer):
+        layer = cmds.createDisplayLayer(
+            objetos,
+            name=nombre_layer,
+            noRecurse=True
+        )
+    else:
+        layer = nombre_layer
+        cmds.editDisplayLayerMembers(layer, objetos, noRecurse=True)
+
+    # 2 = Reference: visible pero no seleccionable
+    cmds.setAttr(layer + ".displayType", 2)
+
+    return layer

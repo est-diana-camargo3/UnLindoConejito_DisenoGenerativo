@@ -10,16 +10,24 @@ import proyectoFinal.funcionesFK as funcionesFK
 import proyectoFinal.funcionesIniciales as funcionesIniciales
 import proyectoFinal.paletas as paletas
 import proyectoFinal.pintarConejo as pintarConejo
+import proyectoFinal.posesui as posesui
+import proyectoFinal.props as props
+import proyectoFinal.tomarfoto as tomarfoto
 importlib.reload(crearConejo)
 importlib.reload(funcionesFK)
 importlib.reload(funcionesIniciales)
 importlib.reload(paletas)
 importlib.reload(pintarConejo)
+importlib.reload(posesui)
+importlib.reload(props)
+importlib.reload(tomarfoto)
+
 
 import os
 import proyectoFinal
 
 ruta_base = os.path.dirname(proyectoFinal.__file__)
+AUTO_TOOL_SCRIPTJOB = None
 
 
 # endregion
@@ -55,20 +63,187 @@ blanco = hex_a_rgb("#FFFFFF")
 
 #region 3. Funciones UI
 
+# =========================
+# CAMBIAR TOOL SEGUN CONTROL
+# =========================
+def _atributo_control_activo(objeto, atributos):
+    if not objeto or not cmds.objExists(objeto):
+        return False
+
+    for attr in atributos:
+        plug = f"{objeto}.{attr}"
+
+        if not cmds.objExists(plug):
+            continue
+
+        try:
+            if not cmds.getAttr(plug, lock=True):
+                return True
+        except Exception:
+            pass
+
+    return False
 
 
+def cambiar_tool_por_control_seleccionado(*args):
+    seleccion = cmds.ls(selection=True, transforms=True) or []
+
+    if not seleccion:
+        return
+
+    control = seleccion[0]
+    puede_mover = _atributo_control_activo(control, ["tx", "ty", "tz"])
+    puede_rotar = _atributo_control_activo(control, ["rx", "ry", "rz"])
+
+    if puede_mover and not puede_rotar:
+        cmds.setToolTo("moveSuperContext")
+    elif puede_rotar and not puede_mover:
+        cmds.setToolTo("RotateSuperContext")
 
 
+def activar_auto_tool_controles():
+    global AUTO_TOOL_SCRIPTJOB
+
+    if AUTO_TOOL_SCRIPTJOB and cmds.scriptJob(exists=AUTO_TOOL_SCRIPTJOB):
+        cmds.scriptJob(kill=AUTO_TOOL_SCRIPTJOB, force=True)
+
+    AUTO_TOOL_SCRIPTJOB = cmds.scriptJob(
+        event=["SelectionChanged", cambiar_tool_por_control_seleccionado],
+        protected=True
+    )
+
+    cambiar_tool_por_control_seleccionado()
+
+
+def seleccionar_fk_por_defecto():
+    if cmds.control("radio_fk", exists=True):
+        cmds.radioButton("radio_fk", edit=True, select=True)
+
+# =========================
+# MOSTRAR MENSAJE CUANDO ARTICULA
+# =========================
+def mostrar_mensaje_conejito(morfologia, ancho_cabeza, emocion, dato_curioso):
+    imagenes = {
+        "descanso": ("descanso.png", 300, 260),
+        "feo": ("feo.png", 300, 260),
+        "pequeno": ("pequeño.png", 300, 260),
+        "fantasia": ("fantasia.png", 300, 260),
+        "odio": ("odio.png", 300, 260),
+        "infiel": ("infiel.png", 300, 260),
+        "artificial": ("artificial.png", 300, 260),
+        "verdad": ("verdad.png", 300, 260),
+    }
+
+    nombre_imagen, ancho_imagen, alto_imagen = imagenes.get(
+        emocion,
+        ("descanso.png", 300, 260)
+    )
+
+    ruta_imagen = os.path.join(ruta_base, "iconosConejo", nombre_imagen)
+    nombre_ventana = "mensajeDulceFortuna"
+
+    if cmds.window(nombre_ventana, exists=True):
+        cmds.deleteUI(nombre_ventana)
+
+    ventana = cmds.window(
+        nombre_ventana,
+        title="Mi Dulce Fortuna",
+        widthHeight=(520, 520),
+        sizeable=False,
+        bgc=fondorosado
+    )
+
+    cmds.columnLayout(
+        adjustableColumn=True,
+        rowSpacing=8,
+        columnOffset=("both", 18),
+        bgc=fondorosado
+    )
+
+    cmds.separator(h=10, style="none")
+
+    cmds.text(
+        label="¡Haz creado una Dulce Fortuna!",
+        height=28,
+        font="boldLabelFont",
+        align="center",
+        bgc=fondorosado
+    )
+
+    contenedor_imagen = cmds.formLayout(
+        width=480,
+        height=alto_imagen,
+        bgc=fondorosado
+    )
+
+    imagen_ui = cmds.image(
+        image=ruta_imagen,
+        width=ancho_imagen,
+        height=alto_imagen
+    )
+
+    cmds.formLayout(
+        contenedor_imagen,
+        edit=True,
+        attachForm=[
+            (imagen_ui, "top", 0),
+        ],
+        attachPosition=[
+            (imagen_ui, "left", 0, 0),
+        ],
+        attachNone=[
+            (imagen_ui, "right"),
+            (imagen_ui, "bottom"),
+        ]
+    )
+
+    cmds.setParent("..")
+
+    cmds.text(
+        label=f"Morfología: {morfologia} ({ancho_cabeza} cm)",
+        align="center",
+        bgc=fondorosado
+    )
+
+    cmds.text(
+        label=f"Emoción: {emocion}",
+        align="center",
+        bgc=fondorosado
+    )
+
+    cmds.separator(h=6, style="none")
+
+
+    cmds.button(
+        label="¡ Mover Conejito !",
+        height=30,
+        bgc=lila,
+        command=lambda *args: cerrar_mensaje_y_abrir_poses(nombre_ventana)
+    )
+
+    cmds.separator(h=10, style="none")
+
+    cmds.showWindow(ventana)
+
+
+def cerrar_mensaje_y_abrir_poses(nombre_ventana):
+    if cmds.window(nombre_ventana, exists=True):
+        cmds.deleteUI(nombre_ventana)
+
+    posesui.abrir_ui()
 
 
 #region 3.1 F.Generar conejo 
+
+
+
 
 # =========================
 # FUNCIÓN DEL BOTÓN GENERAR
 # =========================
 def generar_conejo_ui(*args):
     
-    ubicar_camara()
+   
     funcionesIniciales.crear_jerarquia_general()
     lista_fk = funcionesFK.crear_joints_coplanares(crearConejo.m)
     funcionesFK.orientar_joints_de_toda_la_cadena_FK(lista_fk)
@@ -89,14 +264,21 @@ def generar_conejo_ui(*args):
 
     print(IK_CTRL_COLUMNA)
 
+    posesui.cambiar_fkik(0)
+    seleccionar_fk_por_defecto()
+
     funcionesIniciales.crear_jerarquia_controles_fk_anatomica()
+    funcionesIniciales.crear_jerarquia_controles_ik_anatomica()
 
     funcionesIniciales.controles_en_ctrl_grp()
 
+    activar_auto_tool_controles()
+
     
-    #suavizar_conejo_preview()
 
+    crearConejo.ajustar_base_a_pies()
 
+    ubicar_camara()
     # =========================
     # Mensaje Popup
     # =========================
@@ -115,21 +297,7 @@ def generar_conejo_ui(*args):
     emocion = cmds.radioCollection("emociones", q=True, select=True)
     dato_curioso = pintarConejo.generar_dato_curioso(emocion)
 
-    mensaje = (
-        "\n¡Haz creado una Dulce Fortuna! 🐇 \n\n"        
-        f" 🐰 Morfología: {morfologia} "
-        f" ({ancho_cabeza} cm)\n\n"
-        f" 🐰 Emoción: {emocion}\n\n"
-        f"{dato_curioso}\n"
-    )
-
-    cmds.confirmDialog(
-        title="Mi Dulce Fortuna",
-        message=mensaje,
-        button=["¡ Quiero moverlo ! "],
-        defaultButton="¡ Quiero moverlo ! ",
-        bgc=fondorosado
-    )
+    mostrar_mensaje_conejito(morfologia, ancho_cabeza, emocion, dato_curioso)
 
 # endregion
 
@@ -141,15 +309,71 @@ def generar_conejo_ui(*args):
 # FUNCIÓN UBICAR CÁMARA
 # =========================
 def ubicar_camara():
+    objetos = [
+        obj for obj in crearConejo.piezas_deformables
+        if cmds.objExists(obj)
+    ]
 
-    # Vista 3/4 cercana bonita
-    cmds.setAttr("persp.rotateX", -12)
-    cmds.setAttr("persp.rotateY", 35)
+    if not objetos:
+        objetos = [
+            obj for obj in [
+                "Cabeza_Primitiva_001",
+                "Tronco_Primitiva_010",
+                "ManoIzquierda_Primitiva_011",
+                "ManoDerecha_Primitiva_012",
+                "PieIzquierdo_Primitiva_008",
+                "PieDerecho_Primitiva_009",
+                "Oreja_Izquierda_006",
+                "Oreja_Derecha_007",
+                "Cola_Primitiva_013",
+            ]
+            if cmds.objExists(obj)
+        ]
+
+    if not objetos:
+        cmds.warning("No hay conejo para encuadrar la camara")
+        return
+
+    bbox = cmds.exactWorldBoundingBox(objetos)
+
+    centro_x = (bbox[0] + bbox[3]) / 2
+    centro_y = (bbox[1] + bbox[4]) / 2
+    centro_z = (bbox[2] + bbox[5]) / 2
+
+    ancho = bbox[3] - bbox[0]
+    alto = bbox[4] - bbox[1]
+    profundidad = bbox[5] - bbox[2]
+
+    tamano = max(ancho, alto, profundidad)
+
+    # Ligeramente rotada: no frontal, no 3/4 marcado.
+    cmds.setAttr("persp.rotateX", -8)
+    cmds.setAttr("persp.rotateY", 18)
     cmds.setAttr("persp.rotateZ", 0)
 
-    cmds.setAttr("persp.translateX", 105)
-    cmds.setAttr("persp.translateY", -10)
-    cmds.setAttr("persp.translateZ", 180)
+    # Distancia suave: encuadra todo y se aleja unas pocas unidades.
+    morfologia = getattr(crearConejo, "morfologia", "estandar")
+
+    if morfologia == "vertical":
+        distancia = tamano * 2.5 + 6
+        altura_offset = alto * 0.32
+    elif morfologia == "horizontal":
+        distancia = tamano * 2.0 + 3
+        altura_offset = alto * 0.24
+    else:
+        distancia = tamano * 2.3 + 5
+        altura_offset = alto * 0.28
+
+    cmds.setAttr("persp.translateX", centro_x + distancia * 0.32)
+    cmds.setAttr("persp.translateY", centro_y + altura_offset)
+    cmds.setAttr("persp.translateZ", centro_z + distancia)
+    # Ajustes de lente para evitar cortes.
+    try:
+        cmds.setAttr("perspShape.focalLength", 35)
+        cmds.setAttr("perspShape.nearClipPlane", 0.1)
+        cmds.setAttr("perspShape.farClipPlane", 10000)
+    except:
+        pass
 # endregion
 
 
@@ -160,9 +384,7 @@ def ubicar_camara():
 # =========================
 def ocultar_o_mostrar_malla(estado):
 
-    mostrar = (estado == "mostrar")
-
-    paneles = cmds.getPanel(type='modelPanel')
+    paneles = cmds.getPanel(type="modelPanel")
 
     for panel in paneles:
 
@@ -170,8 +392,15 @@ def ocultar_o_mostrar_malla(estado):
             panel,
             edit=True,
             displayTextures=True,
-            displayAppearance='smoothShaded',
-            wireframeOnShaded=mostrar
+            displayAppearance="smoothShaded",
+            selectionHiliteDisplay=False,
+            wireframeOnShaded=False,
+            grid=False,
+            joints=False,
+            ikHandles=False,
+            locators=True,
+            deformers=False,
+            handles=False
         )
 
     cmds.refresh(force=True)
@@ -185,10 +414,12 @@ def ocultar_o_mostrar_malla(estado):
 # =========================
 def funcion_de_main_crear_conejo_cuadrado(*args):
 
-    ubicar_camara()
+   
     borrar_escena()
     seleccion = cmds.radioCollection("emociones",q=True, select=True )
     crearConejo.crear_conejo(seleccion)
+    ubicar_camara()
+
     global ancho 
     ancho= crearConejo.m * 10
     ocultar_o_mostrar_malla("mostrar")
@@ -216,6 +447,16 @@ def funcion_de_main_pintar_conejo(*args):
 
     cmds.hyperShade(assign=material)
 
+    pintarConejo.pintar_cara_por_emocion(seleccion)
+    pintarConejo.aplicar_outline_conejo()
+
+    props.importar_corazones_decorativos(
+        crearConejo.piezas_deformables,
+        seleccion
+    )
+
+    props.importar_prop_aleatorio_personaje()
+
     cmds.refresh(force=True)
 
     print("✅ Conejo pintado correctamente")
@@ -233,6 +474,7 @@ def suavizar_geometria_de_conejo(*args):
 
     crearConejo.suavizar_conejo()
     crearConejo.deformar_cara_con_plano(crearConejo.cara)
+    pintarConejo.aplicar_outline_conejo()
 
     # =========================
     # OCULTAR LÍNEAS DEL SMOOTH
@@ -301,6 +543,11 @@ def cambiar_fk_ik(*args):
 # FUNCIÓN BOTÓN BORRAR
 # =========================
 def borrar_escena(*args):
+    global AUTO_TOOL_SCRIPTJOB
+
+    if AUTO_TOOL_SCRIPTJOB and cmds.scriptJob(exists=AUTO_TOOL_SCRIPTJOB):
+        cmds.scriptJob(kill=AUTO_TOOL_SCRIPTJOB, force=True)
+        AUTO_TOOL_SCRIPTJOB = None
 
     objetos = cmds.ls(assemblies=True)
 
@@ -318,6 +565,23 @@ def borrar_escena(*args):
     global IK_CTRL_COLUMNA
     IK_CTRL_COLUMNA = None
 
+
+    nodos_render = [
+        "file",
+        "place2dTexture",
+        "ramp",
+        "noise",
+        "bump2d",
+        "bump3d",
+        "aiImage",
+        "aiSkyDomeLight",
+        "aiStandardSurface",
+    ]
+
+    if cmds.window("posesConejitoUI", exists=True):
+        cmds.deleteUI("posesConejitoUI")
+
+
     print("🧹 Escena limpiada")
 # endregion
 
@@ -329,7 +593,7 @@ def borrar_escena(*args):
 # =========================
 def conejo_sorpresa(*args):
 
-    ubicar_camara()
+    
     borrar_escena()
 
     emociones = [
@@ -358,20 +622,11 @@ def conejo_sorpresa(*args):
     suavizar_geometria_de_conejo()
 
     generar_conejo_ui()
+    ubicar_camara()
 
     #cmds.viewFit("persp")
 
-    # =========================
-    # Cámara cercana conejo sorpresa
-    # =========================
-
-    cmds.setAttr("persp.rotateX", -12)
-    cmds.setAttr("persp.rotateY", 35)
-    cmds.setAttr("persp.rotateZ", 0)
-
-    cmds.setAttr("persp.translateX", 35)
-    cmds.setAttr("persp.translateY", 25)
-    cmds.setAttr("persp.translateZ", 85)
+  
 
 # endregion
 
@@ -468,7 +723,7 @@ def crear_ui(*args):
 
     #---Texto instruccion
     cmds.separator(h=10, style="none") #espacio vacio
-    cmds.text(label="Da clic en conejo sorpresa \nó Selecciona una emoción y sigue los botones en orden", bgc=fondorosado)
+    cmds.text(label="Da clic en conejo sorpresa \nó Selecciona una emoción y sigue los botones en orden", bgc=fondorosado,font="boldLabelFont")
 
 
         # =========================
@@ -509,28 +764,28 @@ def crear_ui(*args):
     cmds.radioCollection("emociones")
 
     cmds.radioButton( "descanso",  label="Descanso", align="center",  select=True  )
-    cmds.image(image=ruta_base + "/iconosConejo/cverde.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c1.png",width=10,height=10)
 
     cmds.radioButton(  "feo", label="Feo", align="center"  )
-    cmds.image(image=ruta_base + "/iconosConejo/ccafe.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c5.png",width=10,height=10)
 
     cmds.radioButton( "pequeno", label="Pequeño", align="center" )
-    cmds.image(image=ruta_base + "/iconosConejo/crosa.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c2.png",width=10,height=10)
 
     cmds.radioButton( "fantasia", label="Fantasía", align="center")
-    cmds.image(image=ruta_base + "/iconosConejo/cnaranja.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c6.png",width=10,height=10)
 
     cmds.radioButton( "odio",label="Odio",align="center" )
-    cmds.image(image=ruta_base + "/iconosConejo/cnegro.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c3.png",width=10,height=10)
 
     cmds.radioButton("infiel",label="Infiel",align="center" )
-    cmds.image(image=ruta_base + "/iconosConejo/camarillo.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c7.png",width=10,height=10)
 
     cmds.radioButton("artificial",label="Artificial",align="center" )
-    cmds.image(image=ruta_base + "/iconosConejo/cmora.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c4.png",width=10,height=10)
 
     cmds.radioButton("verdad",label="Verdad",align="center"  )
-    cmds.image(image=ruta_base + "/iconosConejo/cblanco.png",width=10,height=10)
+    cmds.image(image=ruta_base + "/iconosConejo/c8.png",width=10,height=10)
 
     cmds.setParent('..')  # cerrar rowColumnLayout
     cmds.text(label="")  # espacio derecho
@@ -630,6 +885,7 @@ def crear_ui(*args):
         "radio_fk",
         label="Quiero rotar hueso por hueso (FK)",
         select=True,
+        enable=True,
         onc=cambiar_fk_ik
     )
 
@@ -638,6 +894,7 @@ def crear_ui(*args):
     cmds.radioButton(
         "radio_ik",
         label="Quiero rotar hueso con vecinos (IK)",
+        enable=True,
         onc=cambiar_fk_ik
     )
 
@@ -665,7 +922,21 @@ def crear_ui(*args):
     cmds.text(label="", bgc=fondorosado) # espacio derecho
     cmds.setParent('..') #cierro el rowlayout del boton generar_conejo_ui
 
+    # =========================
+    # BOTON TOMAR FOTO
+    # =========================
 
+    cmds.separator(h=8, style="none")
+    cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1,85), (2,120), (3,60)])
+    cmds.text(label="", bgc=fondorosado)
+
+    cmds.rowLayout(numberOfColumns=2, adjustableColumn=2)
+    cmds.iconTextButton(style='iconOnly', image1=ruta_base + "/iconosConejo/crear.png", width=24, height=24)
+    cmds.button(label="Tomar foto", command=tomarfoto.tomar_foto, bgc=gris, height=28)
+    cmds.setParent('..')
+
+    cmds.text(label="", bgc=fondorosado)
+    cmds.setParent('..')
 
         # =========================
         # 🔘 BOTÓN Borrar escena 
@@ -705,7 +976,7 @@ def crear_ui(*args):
     )
 
     cmds.text(
-        label="Jennifer Leiva Martín - Código 1202617",
+        label="Jenifer Lizethe Leiva Martín - Código 1202617",
         align="center",
         bgc=fondorosado,
         font="smallPlainLabelFont"

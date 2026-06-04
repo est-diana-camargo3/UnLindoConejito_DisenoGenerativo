@@ -7,6 +7,7 @@ import proyectoFinal.sistemaIKFKspline as sistemaIKFKspline
 importlib.reload(funcionesFK)
 importlib.reload(sistemaIKFKleg)
 importlib.reload(sistemaIKFKspline)
+import math
 #                         ╔═════════════════════════════════════════════════════════════════╗
 #                         ║  Cambiar unidades a centimetros.                                ║                                                               ║
 #                         ╚═════════════════════════════════════════════════════════════════╝
@@ -96,6 +97,74 @@ def crear_jerarquia_controles_fk_anatomica():
             print(f"Jerarquia FK: {hijo} -> {padre}")
         except Exception as e:
             cmds.warning(f"No se pudo parentar {hijo} a {padre}: {e}")
+
+def _primer_control_existente(nombres):
+
+    for nombre in nombres:
+
+        if cmds.objExists(nombre):
+            return nombre
+
+    return None
+
+
+def _parentar_control_si_existe(hijo, padre, etiqueta):
+
+    if not cmds.objExists(hijo):
+        cmds.warning(f"No existe hijo: {hijo}")
+        return
+
+    if not padre or not cmds.objExists(padre):
+        cmds.warning(f"No existe padre para {hijo}")
+        return
+
+    try:
+        cmds.parent(hijo, padre)
+        print(f"Jerarquia {etiqueta}: {hijo} -> {padre}")
+    except Exception as e:
+        cmds.warning(f"No se pudo parentar {hijo} a {padre}: {e}")
+
+
+def crear_jerarquia_controles_ik_anatomica():
+
+    spine_controls = []
+
+    for obj in sorted(cmds.ls("Columna_SPINE_CTRL_*", type="transform") or []):
+        nombre = obj.split(":")[-1]
+
+        if nombre.endswith("_OFFSET") or nombre.endswith("_AUTO") or nombre.endswith("_ROOT"):
+            continue
+
+        spine_controls.append(obj)
+
+    cadera = spine_controls[0] if spine_controls else "Columna_IK_CTRL_001"
+    pecho = spine_controls[1] if len(spine_controls) > 1 else cadera
+    cabeza = spine_controls[-1] if spine_controls else pecho
+
+    jerarquia = {
+        # Brazos siguen pecho/cuello
+        "BrazoL_IK_CTRL_001_AUTO": pecho,
+        "BrazoL_PV_CTRL_001_AUTO": pecho,
+        "BrazoR_IK_CTRL_001_AUTO": pecho,
+        "BrazoR_PV_CTRL_001_AUTO": pecho,
+
+        # Orejas siguen cabeza/cuello
+        "OrejaL_IK_CTRL_001_AUTO": cabeza,
+        "OrejaL_PV_CTRL_001_AUTO": cabeza,
+        "OrejaR_IK_CTRL_001_AUTO": cabeza,
+        "OrejaR_PV_CTRL_001_AUTO": cabeza,
+
+        # Piernas y cola siguen cadera
+        "PiernaL_IK_CTRL_001_AUTO": cadera,
+        "PiernaL_PV_CTRL_001_AUTO": cadera,
+        "PiernaR_IK_CTRL_001_AUTO": cadera,
+        "PiernaR_PV_CTRL_001_AUTO": cadera,
+        "Cola_IK_CTRL_001_AUTO": cadera,
+        "Cola_PV_CTRL_001_AUTO": cadera,
+    }
+
+    for hijo, padre in jerarquia.items():
+        _parentar_control_si_existe(hijo, padre, "IK")
 
 def controles_en_ctrl_grp():
 
@@ -321,10 +390,37 @@ def crear_sistema_fkik(lista_fk, resultado_dup, meshes):
                 s["main"]
             )
 
+            if s["module"] == sistemaIKFKleg:
+                sistemaIKFKleg.crear_squash_extremidad(
+                s["prefix"],
+                resultado["ikControl"],
+                mesh,
+                s["ik"]
+            )
+
+        if s["module"] == sistemaIKFKspline:
+            spine_controls = resultado.get("spineControls") or []
+
+            if spine_controls:
+                torso_driver = spine_controls[-2] if len(spine_controls) > 1 else spine_controls[-1]
+
+                sistemaIKFKspline.crear_squash_spine(
+                    s["prefix"],
+                    torso_driver,
+                    meshes_sistema,
+                    s["ik"]
+                )
+
+                sistemaIKFKspline.crear_squash_cabeza(
+                    s["prefix"],
+                    spine_controls[-1],
+                    meshes_sistema,
+                    torso_driver
+                )
+
     print("✅ FKIK GENERAL COMPLETO")
 
     return resultados
-
 
 
 
