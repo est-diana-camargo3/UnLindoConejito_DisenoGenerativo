@@ -1,10 +1,45 @@
 import os
 import random
+import zipfile
 
 import maya.cmds as cmds
 
 
-RUTA_PROPS = r"D:\descargas\props"
+RUTA_MODULO = os.path.dirname(os.path.abspath(__file__))
+RUTA_PROPS_LOCAL = os.path.join(RUTA_MODULO, "props_assets")
+RUTA_PROPS_ZIP = os.path.join(RUTA_MODULO, "props.zip")
+RUTA_PROPS_RESPALDO = r"D:\descargas\props"
+
+
+def _extraer_props_zip():
+    if not os.path.exists(RUTA_PROPS_ZIP):
+        return False
+
+    try:
+        if not os.path.exists(RUTA_PROPS_LOCAL):
+            os.makedirs(RUTA_PROPS_LOCAL)
+
+        with zipfile.ZipFile(RUTA_PROPS_ZIP, "r") as archivo_zip:
+            archivo_zip.extractall(RUTA_PROPS_LOCAL)
+
+        print(f"Props extraidos desde: {RUTA_PROPS_ZIP}")
+        return True
+    except Exception as e:
+        cmds.warning(f"No se pudo extraer props.zip: {e}")
+        return False
+
+
+def obtener_ruta_props():
+    if os.path.exists(RUTA_PROPS_LOCAL):
+        return RUTA_PROPS_LOCAL
+
+    if _extraer_props_zip():
+        return RUTA_PROPS_LOCAL
+
+    return RUTA_PROPS_RESPALDO
+
+
+RUTA_PROPS = obtener_ruta_props()
 
 COLORES_CORAZON_POR_EMOCION = {
     "descanso": (0.15, 0.55, 1.00),
